@@ -1,0 +1,234 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { X, ChevronLeft, ChevronRight, Play } from "lucide-react"
+
+export function PhotoGallery() {
+  const [selectedImage, setSelectedImage] = useState<number | null>(null)
+  const [currentCategory, setCurrentCategory] = useState("all")
+
+  const categories = [
+    { id: "all", name: "All Photos" },
+    { id: "training", name: "Training Sessions" },
+    { id: "worship", name: "Worship Services" },
+    { id: "community", name: "Community Events" },
+    { id: "instruments", name: "Musical Instruments" },
+  ]
+
+  const galleryItems = [
+    {
+      id: 1,
+      src: "/assets/image/photo_1_2025-09-19_23-11-01.jpg",
+      alt: "Harp training session",
+      category: "training",
+      title: "Advanced Harp Techniques Class",
+      description: "Students learning traditional and contemporary harp techniques",
+    },
+    {
+      id: 2,
+      src: "/assets/image/photo_2_2025-09-19_23-11-01.jpg",
+      alt: "Worship service",
+      category: "worship",
+      title: "Sunday Worship Service",
+      description: "Congregation engaged in heartfelt worship",
+    },
+    {
+      id: 3,
+      src: "/assets/image/photo_3_2025-09-19_23-11-01.jpg",
+      alt: "Traditional instruments",
+      category: "instruments",
+      title: "Traditional Ethiopian Instruments",
+      description: "Collection of harps and traditional worship instruments",
+    },
+    {
+      id: 4,
+      src: "/assets/image/photo_4_2025-09-19_23-11-01.jpg",
+      alt: "Community event",
+      category: "community",
+      title: "Community Outreach Event",
+      description: "Bringing worship and music to the local community",
+    },
+    {
+      id: 5,
+      src: "/assets/image/photo_5_2025-09-19_23-11-01.jpg",
+      alt: "Worship team practice",
+      category: "training",
+      title: "Worship Team Training",
+      description: "Team members practicing together for Sunday service",
+    },
+    {
+      id: 6,
+      src: "/assets/image/photo_6_2025-09-19_23-11-01.jpg",
+      alt: "Biblical teaching",
+      category: "training",
+      title: "Biblical Worship Foundations",
+      description: "Learning the theological basis of worship",
+    },
+    {
+      id: 7,
+      src: "/assets/image/photo_7_2025-09-19_23-11-01.jpg",
+      alt: "Children's music program",
+      category: "community",
+      title: "Children's Music Program",
+      description: "Teaching the next generation of worship leaders",
+    },
+    {
+      id: 8,
+      src: "/assets/image/photo_8_2025-09-19_23-11-01.jpg",
+      alt: "Graduation ceremony",
+      category: "community",
+      title: "Program Graduation",
+      description: "Celebrating completed training programs",
+    },
+    {
+      id: 9,
+      src: "/assets/image/photo_9_2025-09-19_23-11-01.jpg",
+      alt: "Evening worship",
+      category: "worship",
+      title: "Evening Prayer Service",
+      description: "Intimate worship with harp accompaniment",
+    },
+  ]
+
+  const filteredItems =
+    currentCategory === "all" ? galleryItems : galleryItems.filter((item) => item.category === currentCategory)
+
+  const openLightbox = (index: number) => {
+    setSelectedImage(index)
+  }
+
+  const closeLightbox = () => {
+    setSelectedImage(null)
+  }
+
+  const nextImage = () => {
+    if (selectedImage !== null) {
+      setSelectedImage((selectedImage + 1) % filteredItems.length)
+    }
+  }
+
+  const prevImage = () => {
+    if (selectedImage !== null) {
+      setSelectedImage(selectedImage === 0 ? filteredItems.length - 1 : selectedImage - 1)
+    }
+  }
+
+  return (
+    <section className="py-20 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90">Photo Gallery</Badge>
+          <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">Moments from Our Ministry</h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
+            Explore photos from our training sessions, worship services, community events, and the beautiful instruments
+            that make our ministry possible.
+          </p>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant={currentCategory === category.id ? "default" : "outline"}
+              onClick={() => setCurrentCategory(category.id)}
+              className={
+                currentCategory === category.id
+                  ? "bg-[#212E3E] hover:bg-[#212E3E]/90 text-white"
+                  : "border-[#212E3E] text-[#212E3E] hover:bg-[#212E3E] hover:text-white"
+              }
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
+
+        {/* Gallery Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {filteredItems.map((item, index) => (
+            <Card
+              key={item.id}
+              className="group cursor-pointer border-2 border-gray-100 hover:border-[#E5C985] transition-all duration-300 hover:shadow-xl overflow-hidden"
+              onClick={() => openLightbox(index)}
+            >
+              <CardContent className="p-0 relative">
+                <div className="relative overflow-hidden">
+                  <img
+                    src={item.src || "/placeholder.svg"}
+                    alt={item.alt}
+                    className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
+                    <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-[#212E3E] mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-600">{item.description}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Lightbox */}
+        {selectedImage !== null && (
+          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+            <div className="relative max-w-4xl max-h-full">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 text-white hover:bg-white/20 z-10"
+                onClick={closeLightbox}
+              >
+                <X className="w-6 h-6" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                onClick={prevImage}
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                onClick={nextImage}
+              >
+                <ChevronRight className="w-8 h-8" />
+              </Button>
+
+              <img
+                src={filteredItems[selectedImage].src || "/placeholder.svg"}
+                alt={filteredItems[selectedImage].alt}
+                className="max-w-full max-h-full object-contain"
+              />
+
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <h3 className="text-xl font-semibold mb-2">{filteredItems[selectedImage].title}</h3>
+                <p className="text-gray-300">{filteredItems[selectedImage].description}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="text-center">
+          <Button
+            size="lg"
+            variant="outline"
+            className="border-[#212E3E] text-[#212E3E] hover:bg-[#212E3E] hover:text-white bg-transparent"
+          >
+            View More Photos
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}
