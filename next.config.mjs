@@ -11,6 +11,10 @@ const nextConfig = {
       },
     ],
   },
+  // Production domain configuration
+  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://chenaniah.org' : '',
+  basePath: '',
+  trailingSlash: false,
 };
 
 export default nextConfig;
