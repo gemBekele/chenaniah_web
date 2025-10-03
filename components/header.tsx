@@ -23,7 +23,8 @@ export function Header() {
     { name: "About", href: "/about" },
     // { name: "Programs", href: "/programs" },
     { name: "Events", href: "/events" },
-    { name: "Resources", href: "/resources" },
+    // { name: "Resources", href: "/resources" },
+    { name: "Contact", href: "/contact" },
   ]
 
   return (
@@ -56,7 +57,7 @@ export function Header() {
 
           {/* CTA Button */}
           <div className="hidden lg:block">
-            <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]">Join Our Ministry</Button>
+            <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("https://t.me/screeningchBot", "_blank")}>Join the choir</Button>
           </div>
 
           {/* Mobile Menu Button */}

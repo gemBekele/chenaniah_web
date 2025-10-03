@@ -15,14 +15,14 @@ export function PartnershipSection() {
     {
       icon: Globe,
       title: "Church Partnership",
-      description: "Partner your church with Ethiopian congregations for mutual growth and support.",
+      description: "Partner your church with our ministry for mutual growth and support.",
       amount: "Custom",
       benefits: ["Sister church relationships", "Cultural exchange", "Joint worship events", "Mission trips"],
     },
     {
       icon: Users,
-      title: "Sponsor a Student",
-      description: "Directly support a worship leader's training and development journey.",
+      title: "Sponsor our events",
+      description: "Directly support our events and programs.",
       amount: "of any amount",
       benefits: ["Student updates", "Direct communication", "Graduation celebration", "Ongoing relationship"],
     },

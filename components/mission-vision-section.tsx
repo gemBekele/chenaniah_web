@@ -14,7 +14,7 @@ export function MissionVisionSection() {
       icon: Heart,
       title: "Cultural Sensitivity",
       description:
-        "We honor Ethiopian culture while maintaining biblical principles, creating authentic worship expressions.",
+        "We honor Ethiopian culture while maintaining biblical principles, creating authentic worship culture.",
     },
     {
       icon: Target,
@@ -46,7 +46,7 @@ export function MissionVisionSection() {
           <div className="relative">
             <div className="bg-gradient-to-br from-[#E5C985]/20 to-[#212E3E]/10 rounded-2xl p-0 h-80">
               <img
-                src="assets/image/photo_10_2025-09-19_23-11-01.jpg"
+                src="/assets/image/about.jpg"
                 alt="Worship leaders in training"
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -74,7 +74,7 @@ export function MissionVisionSection() {
           <div className="lg:order-1 relative">
             <div className="bg-gradient-to-br from-[#212E3E]/10 to-[#E5C985]/20 rounded-2xl p-0 h-80">
               <img
-                src="assets/image/photo_11_2025-09-19_23-11-01.jpg"
+                src="/assets/image/photo_2_2025-10-03_16-43-26.jpg"
                 alt="Church congregation in worship"
                 className="w-full h-full object-cover rounded-lg"
               />

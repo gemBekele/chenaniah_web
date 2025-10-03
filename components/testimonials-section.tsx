@@ -13,23 +13,16 @@ export function TestimonialsSection() {
       name: "Pastor Samuel Tadesse",
       role: "Senior Pastor, Bethel Church Addis Ababa",
       content:
-        "Chenaniah.org has transformed our worship ministry. The training our musicians received has elevated our entire worship experience and brought our congregation closer to God.",
+        "I’m so glad I came. 🎶 It was actually my first concert, and I feel so blessed and inspired. Thank you again for the invitation. God bless  you and your ministry. I hope we’ll meet soon ✨.Blessings 😊",
       image: "/assets/image/photo_4_2025-09-19_23-11-01.jpg",
     },
     {
       name: "Sister Meron Bekele",
       role: "Worship Leader, Grace Fellowship",
-      content:
-        "The biblical foundation combined with practical music training has equipped me to lead worship with confidence and spiritual depth. This ministry is truly a blessing.",
+      content: "በነገር ሁሉ እንኳን ጌታ ተገኘላቹ ረዳቹ በእናንተ ስኬት እናንተ ላይ ስላለዉ ፀጋ ጌታን አመሰገንኩ በእዉነት ትላንትን አስታወስኩ 😢ጌታ ይመስገን ስሜቴን መቆጣጠር አቅቶኝ 🥲ነበር ጌታ ይችላል ምንም በሌለበት እሱ ይታመናል 🫢እንኳንም ጌታ አከበራቹ ለምልሙ ብዙ እወዳችዋለሁ።",
       image: "/assets/image/photo_5_2025-09-19_23-11-01.jpg",
     },
-    {
-      name: "Brother Daniel Haile",
-      role: "Youth Pastor & Musician",
-      content:
-        "As a young worship leader, the mentorship and training I received through Chenaniah.org has been invaluable. I now train other young musicians in my community.",
-      image: "/assets/image/photo_6_2025-09-19_23-11-01.jpg",
-    },
+  
   ]
 
   const nextTestimonial = () => {
@@ -49,10 +42,9 @@ export function TestimonialsSection() {
     <section className="py-20 bg-card">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-card-foreground mb-4">Voices of Transformation</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-card-foreground mb-4">Testimonials</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Hear from worship leaders and pastors whose ministries have been transformed through our training programs
-            and community support.
+            Hear from the people who have been part of our ministry.
           </p>
         </div>
 
@@ -62,19 +54,19 @@ export function TestimonialsSection() {
               <div className="text-center">
                 <Quote className="h-12 w-12 text-primary mx-auto mb-6" />
 
-                <blockquote className="text-xl md:text-2xl text-card-foreground mb-8 text-balance font-medium">
+                <blockquote className="text-xl md:text-2xl text-card-foreground mb-8 text-balance font-light">
                   "{testimonials[currentIndex].content}"
                 </blockquote>
 
                 <div className="flex items-center justify-center space-x-4">
-                  <div
+                  {/* <div
                     className="w-16 h-16 rounded-full bg-cover bg-center border-2 border-primary"
                     style={{ backgroundImage: `url('${testimonials[currentIndex].image}')` }}
-                  />
-                  <div className="text-left">
+                  /> */}
+                  {/* <div className="text-left">
                     <div className="font-semibold text-card-foreground">{testimonials[currentIndex].name}</div>
                     <div className="text-muted-foreground">{testimonials[currentIndex].role}</div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </CardContent>

@@ -22,16 +22,15 @@ export function AmharicSection() {
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-20 bg-gray-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90">የእኛ ተልእኮ</Badge>
+          <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90 mb-8">የእኛ ተልእኮ</Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">
-            በመጽሐፍ ቅዱስ ስልጠና የምስክርነት ለውጥ
+            የመጽሐፍ ቅዱስ መሰረት ያለው የዝማሬ አገልግሎት
           </h2>
           <p className="text-xl text-gray-600 max-w-4xl mx-auto text-pretty leading-relaxed">
-            ተልእኮችን በመጽሐፍ ቅዱስ የተመሰረተ ጠንካራ መሰረት፣ በሙዚቃ ውስጥ ለላቀ፣ እና በመንፈሳዊ ጥናት ውስጥ በኢትዮጵያ ውስጥ የምስክርነት መሪዎችን እናስተማራለን። 
-            የምስክርነት መሪዎች በትክክል በተሰለጠኑ ጊዜ፣ ሙሉ ጉባኤዎች ይለወጣሉ፣ እና የእግዚአብሔር መንግስት በሀገራችን ውስጥ ይስፋፋል።
+            ተልእኮአችን የኢትዮጵያ ቤተክርስቲያንን የዝማሬ አገልግሎት በመጽሐፍ ቅዱስ ላይ የተመሰረተ ጠንካራ መሰረት፣ በሙዚቃ ልቀት እና በመንፈሳዊ ሕይወት በማጠንከር እና በመቀየር፣ እግዚአብሔርን የሚያከብር  የአምልኮ ባህል መፍጠር ነው። 
           </p>
         </div>
 

@@ -31,17 +31,17 @@ export function CTASection() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => window.open("https://t.me/screeningchBot", "_blank")}>
-                Start Your Training
+                Join the choir!
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
-              <Button
+              {/* <Button
                 variant="outline"
                 size="lg"
                 className="border-white text-white hover:bg-white hover:text-foreground bg-transparent"
               >
                 Schedule a Call
-              </Button>
+              </Button> */}
             </div>
           </div>
 
@@ -58,7 +58,7 @@ export function CTASection() {
 
                 <div className="flex items-center space-x-3 text-white/90">
                   <Phone className="h-5 w-5 text-primary" />
-                  <span>+251 11 123 4567</span>
+                  <span>+2519 9888 2041</span>
                 </div>
 
                 <div className="flex items-center space-x-3 text-white/90">

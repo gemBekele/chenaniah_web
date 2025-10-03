@@ -7,40 +7,82 @@ import { Mail, Linkedin, Music } from "lucide-react"
 export function TeamSection() {
   const teamMembers = [
     {
-      name: "Pastor Daniel Mekonnen",
+      name: "Illasha Fekadu",
       role: "Founder & Director",
-      bio: "With over 20 years of ministry experience, Pastor Daniel founded Chenaniah to address the need for biblical worship training in Ethiopian churches.",
+      bio: "With over 20 years of ministry experience, Illasha Fekadu founded Chenaniah to address the need for biblical worship training in Ethiopian churches.",
       image: "/assets/image/photo_10_2025-09-19_23-11-01.jpg",
-      specialties: ["Biblical Theology", "Worship Leadership", "Church Planting"],
+      specialties: ["Singer", "Musician", "Church Planting"],
     },
     {
-      name: "Sister Ruth Tadesse",
+      name: "Zeritu Kebede",
       role: "Music Director",
-      bio: "A classically trained musician and worship leader, Sister Ruth oversees all musical training and curriculum development.",
+      bio: "A classically trained musician and worship leader, Zeritu Kebede oversees all musical training and curriculum development.",
       image: "/assets/image/photo_11_2025-09-19_23-11-01.jpg",
       specialties: ["Harp Performance", "Music Theory", "Vocal Training"],
     },
     {
-      name: "Deacon Samuel Bekele",
+      name: "john doe",
       role: "Training Coordinator",
       bio: "Samuel coordinates our training programs and manages relationships with partner churches across Ethiopia.",
       image: "/assets/image/photo_12_2025-09-19_23-11-01.jpg",
       specialties: ["Program Management", "Church Relations", "Student Mentoring"],
     },
     {
-      name: "Sister Hanna Girma",
+      name: "john doe",
       role: "Outreach Director",
       bio: "Hanna leads our community outreach efforts and manages partnerships with international supporters.",
       image: "/assets/image/photo_13_2025-09-19_23-11-01.jpg",
       specialties: ["Community Outreach", "Partnership Development", "Communications"],
     },
+    {
+      name: "Kaleab Yinebeb",
+      role: "Leader",
+      bio: "A dedicated leader contributing to the mission of Chenaniah.",
+      image: "/placeholder.svg",
+      specialties: ["Leadership", "Ministry"],
+    },
+    {
+      name: "Bereket Demeke",
+      role: "Leader",
+      bio: "A dedicated leader contributing to the mission of Chenaniah.",
+      image: "/placeholder.svg",
+      specialties: ["Leadership", "Ministry"],
+    },
+    {
+      name: "Amanuel Wolde",
+      role: "Leader",
+      bio: "A dedicated leader contributing to the mission of Chenaniah.",
+      image: "/placeholder.svg",
+      specialties: ["Leadership", "Ministry"],
+    },
+    {
+      name: "Abel Gashaw",
+      role: "Leader",
+      bio: "A dedicated leader contributing to the mission of Chenaniah.",
+      image: "/placeholder.svg",
+      specialties: ["Leadership", "Ministry"],
+    },
+    {
+      name: "Abigiya Elias",
+      role: "Leader",
+      bio: "A dedicated leader contributing to the mission of Chenaniah.",
+      image: "/placeholder.svg",
+      specialties: ["Leadership", "Ministry"],
+    },
+    {
+      name: "Ermias Menberu",
+      role: "Leader",
+      bio: "A dedicated leader contributing to the mission of Chenaniah.",
+      image: "/placeholder.svg",
+      specialties: ["Leadership", "Ministry"],
+    },
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+    <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90">Our Team</Badge>
+          {/* <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90">Our Team</Badge> */}
           <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">
             Meet the Leaders Behind the Mission
           </h2>
@@ -50,7 +92,7 @@ export function TeamSection() {
           </p> */}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {teamMembers.map((member, index) => (
             <Card
               key={index}
@@ -65,19 +107,19 @@ export function TeamSection() {
                   />
                 </div>
                 <CardTitle className="text-xl text-[#212E3E]">{member.name}</CardTitle>
-                <Badge variant="outline" className="text-[#E5C985] border-[#E5C985] text-center">
+                {/* <Badge variant="outline" className="text-[#E5C985] border-[#E5C985] text-center">
                   {member.role}
-                </Badge>
+                </Badge> */}
               </CardHeader>
               <CardContent className="text-center">
-                <div className="space-y-2 mb-4">
+                {/* <div className="space-y-2 mb-4">
                   {member.specialties.map((specialty, idx) => (
                     <div key={idx} className="flex items-center justify-center text-xs text-gray-500">
                       <Music className="w-3 h-3 mr-1 text-[#E5C985]" />
                       {specialty}
                     </div>
                   ))}
-                </div>
+                </div> */}
                 <div className="flex justify-center space-x-2">
                   <Button
                     size="sm"

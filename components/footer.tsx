@@ -5,9 +5,9 @@ import { Facebook, Youtube, Instagram, Mail, Music } from "lucide-react"
 export function Footer() {
   const quickLinks = [
     { name: "About Us", href: "/about" },
+    { name: "Home", href: "/" },
     { name: "Events", href: "/events" },
-    { name: "Online Classes", href: "/classes" },
-    { name: "Photo Gallery", href: "/gallery" },
+    { name: "Resources", href: "/resources" },
   ]
 
   const programs = [
@@ -77,7 +77,7 @@ export function Footer() {
           </div>
 
           {/* Programs */}
-          <div>
+          {/* <div>
             <h3 className="font-semibold text-primary mb-4">Programs</h3>
             <ul className="space-y-2">
               {programs.map((program) => (
@@ -88,7 +88,7 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
         </div>
 
         {/* Bottom Bar */}
