@@ -51,7 +51,7 @@ export function PastEventsSection() {
         videos: 8,
         recordings: 12,
       },
-      image: "/assets/image/photo_10_2025-09-19_23-11-01.jpg",
+      image: "/assets/image/photo_15_2025-09-19_23-11-01.jpg",
       photos: [
         "/assets/image/photo_10_2025-09-19_23-11-01.jpg",
         "/assets/image/photo_11_2025-09-19_23-11-01.jpg",
@@ -207,7 +207,7 @@ export function PastEventsSection() {
                       </div>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                    {/* <div className="bg-gray-50 rounded-lg p-4 mb-6">
                       <h4 className="font-semibold text-[#212E3E] mb-3">Available Resources</h4>
                       <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
@@ -223,7 +223,7 @@ export function PastEventsSection() {
                           <div className="text-sm text-gray-600">Recordings</div>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-wrap gap-3">
                       <Button size="sm" className="bg-[#212E3E] hover:bg-[#212E3E]/90 text-white">
@@ -254,7 +254,7 @@ export function PastEventsSection() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        {/* <div className="text-center mt-12">
           <Button
             size="lg"
             variant="outline"
@@ -262,7 +262,7 @@ export function PastEventsSection() {
           >
             View Complete Event Archive
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Photo Gallery Modal */}

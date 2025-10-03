@@ -33,11 +33,11 @@ export function ContactSection() {
   }
 
   const contactInfo = [
-    {
-      icon: MapPin,
-      title: "Visit Us",
-      details: ["Addis Ababa, Ethiopia", "Bole Sub-City", "Woreda 03, House No. 123"],
-    },
+    // {
+    //   icon: MapPin,
+    //   title: "Visit Us",
+    //   details: ["Addis Ababa, Ethiopia", "Bole Sub-City", "Woreda 03, House No. 123"],
+    // },
     {
       icon: Phone,
       title: "Call Us",
@@ -48,11 +48,11 @@ export function ContactSection() {
       title: "Email Us",
       details: ["info@chenaniah.org", "training@chenaniah.org", "partnerships@chenaniah.org"],
     },
-    {
-      icon: Clock,
-      title: "Office Hours",
-      details: ["Monday - Friday: 9:00 AM - 5:00 PM", "Saturday: 9:00 AM - 1:00 PM", "Sunday: Closed"],
-    },
+    // {
+    //   icon: Clock,
+    //   title: "Office Hours",
+    //   details: ["Monday - Friday: 9:00 AM - 5:00 PM", "Saturday: 9:00 AM - 1:00 PM", "Sunday: Closed"],
+    // },
   ]
 
   if (isSubmitted) {
@@ -127,9 +127,9 @@ export function ContactSection() {
             <div className="mt-8 p-6 bg-[#212E3E] rounded-2xl text-white">
               <h4 className="text-xl font-semibold mb-4">Need Immediate Assistance?</h4>
               <p className="text-gray-300 mb-4">
-                For urgent matters or immediate support, please call our main office during business hours.
+                For urgent matters or immediate support, please call us during business hours.
               </p>
-              <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]">
+              <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("tel:+251912345678", "_blank")}>
                 <Phone className="w-4 h-4 mr-2" />
                 Call Now
               </Button>
@@ -137,7 +137,7 @@ export function ContactSection() {
           </div>
 
           {/* Contact Form */}
-          <div>
+          <div className="pt-15">
             <Card className="border-2 border-gray-100">
               <CardHeader>
                 <CardTitle className="text-2xl text-[#212E3E]">Send Us a Message</CardTitle>
@@ -222,7 +222,7 @@ export function ContactSection() {
         </div>
 
         {/* Map Section */}
-        <div className="bg-gray-100 rounded-2xl p-8 text-center">
+        {/* <div className="bg-gray-100 rounded-2xl p-8 text-center">
           <h3 className="text-2xl font-bold text-[#212E3E] mb-4">Find Us on the Map</h3>
           <p className="text-gray-600 mb-6">
             Located in the heart of Addis Ababa, we're easily accessible by public transportation.
@@ -234,7 +234,7 @@ export function ContactSection() {
               <p className="text-sm text-gray-500">Addis Ababa, Ethiopia</p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   )

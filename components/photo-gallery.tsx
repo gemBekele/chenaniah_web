@@ -147,7 +147,7 @@ export function PhotoGallery() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-12">
           {filteredItems.map((item, index) => (
             <Card
               key={item.id}
@@ -165,10 +165,10 @@ export function PhotoGallery() {
                     <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                 </div>
-                <div className="p-4">
+                {/* <div className="p-4">
                   <h3 className="font-semibold text-[#212E3E] mb-2">{item.title}</h3>
                   <p className="text-sm text-gray-600">{item.description}</p>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           ))}
@@ -219,7 +219,7 @@ export function PhotoGallery() {
           </div>
         )}
 
-        <div className="text-center">
+        {/* <div className="text-center">
           <Button
             size="lg"
             variant="outline"
@@ -227,7 +227,7 @@ export function PhotoGallery() {
           >
             View More Photos
           </Button>
-        </div>
+        </div> */}
       </div>
     </section>
   )

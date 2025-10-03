@@ -12,7 +12,7 @@ export function EventsHeroSection() {
   }
 
   return (
-    <section className="relative py-32 bg-gradient-to-br from-[#212E3E] via-[#212E3E] to-[#212E3E]/90 text-white overflow-hidden">
+    <section className="relative py-32 bg-gradient-to-br from-[#212E3E] via-[#212E3E] to-[#212E3E]/90 text-white overflow-hidden ">
       {/* Background Image */}
       <div className="absolute inset-0">
         <div
@@ -25,13 +25,13 @@ export function EventsHeroSection() {
       </div>
       
       {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
+      {/* <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 border border-[#E5C985] rounded-full"></div>
         <div className="absolute bottom-20 right-10 w-24 h-24 border border-[#E5C985] rounded-full"></div>
         <div className="absolute top-1/2 left-1/3 w-16 h-16 border border-[#E5C985] rounded-full"></div>
-      </div>
+      </div> */}
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 relative z-10 pt-20">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <Badge className="mb-6 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90 text-lg px-6 py-2">

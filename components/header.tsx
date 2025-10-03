@@ -36,7 +36,7 @@ export function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Image src="/assets/logo/Asset 2@4x.png" alt="Chenaniah.org Logo" width={120} height={40} className="h-10 w-auto" />
+            <Image src="/assets/logo/Asset 2@4x.png" alt="Chenaniah.org Logo" width={120} height={40} className={`h-10 w-auto transition-all duration-300 ${isScrolled ? "" : "brightness-0 invert"}`} />
           </Link>
 
           {/* Desktop Navigation */}

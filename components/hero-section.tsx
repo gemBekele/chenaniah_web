@@ -1,5 +1,9 @@
+"use client"
+
+
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Play } from "lucide-react"
+import Image from "next/image"
 
 export function HeroSection() {
   return (
@@ -16,7 +20,18 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center max-w-4xl">
+      <div className="relative z-10 container mx-auto px-4  text-center max-w-4xl">
+        {/* Logo */}
+        {/* <div className="mb-8">
+          <Image
+            src="/assets/logo/Asset 2@4x.png"
+            alt="Chenaniah.org Logo"
+            width={200}
+            height={67}
+            className="h-16 w-auto mx-auto brightness-0 invert"
+          />
+        </div> */}
+
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 text-balance">
           Equipping Worship Leaders for
           <span className="text-primary block mt-2">Musical Excellence</span>
@@ -28,7 +43,7 @@ export function HeroSection() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+          <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => window.open("https://t.me/screeningchBot", "_blank")}>
             Join Our Training
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
@@ -44,7 +59,7 @@ export function HeroSection() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 pt-8 border-t border-white/20">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-16 pt-8 border-t border-white/20">
           <div className="text-center">
             <div className="text-3xl md:text-4xl font-bold text-primary mb-2">500+</div>
             <div className="text-white/80">Musicians Trained</div>
@@ -56,8 +71,8 @@ export function HeroSection() {
           <div className="text-center">
             <div className="text-3xl md:text-4xl font-bold text-primary mb-2">10+</div>
             <div className="text-white/80">Years of Ministry</div>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
       </div>
     </section>
   )

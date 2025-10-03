@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Facebook, Youtube, Instagram, Mail } from "lucide-react"
+import { Facebook, Youtube, Instagram, Mail, Music } from "lucide-react"
 
 export function Footer() {
   const quickLinks = [
@@ -18,10 +18,11 @@ export function Footer() {
   ]
 
   const socialLinks = [
-    { name: "Facebook", href: "#", icon: Facebook },
-    { name: "YouTube", href: "#", icon: Youtube },
-    { name: "Instagram", href: "#", icon: Instagram },
-    { name: "Email", href: "mailto:info@chenaniah.org", icon: Mail },
+    { name: "TikTok", href: "https://www.tiktok.com/@chenaniahethiopia?is_from_webapp=1&sender_device=pc", icon: Music },
+    { name: "Facebook", href: "https://web.facebook.com/chenaniahethiopia/", icon: Facebook },
+    { name: "YouTube", href: "https://youtube.com/@chenaniahethiopia?feature=shared", icon: Youtube },
+    { name: "Instagram", href: "https://instagram.com/chenaniahethiopia", icon: Instagram },
+    { name: "Email", href: "mailto:chenaniahethiopia@gmail.com", icon: Mail },
   ]
 
   return (
@@ -50,6 +51,8 @@ export function Footer() {
                 <Link
                   key={social.name}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
                   aria-label={social.name}
                 >

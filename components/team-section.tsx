@@ -1,3 +1,4 @@
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -43,10 +44,10 @@ export function TeamSection() {
           <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">
             Meet the Leaders Behind the Mission
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
+          {/* <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
             Our dedicated team brings together decades of ministry experience, musical expertise, and passionate
             commitment to equipping worship leaders across Ethiopia.
-          </p>
+          </p> */}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
@@ -64,12 +65,11 @@ export function TeamSection() {
                   />
                 </div>
                 <CardTitle className="text-xl text-[#212E3E]">{member.name}</CardTitle>
-                <Badge variant="outline" className="text-[#E5C985] border-[#E5C985]">
+                <Badge variant="outline" className="text-[#E5C985] border-[#E5C985] text-center">
                   {member.role}
                 </Badge>
               </CardHeader>
               <CardContent className="text-center">
-                <p className="text-gray-600 mb-4 text-sm text-pretty">{member.bio}</p>
                 <div className="space-y-2 mb-4">
                   {member.specialties.map((specialty, idx) => (
                     <div key={idx} className="flex items-center justify-center text-xs text-gray-500">
@@ -104,8 +104,8 @@ export function TeamSection() {
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             We're always looking for passionate individuals to join our team and help expand our impact across Ethiopia.
           </p>
-          <Button size="lg" className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]">
-            View Open Positions
+          <Button size="lg" className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("https://t.me/screeningchBot", "_blank")}>
+            Join us!
           </Button>
         </div>
       </div>
