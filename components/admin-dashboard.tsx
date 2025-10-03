@@ -391,10 +391,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             <p className="text-sm font-medium text-gray-700 mb-2">Worship Sample</p>
                             <div className="flex items-center gap-3">
                               <Button
-                                onClick={() => toggleAudio(submission.id, submission.audio_file_path || submission.audio_drive_link || '')}
+                                onClick={() => toggleAudio(submission.id, submission.audio_file_path || '')}
                                 size="lg"
                                 className="flex-shrink-0"
-                                disabled={!submission.audio_file_path && !submission.audio_drive_link}
+                                disabled={!submission.audio_file_path}
                               >
                                 {playingAudio === submission.id ? (
                                   <Pause className="h-5 w-5" />
