@@ -143,15 +143,52 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   }
 
-  const toggleAudio = (submissionId: number, audioPath: string) => {
+  const toggleAudio = async (submissionId: number, audioPath: string) => {
+    console.log('toggleAudio called:', { submissionId, audioPath, API_BASE_URL })
+    
     if (playingAudio === submissionId) {
       audioRef.current?.pause()
       setPlayingAudio(null)
     } else {
       if (audioRef.current) {
-        audioRef.current.src = `${API_BASE_URL}/audio/${audioPath}`
-        audioRef.current.play()
-        setPlayingAudio(submissionId)
+        try {
+          const audioUrl = `${API_BASE_URL}/audio/${audioPath}`
+          console.log('Fetching audio from:', audioUrl)
+          
+          // Fetch audio with authentication
+          const response = await fetch(audioUrl, {
+            headers: {
+              'Authorization': `Bearer ${getToken()}`
+            }
+          })
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+          
+          // Create blob URL for the audio
+          const audioBlob = await response.blob()
+          const blobUrl = URL.createObjectURL(audioBlob)
+          
+          console.log('Setting audio src to blob URL:', blobUrl)
+          audioRef.current.src = blobUrl
+          audioRef.current.load()
+          
+          audioRef.current.play()
+            .then(() => {
+              console.log('Audio playback started successfully')
+              setPlayingAudio(submissionId)
+            })
+            .catch((error) => {
+              console.error('Audio playback failed:', error)
+              setPlayingAudio(null)
+            })
+        } catch (error) {
+          console.error('Error fetching audio:', error)
+          setPlayingAudio(null)
+        }
+      } else {
+        console.error('Audio element not found')
       }
     }
   }
@@ -173,9 +210,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }
 
   const filteredSubmissions = submissions.filter(sub => 
-    sub.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    sub.phone.includes(searchQuery) ||
-    sub.church.toLowerCase().includes(searchQuery.toLowerCase())
+    sub.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sub.phone?.includes(searchQuery) ||
+    sub.church?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const formatFileSize = (bytes: number) => {
@@ -354,9 +391,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             <p className="text-sm font-medium text-gray-700 mb-2">Worship Sample</p>
                             <div className="flex items-center gap-3">
                               <Button
-                                onClick={() => toggleAudio(submission.id, submission.audio_file_path)}
+                                onClick={() => toggleAudio(submission.id, submission.audio_file_path || submission.audio_drive_link || '')}
                                 size="lg"
                                 className="flex-shrink-0"
+                                disabled={!submission.audio_file_path && !submission.audio_drive_link}
                               >
                                 {playingAudio === submission.id ? (
                                   <Pause className="h-5 w-5" />
@@ -463,7 +501,13 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       <audio
         ref={audioRef}
         onEnded={() => setPlayingAudio(null)}
-        onError={() => setPlayingAudio(null)}
+        onError={(e) => {
+          console.error('Audio element error:', e)
+          setPlayingAudio(null)
+        }}
+        onLoadStart={() => console.log('Audio loading started')}
+        onCanPlay={() => console.log('Audio can play')}
+        onLoadedData={() => console.log('Audio data loaded')}
       />
     </div>
   )
