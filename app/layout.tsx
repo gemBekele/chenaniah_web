@@ -22,7 +22,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>{children}</Suspense>
-        <Analytics />
+        {/* Only load Analytics on Vercel deployments */}
+        {process.env.VERCEL && <Analytics />}
       </body>
     </html>
   )
