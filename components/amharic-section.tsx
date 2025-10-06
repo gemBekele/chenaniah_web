@@ -27,7 +27,7 @@ export function AmharicSection() {
         <div className="text-center mb-16">
           <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90 mb-8">የእኛ ተልእኮ</Badge>
           <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">
-            የመጽሐፍ ቅዱስ መሰረት ያለው የዝማሬ አገልግሎት
+            የመጽሐፍ ቅዱሳዊ  መሰረት ያለው የዝማሬ አገልግሎት
           </h2>
           <p className="text-xl text-gray-600 max-w-4xl mx-auto text-pretty leading-relaxed">
             ተልእኮአችን የኢትዮጵያ ቤተክርስቲያንን የዝማሬ አገልግሎት በመጽሐፍ ቅዱስ ላይ የተመሰረተ ጠንካራ መሰረት፣ በሙዚቃ ልቀት እና በመንፈሳዊ ሕይወት በማጠንከር እና በመቀየር፣ እግዚአብሔርን የሚያከብር  የአምልኮ ባህል መፍጠር ነው። 

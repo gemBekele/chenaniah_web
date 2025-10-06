@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
@@ -20,9 +19,9 @@ import {
   Church,
   LogOut,
   Search,
-  Music,
   FileAudio,
 } from "lucide-react"
+import Image from "next/image"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://15.204.227.47:5000/api"
 
@@ -66,7 +65,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [playingAudio, setPlayingAudio] = useState<number | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const getToken = () => localStorage.getItem("admin_token")
+  const getToken = () => {
+    let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
+
+    // If no full token, try to reconstruct from compressed storage
+    if (!token) {
+      const compressedToken = localStorage.getItem("admin_token_compressed")
+      const header = localStorage.getItem("admin_token_header")
+      if (compressedToken && header) {
+        token = `${header}.${compressedToken}`
+      }
+    }
+
+    return token
+  }
 
   const fetchStats = async () => {
     try {
@@ -196,14 +208,23 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { color: string; icon: any }> = {
-      pending: { color: "bg-warning-light text-warning border-warning/20", icon: Clock },
-      approved: { color: "bg-success-light text-success border-success/20", icon: CheckCircle },
-      rejected: { color: "bg-error-light text-error border-error/20", icon: XCircle },
+      pending: {
+        color: "text-amber-600 dark:text-amber-400",
+        icon: Clock,
+      },
+      approved: {
+        color: "text-emerald-600 dark:text-emerald-400",
+        icon: CheckCircle,
+      },
+      rejected: {
+        color: "text-rose-600 dark:text-rose-400",
+        icon: XCircle,
+      },
     }
     const variant = variants[status] || variants.pending
     const Icon = variant.icon
     return (
-      <Badge className={`${variant.color} flex items-center gap-1.5 px-3 py-1 border font-medium`}>
+      <Badge variant="outline" className={`${variant.color} bg-transparent border-transparent flex items-center gap-1.5 px-3 py-1.5 font-medium`}>
         <Icon className="h-3.5 w-3.5" />
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </Badge>
@@ -236,119 +257,124 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="bg-card border-b border-border/50 shadow-sm">
-        <div className="container mx-auto px-4 lg:px-6 py-5">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/40">
+        <div className="container mx-auto px-6 lg:px-8 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
-                <Music className="h-6 w-6 text-primary" />
+              <div className="relative">
+                {/* <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl blur-lg opacity-40"></div> */}
+                <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl ">
+                  <Image 
+                    src="/assets/logo/logo_icon.png" 
+                    alt="Chenaniah Logo" 
+                    width={35} 
+                    height={35}
+                    className="object-contain"
+                  />
+                </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Screening Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Chenaniah Worship Ministry</p>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  Screening Dashboard
+                </h1>
+                <p className="text-sm text-muted-foreground font-medium text-primary">Chenaniah Music Ministry</p>
               </div>
             </div>
-            <Button onClick={onLogout} variant="outline" size="sm" className="gap-2 hover:bg-muted bg-transparent">
-              <LogOut className="h-4 w-4" />
-              Logout
+            <Button onClick={onLogout} variant="ghost" size="sm" className="gap-2 hover:bg-muted/50 transition-all">
+              <LogOut className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 lg:px-6 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Total Applications</p>
-                  <p className="text-3xl font-bold text-foreground">{stats.total}</p>
-                </div>
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted">
-                  <User className="h-6 w-6 text-muted-foreground" />
-                </div>
+      <div className="container mx-auto px-6 lg:px-8 py-8 lg:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10">
+          <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-background to-muted/30 p-6 border border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-muted/20">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-violet-500/10 to-transparent rounded-full blur-2xl"></div>
+            <div className="relative">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Total Applications</p>
+              <p className="text-4xl font-bold text-foreground mb-3">{stats.total}</p>
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-muted/50 group-hover:bg-muted transition-colors">
+                <User className="h-5 w-5 text-muted-foreground" />
               </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Pending Review</p>
-                  <p className="text-3xl font-bold text-warning">{stats.pending}</p>
                 </div>
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-warning-light">
-                  <Clock className="h-6 w-6 text-warning" />
                 </div>
+
+          <div className="group relative overflow-hidden rounded-2xl bg-amber-50 p-6 border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/10">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-2xl"></div>
+            <div className="relative">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Pending Review</p>
+              <p className="text-4xl font-bold text-amber-600 dark:text-amber-500 mb-3">{stats.pending}</p>
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
+                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-500" />
               </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Approved</p>
-                  <p className="text-3xl font-bold text-success">{stats.approved}</p>
                 </div>
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-success-light">
-                  <CheckCircle className="h-6 w-6 text-success" />
                 </div>
+
+          <div className="group relative overflow-hidden rounded-2xl bg-emerald-50 p-6 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-full blur-2xl"></div>
+            <div className="relative">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Approved</p>
+              <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-500 mb-3">{stats.approved}</p>
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
+                <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-500" />
               </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Rejected</p>
-                  <p className="text-3xl font-bold text-error">{stats.rejected}</p>
                 </div>
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-error-light">
-                  <XCircle className="h-6 w-6 text-error" />
                 </div>
+
+          <div className="group relative overflow-hidden rounded-2xl bg-rose-50 p-6 border border-rose-500/20 hover:border-rose-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/10">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-rose-500/20 to-transparent rounded-full blur-2xl"></div>
+            <div className="relative">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Rejected</p>
+              <p className="text-4xl font-bold text-rose-600 dark:text-rose-500 mb-3">{stats.rejected}</p>
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-rose-500/10 group-hover:bg-rose-500/20 transition-colors">
+                <XCircle className="h-5 w-5 text-rose-600 dark:text-rose-500" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-8">
+          <div className="relative group">
+            {/* <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div> */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5  text-amber-500 " />
             <Input
               type="text"
               placeholder="Search by name, phone, or church..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-12 bg-card border-border/50 shadow-sm focus:shadow-md transition-shadow"
+                className="pl-14 h-14 bg-background/50 backdrop-blur-sm border-border/50 rounded-2xl text-base focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
             />
+            </div>
           </div>
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="mb-6 bg-card border border-border/50 p-1 shadow-sm">
+          <TabsList className="mb-8 bg-muted/50 backdrop-blur-sm p-1 rounded-xl border border-border/50 inline-flex">
             <TabsTrigger
               value="all"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-6 py-2.5 font-medium transition-all"
             >
               All Applications
             </TabsTrigger>
             <TabsTrigger
               value="pending"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-6 py-2.5 font-medium transition-all"
             >
               Pending
             </TabsTrigger>
             <TabsTrigger
               value="approved"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-6 py-2.5 font-medium transition-all"
             >
               Approved
             </TabsTrigger>
             <TabsTrigger
               value="rejected"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-6 py-2.5 font-medium transition-all"
             >
               Rejected
             </TabsTrigger>
@@ -356,156 +382,153 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
           <TabsContent value={selectedTab}>
             {isLoading ? (
-              <div className="flex justify-center py-16">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-primary"></div>
-                  <p className="text-sm text-muted-foreground">Loading applications...</p>
+              <div className="flex justify-center py-24">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative">
+                    {/* <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full blur-xl opacity-40"></div> */}
+                    <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-muted border-t-amber-500"></div>
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium">Loading applications...</p>
                 </div>
               </div>
             ) : filteredSubmissions.length === 0 ? (
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-16 text-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-muted">
-                      <FileAudio className="h-8 w-8 text-muted-foreground" />
+              <div className="rounded-3xl bg-gradient-to-br from-background to-muted/30 border border-border/50 p-20 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center justify-center w-20 h-20 rounded-3xl bg-muted/50">
+                    <FileAudio className="h-10 w-10 text-muted-foreground" />
                     </div>
-                    <p className="text-lg font-medium text-foreground">No applications found</p>
+                  <div>
+                    <p className="text-xl font-semibold text-foreground mb-2">No applications found</p>
                     <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ) : (
-              <div className="grid gap-5">
-                {filteredSubmissions.map((submission) => (
-                  <Card
-                    key={submission.id}
-                    className="border-border/50 shadow-sm hover:shadow-lg transition-all duration-200"
-                  >
-                    <CardContent className="p-6 lg:p-8">
-                      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                        {/* Left: Applicant Info */}
-                        <div className="flex-1 space-y-5">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <h3 className="text-xl font-bold text-foreground mb-1">{submission.name}</h3>
-                              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                                <Clock className="h-3.5 w-3.5" />
-                                Applied {formatDate(submission.submitted_at)}
-                              </p>
+              <div className="rounded-2xl bg-gradient-to-br from-background to-muted/20 border border-border/50 overflow-hidden">
+                {/* Table Header */}
+                <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 border-b border-border/50">
+                  <div className="col-span-2">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Applicant</p>
                             </div>
-                            {getStatusBadge(submission.status)}
+                  <div className="col-span-2">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Contact</p>
                           </div>
+                  <div className="col-span-2">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Church</p>
+                              </div>
+                  <div className="col-span-1">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Submitted</p>
+                              </div>
+                  <div className="col-span-2 flex justify-center">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Audio Sample</p>
+                            </div>
+                  <div className="col-span-2 flex justify-center">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Status</p>
+                              </div>
+                  <div className="col-span-1 flex justify-center">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Actions</p>
+                              </div>
+                            </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex items-center gap-3 text-sm bg-muted/50 p-3 rounded-lg">
-                              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-card">
-                                <Phone className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
-                                <p className="font-medium">{submission.phone}</p>
-                              </div>
+                {/* Table Body */}
+                <div className="divide-y divide-border/30">
+                  {filteredSubmissions.map((submission) => (
+                    <div
+                      key={submission.id}
+                      className="group grid grid-cols-12 gap-4 px-6 py-5 hover:bg-muted/20 transition-colors"
+                    >
+                      {/* Applicant Info */}
+                      <div className="col-span-2 flex flex-col justify-center">
+                        <p className="text-base font-semibold text-foreground mb-1 text-balance">{submission.name}</p>
+                        <p className="text-sm text-muted-foreground">@{submission.telegram_username || "N/A"}</p>
                             </div>
-                            <div className="flex items-center gap-3 text-sm bg-muted/50 p-3 rounded-lg">
-                              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-card">
-                                <MapPin className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Address</p>
-                                <p className="font-medium">{submission.address}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm bg-muted/50 p-3 rounded-lg">
-                              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-card">
-                                <Church className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Church</p>
-                                <p className="font-medium">{submission.church}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 text-sm bg-muted/50 p-3 rounded-lg">
-                              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-card">
-                                <User className="h-4 w-4 text-muted-foreground" />
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground mb-0.5">Telegram</p>
-                                <p className="font-medium">@{submission.telegram_username || "N/A"}</p>
-                              </div>
-                            </div>
-                          </div>
 
-                          {submission.reviewer_comments && (
-                            <div className="bg-muted/70 border border-border/50 p-4 rounded-xl">
-                              <p className="text-sm font-semibold text-foreground mb-2">Review Comments</p>
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                {submission.reviewer_comments}
-                              </p>
-                              {submission.reviewed_by && (
-                                <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border/50">
-                                  Reviewed by {submission.reviewed_by} on{" "}
-                                  {submission.reviewed_at && formatDate(submission.reviewed_at)}
+
+                      {/* Contact */}
+                      <div className="col-span-2 flex flex-col justify-center">
+                          <p className="text-base font-semibold text-foreground mb-1 flex items-center gap-1.5">
+                            <Phone className="h-5 w-5 text-muted-foreground" />
+                            {submission.phone}
+                          </p>
+                        <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                          <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+                          <span className="line-clamp-2">{submission.address}</span>
                                 </p>
-                              )}
-                            </div>
-                          )}
+                              </div>
+
+                      {/* Church */}
+                      <div className="col-span-2 flex items-center">
+                        <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                          <Church className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          <span className="line-clamp-2">{submission.church}</span>
+                        </p>
+                          </div>
+
+                      {/* Submitted Date */}
+                      <div className="col-span-1 flex items-center">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                          {/* <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" /> */}
+                          <span className="text-md font-medium">{formatDate(submission.submitted_at)}</span>
+                        </p>
                         </div>
 
-                        {/* Right: Audio Player & Actions */}
-                        <div className="lg:w-80 space-y-4">
-                          <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border border-primary/20 p-5 rounded-xl">
-                            <div className="flex items-center gap-2 mb-4">
-                              <Music className="h-4 w-4 text-primary" />
-                              <p className="text-sm font-semibold text-foreground">Worship Sample</p>
-                            </div>
-                            <div className="flex items-center gap-4">
+                      {/* Audio Sample */}
+                      <div className="col-span-2 flex items-center justify-center">
+                        {/* <div className="flex items-center gap-3"> */}
                               <Button
                                 onClick={() => toggleAudio(submission.id, submission.audio_file_path || "")}
-                                size="lg"
-                                className="flex-shrink-0 w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg transition-all"
+                            size="icon"
+                            className="w-10 h-10 rounded-xl bg-primary-foreground shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all"
                                 disabled={!submission.audio_file_path}
                               >
                                 {playingAudio === submission.id ? (
-                                  <Pause className="h-6 w-6" />
+                              <Pause className="h-4 w-4 text-primary" />
                                 ) : (
-                                  <Play className="h-6 w-6 ml-0.5" />
+                              <Play className="h-4 w-4 ml-0.5 text-primary" />
                                 )}
                               </Button>
-                              <div className="flex-1">
-                                <p className="text-sm font-medium text-foreground mb-1">
-                                  {playingAudio === submission.id ? "Now Playing" : "Ready to Play"}
+                          {/* <div>
+                            <p className="text-xs font-medium text-foreground">
+                              {playingAudio === submission.id ? "Playing" : "Ready"}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                   {formatFileSize(submission.audio_file_size)}
                                 </p>
+                          </div> */}
+                        {/* </div> */}
+                      </div>
+
+                      {/* Status */}
+                      <div className="col-span-2 flex items-center justify-center">
+                        {getStatusBadge(submission.status)}
+                        {submission.reviewer_comments && (
+                          <div className="ml-2 group/tooltip relative">
+                            <div className="w-5 h-5 rounded-full bg-muted/50 flex items-center justify-center text-xs text-muted-foreground cursor-help">
+                              i
                               </div>
+                            <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-popover border border-border rounded-xl shadow-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-10">
+                              <p className="text-xs text-popover-foreground">{submission.reviewer_comments}</p>
                             </div>
                           </div>
+                        )}
+                          </div>
 
+                      {/* Actions */}
+                      <div className="col-span-1 flex items-center justify-center">
                           {submission.status === "pending" && (
-                            <div className="space-y-3">
                               <Button
                                 onClick={() => setSelectedSubmission(submission)}
-                                className="w-full h-11 bg-success hover:bg-success/90 text-white font-semibold shadow-sm hover:shadow-md transition-all"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Approve Application
+                            size="sm"
+                            variant="ghost"
+                            className="h-9 px-3 hover:bg-muted/50 rounded-lg"
+                          >
+                            Review
                               </Button>
-                              <Button
-                                onClick={() => setSelectedSubmission(submission)}
-                                className="w-full h-11 bg-error hover:bg-error/90 text-white font-semibold shadow-sm hover:shadow-md transition-all"
-                                variant="destructive"
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Reject Application
-                              </Button>
-                            </div>
                           )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
                 ))}
+                </div>
               </div>
             )}
           </TabsContent>
@@ -513,17 +536,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       </div>
 
       {selectedSubmission && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <Card className="w-full max-w-lg border-border/50 shadow-2xl animate-in zoom-in-95 duration-200">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl">Review Application</CardTitle>
-              <CardDescription className="text-base">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
+          <div className="w-full max-w-lg rounded-3xl bg-gradient-to-br from-background to-muted/30 border border-border/50 shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-300">
+            <div className="p-8 pb-6 border-b border-border/50">
+              {/* <h2 className="text-2xl font-bold text-foreground mb-2">Review Application</h2> */}
+              <p className="text-xl text-muted-foreground font-light">
                 {selectedSubmission.name} • {selectedSubmission.church}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
+              </p>
+            </div>
+            <div className="p-8 space-y-6">
               <div>
-                <Label htmlFor="comments" className="text-sm font-medium mb-2 block">
+                <Label htmlFor="comments" className="text-sm font-semibold mb-3 block uppercase tracking-wide">
                   Comments (optional)
                 </Label>
                 <Textarea
@@ -532,20 +555,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Add any comments about this application..."
                   rows={4}
-                  className="resize-none bg-input border-border/50"
+                  className="resize-none rounded-xl bg-muted/30 border-border/50 focus:border-violet-500/50 focus:ring-violet-500/20"
                 />
               </div>
               <div className="flex gap-3">
                 <Button
                   onClick={() => handleStatusUpdate(selectedSubmission.id, "approved")}
-                  className="flex-1 h-11 bg-success hover:bg-success/90 text-white font-semibold"
+                  className="flex-1 h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/40 transition-all"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve
                 </Button>
                 <Button
                   onClick={() => handleStatusUpdate(selectedSubmission.id, "rejected")}
-                  className="flex-1 h-11 bg-error hover:bg-error/90 text-white font-semibold"
+                  className="flex-1 h-12 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white font-semibold rounded-xl shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/40 transition-all"
                   variant="destructive"
                 >
                   <XCircle className="h-4 w-4 mr-2" />
@@ -557,13 +580,13 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   setSelectedSubmission(null)
                   setComments("")
                 }}
-                className="w-full h-11"
+                className="w-full h-12 rounded-xl font-semibold hover:bg-muted/50"
                 variant="outline"
               >
                 Cancel
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
 

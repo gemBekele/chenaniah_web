@@ -33,7 +33,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <Image
-                src="/assets/logo/Asset 2@4x.png"
+                src="/assets/logo/logo_full.png"
                 alt="Chenaniah.org Logo"
                 width={120}
                 height={40}

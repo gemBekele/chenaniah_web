@@ -35,14 +35,23 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         body: JSON.stringify({ username, password }),
       })
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
 
-      if (response.ok && data.success) {
+      console.log("data", data)
+
+      if (data.success && data.token) {
+        console.log("Login successful, calling onLoginSuccess with token:", data.token)
         onLoginSuccess(data.token)
       } else {
+        console.log("Login failed, data:", data)
         setError(data.error || "Invalid credentials")
       }
     } catch (err) {
+      console.error("Login error:", err)
       setError("Failed to connect to server. Please try again.")
     } finally {
       setIsLoading(false)

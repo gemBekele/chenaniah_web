@@ -30,7 +30,7 @@ export function CTASection() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => window.open("https://t.me/screeningchBot", "_blank")}>
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}>
                 Join the choir!
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
