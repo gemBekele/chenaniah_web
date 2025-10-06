@@ -37,7 +37,7 @@ export function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Image src="/assets/logo/Asset 2@4x.png" alt="Chenaniah.org Logo" width={120} height={40} className={`h-10 w-auto transition-all duration-300 ${isScrolled ? "" : "brightness-0 invert"}`} />
+            <Image src="/assets/logo/logo_full.png" alt="Chenaniah.org Logo" width={120} height={40} className={`h-10 w-auto transition-all duration-300 ${isScrolled ? "" : "brightness-0 invert"}`} />
           </Link>
 
           {/* Desktop Navigation */}
@@ -57,7 +57,7 @@ export function Header() {
 
           {/* CTA Button */}
           <div className="hidden lg:block">
-            <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("https://t.me/screeningchBot", "_blank")}>Join the choir</Button>
+            <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}>Join the choir</Button>
           </div>
 
           {/* Mobile Menu Button */}

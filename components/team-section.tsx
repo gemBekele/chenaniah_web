@@ -146,7 +146,7 @@ export function TeamSection() {
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             We're always looking for passionate individuals to join our team and help expand our impact across Ethiopia.
           </p>
-          <Button size="lg" className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("https://t.me/screeningchBot", "_blank")}>
+          <Button size="lg" className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}>
             Join us!
           </Button>
         </div>
