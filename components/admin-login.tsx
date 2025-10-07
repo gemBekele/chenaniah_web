@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Lock, UserIcon } from "lucide-react"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://15.204.227.47:5000/api"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://www.chenaniah.org/api"
 
 interface AdminLoginProps {
   onLoginSuccess: (token: string) => void
