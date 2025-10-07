@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://15.204.227.47:5000/api"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://www.chenaniah.org/api"
 
 interface Submission {
   id: number
