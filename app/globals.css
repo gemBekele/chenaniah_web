@@ -31,4 +31,25 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+  
+  /* Improve mobile scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Better mobile touch targets */
+  button, a, input, select, textarea {
+    min-height: 44px;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Better text rendering on mobile */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }

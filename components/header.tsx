@@ -33,11 +33,11 @@ export function Header() {
         isScrolled ? "bg-white/95 backdrop-blur-sm shadow-lg" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Image src="/assets/logo/logo_full.png" alt="Chenaniah.org Logo" width={120} height={40} className={`h-10 w-auto transition-all duration-300 ${isScrolled ? "" : "brightness-0 invert"}`} />
+            <Image src="/assets/logo/logo_full.png" alt="Chenaniah.org Logo" width={120} height={40} className={`h-8 sm:h-10 w-auto transition-all duration-300 ${isScrolled ? "" : "brightness-0 invert"}`} />
           </Link>
 
           {/* Desktop Navigation */}
@@ -64,10 +64,10 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden"
+            className="lg:hidden p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
 
@@ -79,13 +79,18 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-sm font-medium text-[#212E3E] hover:text-[#E5C985] transition-colors"
+                  className="text-base font-medium text-[#212E3E] hover:text-[#E5C985] transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
-              <Button className="w-fit bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]">Join Our Ministry</Button>
+              <Button 
+                className="w-fit bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] mt-2" 
+                onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}
+              >
+                Join the choir
+              </Button>
             </div>
           </nav>
         )}

@@ -27,8 +27,8 @@ export function Footer() {
 
   return (
     <footer className="bg-foreground text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Logo and Description */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center space-x-2 mb-4">
@@ -40,23 +40,23 @@ export function Footer() {
                 className="h-10 w-auto brightness-0 invert"
               />
             </Link>
-            <p className="text-white/80 mb-6 text-pretty max-w-md">
+            <p className="text-white/80 mb-6 text-pretty max-w-md text-sm sm:text-base">
               Equipping church musicians, singers, and worship leaders across Ethiopia and beyond through biblical
               worship training and musical excellence.
             </p>
 
             {/* Social Links */}
-            <div className="flex space-x-4">
+            <div className="flex space-x-3 sm:space-x-4">
               {socialLinks.map((social) => (
                 <Link
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
                   aria-label={social.name}
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Link>
               ))}
             </div>
@@ -64,11 +64,11 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-primary mb-4">Quick Links</h3>
+            <h3 className="font-semibold text-primary mb-4 text-sm sm:text-base">Quick Links</h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-white/80 hover:text-primary transition-colors">
+                  <Link href={link.href} className="text-white/80 hover:text-primary transition-colors text-sm sm:text-base">
                     {link.name}
                   </Link>
                 </li>
@@ -92,13 +92,13 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-white/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-white/60 text-sm">© 2024 Chenaniah.org. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link href="/privacy" className="text-white/60 hover:text-primary text-sm transition-colors">
+        <div className="border-t border-white/20 mt-8 sm:mt-12 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-white/60 text-xs sm:text-sm">© 2024 Chenaniah.org. All rights reserved.</p>
+          <div className="flex space-x-4 sm:space-x-6 mt-4 md:mt-0">
+            <Link href="/privacy" className="text-white/60 hover:text-primary text-xs sm:text-sm transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-white/60 hover:text-primary text-sm transition-colors">
+            <Link href="/terms" className="text-white/60 hover:text-primary text-xs sm:text-sm transition-colors">
               Terms of Service
             </Link>
           </div>

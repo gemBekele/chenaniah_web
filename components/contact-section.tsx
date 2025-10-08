@@ -81,21 +81,21 @@ export function ContactSection() {
   }
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-16 sm:py-20 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 sm:mb-16">
           <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90">Get In Touch</Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">Contact Us</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">Contact Us</h2>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
             We'd love to hear from you. Whether you have questions about our programs, want to partner with us, or need
             more information, we're here to help.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-16 mb-16">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 mb-16">
           {/* Contact Information */}
           <div>
-            <h3 className="text-2xl font-bold text-[#212E3E] mb-8">How to Reach Us</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-[#212E3E] mb-6 sm:mb-8">How to Reach Us</h3>
             <div className="space-y-6">
               {contactInfo.map((info, index) => {
                 const IconComponent = info.icon
@@ -104,15 +104,15 @@ export function ContactSection() {
                     key={index}
                     className="border-2 border-gray-100 hover:border-[#E5C985] transition-all duration-300"
                   >
-                    <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <div className="p-3 bg-[#E5C985]/10 rounded-lg">
-                          <IconComponent className="w-6 h-6 text-[#E5C985]" />
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex items-start space-x-3 sm:space-x-4">
+                        <div className="p-2 sm:p-3 bg-[#E5C985]/10 rounded-lg flex-shrink-0">
+                          <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-[#E5C985]" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-[#212E3E] mb-2">{info.title}</h4>
+                          <h4 className="font-semibold text-[#212E3E] mb-2 text-sm sm:text-base">{info.title}</h4>
                           {info.details.map((detail, idx) => (
-                            <p key={idx} className="text-gray-600 text-sm">
+                            <p key={idx} className="text-gray-600 text-xs sm:text-sm">
                               {detail}
                             </p>
                           ))}
@@ -124,12 +124,12 @@ export function ContactSection() {
               })}
             </div>
 
-            <div className="mt-8 p-6 bg-[#212E3E] rounded-2xl text-white">
-              <h4 className="text-xl font-semibold mb-4">Need Immediate Assistance?</h4>
-              <p className="text-gray-300 mb-4">
+            <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-[#212E3E] rounded-2xl text-white">
+              <h4 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Need Immediate Assistance?</h4>
+              <p className="text-gray-300 mb-4 text-sm sm:text-base">
                 For urgent matters or immediate support, please call us during business hours.
               </p>
-              <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("tel:+251912345678", "_blank")}>
+              <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] w-full sm:w-auto" onClick={() => window.open("tel:+251912345678", "_blank")}>
                 <Phone className="w-4 h-4 mr-2" />
                 Call Now
               </Button>
@@ -137,17 +137,17 @@ export function ContactSection() {
           </div>
 
           {/* Contact Form */}
-          <div className="pt-15">
+          <div className="pt-0 sm:pt-15">
             <Card className="border-2 border-gray-100">
-              <CardHeader>
-                <CardTitle className="text-2xl text-[#212E3E]">Send Us a Message</CardTitle>
-                <CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-xl sm:text-2xl text-[#212E3E]">Send Us a Message</CardTitle>
+                <CardDescription className="text-sm sm:text-base">
                   Fill out the form below and we'll get back to you as soon as possible.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name *</Label>
                       <Input
@@ -171,21 +171,21 @@ export function ContactSection() {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="phone" className="text-sm sm:text-base">Phone Number</Label>
                       <Input
                         id="phone"
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => handleInputChange("phone", e.target.value)}
-                        className="border-gray-300 focus:border-[#E5C985]"
+                        className="border-gray-300 focus:border-[#E5C985] text-sm sm:text-base"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="subject">Subject *</Label>
+                      <Label htmlFor="subject" className="text-sm sm:text-base">Subject *</Label>
                       <Select onValueChange={(value) => handleInputChange("subject", value)} required>
-                        <SelectTrigger className="border-gray-300 focus:border-[#E5C985]">
+                        <SelectTrigger className="border-gray-300 focus:border-[#E5C985] text-sm sm:text-base">
                           <SelectValue placeholder="Select a subject" />
                         </SelectTrigger>
                         <SelectContent>
@@ -200,14 +200,14 @@ export function ContactSection() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message *</Label>
+                    <Label htmlFor="message" className="text-sm sm:text-base">Message *</Label>
                     <Textarea
                       id="message"
                       value={formData.message}
                       onChange={(e) => handleInputChange("message", e.target.value)}
                       placeholder="Please provide details about your inquiry..."
                       required
-                      className="border-gray-300 focus:border-[#E5C985] min-h-[120px]"
+                      className="border-gray-300 focus:border-[#E5C985] min-h-[120px] text-sm sm:text-base"
                     />
                   </div>
 

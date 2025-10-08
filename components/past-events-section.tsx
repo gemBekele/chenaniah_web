@@ -121,14 +121,14 @@ export function PastEventsSection() {
   ]
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-16 sm:py-20 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 sm:mb-16">
           <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90">Past Events</Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">
             Celebrating Our Journey Together
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
             Relive the powerful moments from our past events and access recordings, photos, and resources from
             conferences and workshops that have shaped our worship community.
           </p>
@@ -150,13 +150,13 @@ export function PastEventsSection() {
                     <img
                       src={event.image || "/placeholder.svg"}
                       alt={event.title}
-                      className="w-full h-64 lg:h-full object-cover"
+                      className="w-full h-48 sm:h-64 lg:h-full object-cover"
                     />
                     <div className="absolute top-4 left-4">
-                      <Badge className="bg-black/70 text-white">Past Event</Badge>
+                      <Badge className="bg-black/70 text-white text-xs sm:text-sm">Past Event</Badge>
                     </div>
                   </div>
-                  <div className="lg:col-span-2 p-8">
+                  <div className="lg:col-span-2 p-4 sm:p-6 lg:p-8">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <div className="flex items-center space-x-4 mb-2">
@@ -174,32 +174,32 @@ export function PastEventsSection() {
                             <span className="text-sm font-semibold text-[#212E3E]">{event.rating}</span>
                           </div> */}
                         </div>
-                        <h3 className="text-2xl font-bold text-[#212E3E] mb-2">{event.title}</h3>
-                        <p className="text-gray-600 mb-6 text-pretty">{event.description}</p>
+                        <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-[#212E3E] mb-2">{event.title}</h3>
+                        <p className="text-gray-600 mb-4 sm:mb-6 text-pretty text-sm sm:text-base">{event.description}</p>
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6 mb-6">
-                      <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                      <div className="space-y-2 sm:space-y-3">
                         <div className="flex items-center space-x-3 text-gray-600">
-                          <Calendar className="w-5 h-5 text-[#E5C985]" />
-                          <span>{event.date}</span>
+                          <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5C985] flex-shrink-0" />
+                          <span className="text-xs sm:text-sm">{event.date}</span>
                         </div>
                         <div className="flex items-center space-x-3 text-gray-600">
-                          <MapPin className="w-5 h-5 text-[#E5C985]" />
-                          <span>{event.location}</span>
+                          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5C985] flex-shrink-0" />
+                          <span className="text-xs sm:text-sm">{event.location}</span>
                         </div>
                         <div className="flex items-center space-x-3 text-gray-600">
-                          <Users className="w-5 h-5 text-[#E5C985]" />
-                          <span>{event.attendees}</span>
+                          <Users className="w-4 h-4 sm:w-5 sm:h-5 text-[#E5C985] flex-shrink-0" />
+                          <span className="text-xs sm:text-sm">{event.attendees}</span>
                         </div>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-[#212E3E] mb-3">Event Highlights</h4>
+                        <h4 className="font-semibold text-[#212E3E] mb-2 sm:mb-3 text-sm sm:text-base">Event Highlights</h4>
                         <ul className="space-y-1">
                           {event.highlights.map((highlight, index) => (
-                            <li key={index} className="text-sm text-gray-600 flex items-center space-x-2">
-                              <div className="w-1.5 h-1.5 bg-[#E5C985] rounded-full"></div>
+                            <li key={index} className="text-xs sm:text-sm text-gray-600 flex items-center space-x-2">
+                              <div className="w-1.5 h-1.5 bg-[#E5C985] rounded-full flex-shrink-0"></div>
                               <span>{highlight}</span>
                             </li>
                           ))}
@@ -225,15 +225,15 @@ export function PastEventsSection() {
                       </div>
                     </div> */}
 
-                    <div className="flex flex-wrap gap-3">
-                      <Button size="sm" className="bg-[#212E3E] hover:bg-[#212E3E]/90 text-white">
-                        <Play className="w-4 h-4 mr-2" />
+                    <div className="flex flex-wrap gap-2 sm:gap-3">
+                      <Button size="sm" className="bg-[#212E3E] hover:bg-[#212E3E]/90 text-white text-xs sm:text-sm">
+                        <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                         Watch Highlights
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-[#212E3E] text-[#212E3E] hover:bg-[#212E3E] hover:text-white bg-transparent"
+                        className="border-[#212E3E] text-[#212E3E] hover:bg-[#212E3E] hover:text-white bg-transparent text-xs sm:text-sm"
                         onClick={() => openGallery(event.photos, event.title)}
                       >
                         View Photos

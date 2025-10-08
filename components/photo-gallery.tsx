@@ -117,29 +117,29 @@ export function PhotoGallery() {
   }
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-16 sm:py-20 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 sm:mb-16">
           <Badge className="mb-4 bg-[#E5C985] text-[#212E3E] hover:bg-[#E5C985]/90">Photo Gallery</Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">Moments from Our Ministry</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#212E3E] mb-6 text-balance">Moments from Our Ministry</h2>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
             Explore photos from our training sessions, worship services, community events, and the beautiful instruments
             that make our ministry possible.
           </p>
         </div>
 
         {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 sm:mb-12">
           {categories.map((category) => (
             <Button
               key={category.id}
               variant={currentCategory === category.id ? "default" : "outline"}
               onClick={() => setCurrentCategory(category.id)}
-              className={
+              className={`text-xs sm:text-sm ${
                 currentCategory === category.id
                   ? "bg-[#212E3E] hover:bg-[#212E3E]/90 text-white"
                   : "border-[#212E3E] text-[#212E3E] hover:bg-[#212E3E] hover:text-white"
-              }
+              }`}
             >
               {category.name}
             </Button>
@@ -147,7 +147,7 @@ export function PhotoGallery() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-12">
           {filteredItems.map((item, index) => (
             <Card
               key={item.id}
@@ -159,10 +159,10 @@ export function PhotoGallery() {
                   <img
                     src={item.src || "/placeholder.svg"}
                     alt={item.alt}
-                    className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-48 sm:h-56 lg:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                    <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Play className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
                 </div>
                 {/* <div className="p-4">
@@ -176,33 +176,33 @@ export function PhotoGallery() {
 
         {/* Lightbox */}
         {selectedImage !== null && (
-          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-2 sm:p-4">
             <div className="relative max-w-4xl max-h-full">
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-4 right-4 text-white hover:bg-white/20 z-10"
+                className="absolute top-2 right-2 sm:top-4 sm:right-4 text-white hover:bg-white/20 z-10"
                 onClick={closeLightbox}
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </Button>
 
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                className="absolute left-2 top-1/2 -translate-y-1/2 sm:left-4 text-white hover:bg-white/20"
                 onClick={prevImage}
               >
-                <ChevronLeft className="w-8 h-8" />
+                <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
               </Button>
 
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                className="absolute right-2 top-1/2 -translate-y-1/2 sm:right-4 text-white hover:bg-white/20"
                 onClick={nextImage}
               >
-                <ChevronRight className="w-8 h-8" />
+                <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
               </Button>
 
               <img
@@ -211,9 +211,9 @@ export function PhotoGallery() {
                 className="max-w-full max-h-full object-contain"
               />
 
-              <div className="absolute bottom-4 left-4 right-4 text-white">
-                <h3 className="text-xl font-semibold mb-2">{filteredItems[selectedImage].title}</h3>
-                <p className="text-gray-300">{filteredItems[selectedImage].description}</p>
+              <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-4 sm:right-4 text-white">
+                <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">{filteredItems[selectedImage].title}</h3>
+                <p className="text-gray-300 text-sm sm:text-base">{filteredItems[selectedImage].description}</p>
               </div>
             </div>
           </div>
