@@ -64,7 +64,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden p-2"
+            className={`lg:hidden p-2 ${isScrolled ? "text-[#212E3E]" : "text-white"}`}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -73,26 +73,30 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <nav className="lg:hidden mt-4 pb-4 border-t border-gray-200">
-            <div className="flex flex-col space-y-4 pt-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-base font-medium text-[#212E3E] hover:text-[#E5C985] transition-colors py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
+          <div className={`lg:hidden ${isScrolled ? "bg-white" : "bg-white/20 backdrop-blur-sm p-4 rounded-lg"}`}>
+            <nav className={`mt-4 pb-4  ${isScrolled ? "border-gray-200" : "border-white/20"}`}>
+              <div className="flex flex-col space-y-4 pl-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`text-base font-medium hover:text-[#E5C985] transition-colors py-2 border-b border-white/20 ${
+                      isScrolled ? "text-[#212E3E]" : "text-white"
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                <Button 
+                  className="w-fit bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] mt-2" 
+                  onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}
                 >
-                  {item.name}
-                </Link>
-              ))}
-              <Button 
-                className="w-fit bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] mt-2" 
-                onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}
-              >
-                Join the choir
-              </Button>
-            </div>
-          </nav>
+                  Join the choir
+                </Button>
+              </div>
+            </nav>
+          </div>
         )}
       </div>
     </header>

@@ -28,9 +28,9 @@ export function AboutSection() {
   return (
     <section className="py-16 sm:py-20 bg-card">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
           {/* Content */}
-          <div>
+          <div className="flex flex-col justify-center">
             {/* <h2 className="text-3xl md:text-4xl font-bold text-card-foreground mb-6">
               Inspired by Chenaniah, the Biblical Worship Leader
             </h2> */}
@@ -64,7 +64,7 @@ export function AboutSection() {
               <div
                 className="w-full h-full bg-cover bg-center"
                 style={{
-                  backgroundImage: `url('/assets/image/photo_2_2025-09-19_23-11-01.jpg')`,
+                  backgroundImage: `url('/assets/image/photo_3_2025-10-03_16-43-26.jpg')`,
                 }}
               />
             </div>

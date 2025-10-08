@@ -9,30 +9,16 @@ export function TeamSection() {
     {
       name: "Illasha Fekadu",
       role: "Founder & Director",
-      bio: "With over 20 years of ministry experience, Illasha Fekadu founded Chenaniah to address the need for biblical worship training in Ethiopian churches.",
-      image: "/assets/image/photo_10_2025-09-19_23-11-01.jpg",
+      bio: "Singer, Musician, Song Writer, born again.",
+      image: "/assets/leaders/illasha.jpg",
       specialties: ["Singer", "Musician", "Church Planting"],
     },
     {
       name: "Zeritu Kebede",
-      role: "Music Director",
-      bio: "A classically trained musician and worship leader, Zeritu Kebede oversees all musical training and curriculum development.",
-      image: "/assets/image/photo_11_2025-09-19_23-11-01.jpg",
+      role: "Leader",
+      bio: "Singer, song writer, mother, disciple. Lives to love God and those he deid to save.",
+      image: "/assets/leaders/zeritu.jpg",
       specialties: ["Harp Performance", "Music Theory", "Vocal Training"],
-    },
-    {
-      name: "john doe",
-      role: "Training Coordinator",
-      bio: "Samuel coordinates our training programs and manages relationships with partner churches across Ethiopia.",
-      image: "/assets/image/photo_12_2025-09-19_23-11-01.jpg",
-      specialties: ["Program Management", "Church Relations", "Student Mentoring"],
-    },
-    {
-      name: "john doe",
-      role: "Outreach Director",
-      bio: "Hanna leads our community outreach efforts and manages partnerships with international supporters.",
-      image: "/assets/image/photo_13_2025-09-19_23-11-01.jpg",
-      specialties: ["Community Outreach", "Partnership Development", "Communications"],
     },
     {
       name: "Kaleab Yinebeb",
@@ -44,15 +30,15 @@ export function TeamSection() {
     {
       name: "Bereket Demeke",
       role: "Leader",
-      bio: "A dedicated leader contributing to the mission of Chenaniah.",
-      image: "/placeholder.svg",
+      bio: "Musician, guitarist, born again. Passionate about worship, music and the Lord.",
+      image: "/assets/leaders/bereket.jpg",
       specialties: ["Leadership", "Ministry"],
     },
     {
       name: "Amanuel Wolde",
       role: "Leader",
-      bio: "A dedicated leader contributing to the mission of Chenaniah.",
-      image: "/placeholder.svg",
+      bio: "Musician.",
+      image: "/assets/leaders/amanuel.jpg",
       specialties: ["Leadership", "Ministry"],
     },
     {
@@ -65,17 +51,24 @@ export function TeamSection() {
     {
       name: "Abigiya Elias",
       role: "Leader",
-      bio: "A dedicated leader contributing to the mission of Chenaniah.",
-      image: "/placeholder.svg",
+      bio: "Social media manager, content creator, event organizer",
+      image: "/assets/leaders/abigia.jpg",
       specialties: ["Leadership", "Ministry"],
     },
     {
       name: "Ermias Menberu",
       role: "Leader",
-      bio: "A dedicated leader contributing to the mission of Chenaniah.",
-      image: "/placeholder.svg",
+      bio: "Dedicated to empowering young talent through innovative event organizing and digital solutions.",
+      image: "/assets/leaders/ermias.JPG",
       specialties: ["Leadership", "Ministry"],
     },
+    {
+      name:"Natnael",
+      role:"Leader",
+      bio:"Musician",
+      image:"/placeholder.svg",
+      specialties:["Leadership","Ministry"],
+    }
   ]
 
   return (
@@ -92,7 +85,7 @@ export function TeamSection() {
           </p> */}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {teamMembers.map((member, index) => (
             <Card
               key={index}
@@ -112,6 +105,11 @@ export function TeamSection() {
                 </Badge> */}
               </CardHeader>
               <CardContent className="text-center">
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {member.bio}
+                  </p>
+                </div>
                 {/* <div className="space-y-2 mb-4">
                   {member.specialties.map((specialty, idx) => (
                     <div key={idx} className="flex items-center justify-center text-xs text-gray-500">
@@ -120,7 +118,7 @@ export function TeamSection() {
                     </div>
                   ))}
                 </div> */}
-                <div className="flex justify-center space-x-2">
+                {/* <div className="flex justify-center space-x-2">
                   <Button
                     size="sm"
                     variant="outline"
@@ -135,7 +133,7 @@ export function TeamSection() {
                   >
                     <Linkedin className="w-4 h-4" />
                   </Button>
-                </div>
+                </div> */}
               </CardContent>
             </Card>
           ))}
