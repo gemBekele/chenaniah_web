@@ -59,8 +59,8 @@ export function AboutSection() {
           </div>
 
           {/* Image */}
-          <div className="relative">
-            <div className="aspect-[4/3] rounded-lg overflow-hidden shadow-2xl">
+          <div className="relative h-full">
+            <div className="h-full rounded-lg overflow-hidden shadow-2xl">
               <div
                 className="w-full h-full bg-cover bg-center"
                 style={{
