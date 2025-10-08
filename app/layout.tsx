@@ -20,6 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>  <script defer src="https://cloud.umami.is/script.js" data-website-id="61ebb888-fe65-47cf-a9d1-9c94ee2f874e"></script></head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>{children}</Suspense>
         {/* Only load Analytics on Vercel deployments */}
