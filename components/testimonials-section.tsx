@@ -39,22 +39,22 @@ export function TestimonialsSection() {
   }, [])
 
   return (
-    <section className="py-20 bg-card">
+    <section className="py-16 sm:py-20 bg-card">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-card-foreground mb-4">Testimonials</h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-card-foreground mb-4">Testimonials</h2>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
             Hear from the people who have been part of our ministry.
           </p>
         </div>
 
         <div className="max-w-4xl mx-auto">
           <Card className="border-primary/20 shadow-xl">
-            <CardContent className="p-8 md:p-12">
+            <CardContent className="p-6 sm:p-8 md:p-12">
               <div className="text-center">
-                <Quote className="h-12 w-12 text-primary mx-auto mb-6" />
+                <Quote className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-primary mx-auto mb-4 sm:mb-6" />
 
-                <blockquote className="text-xl md:text-2xl text-card-foreground mb-8 text-balance font-light">
+                <blockquote className="text-base sm:text-lg md:text-xl lg:text-2xl text-card-foreground mb-6 sm:mb-8 text-balance font-light">
                   "{testimonials[currentIndex].content}"
                 </blockquote>
 

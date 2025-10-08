@@ -26,15 +26,15 @@ export function AboutSection() {
   ]
 
   return (
-    <section className="py-20 bg-card">
+    <section className="py-16 sm:py-20 bg-card">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Content */}
           <div>
             {/* <h2 className="text-3xl md:text-4xl font-bold text-card-foreground mb-6">
               Inspired by Chenaniah, the Biblical Worship Leader
             </h2> */}
-            <p className="text-lg text-muted-foreground mb-6 text-pretty">
+            <p className="text-base sm:text-lg text-muted-foreground mb-6 text-pretty">
               Named after Chenaniah, the Levite musician from 1 Chronicles 15:22, our ministry is dedicated to equipping
               church musicians, singers, and worship leaders throughout Ethiopia and beyond. We believe in the power of
               worship to transform lives and communities.
@@ -45,13 +45,13 @@ export function AboutSection() {
             </p> */}
 
             {/* Features Grid */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {features.map((feature, index) => (
                 <Card key={index} className="border-primary/20">
                   <CardContent className="p-4">
-                    <feature.icon className="h-8 w-8 text-primary mb-3" />
-                    <h3 className="font-semibold text-card-foreground mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <feature.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mb-3" />
+                    <h3 className="font-semibold text-card-foreground mb-2 text-sm sm:text-base">{feature.title}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}

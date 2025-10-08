@@ -32,18 +32,18 @@ export function HeroSection() {
           />
         </div> */}
 
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 text-balance">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 text-balance">
           Equipping Worship Leaders for
           <span className="text-primary block mt-2">Musical Excellence</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto text-pretty">
+        <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto text-pretty px-4">
           Join Chenaniah.org in our mission to train church musicians, singers, and worship leaders across Ethiopia and
           beyond through biblical worship and musical excellence.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
+          <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto" onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}>
             Join the choir
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
@@ -51,7 +51,7 @@ export function HeroSection() {
           <Button
             variant="outline"
             size="lg"
-            className="border-white text-white hover:bg-white hover:text-foreground bg-transparent"
+            className="border-white text-white hover:bg-white hover:text-foreground bg-transparent w-full sm:w-auto"
           >
             <Play className="mr-2 h-5 w-5" />
             Watch Our Story

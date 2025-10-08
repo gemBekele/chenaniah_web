@@ -4,7 +4,7 @@ import { ArrowDown } from "lucide-react"
 
 export function AboutHeroSection() {
   return (
-    <section className="relative py-32 pt-70 bg-gradient-to-br from-[#212E3E] via-[#212E3E] to-[#212E3E]/90 text-white overflow-hidden">
+    <section className="relative py-24 sm:py-32 pt-20 sm:pt-32 bg-gradient-to-br from-[#212E3E] via-[#212E3E] to-[#212E3E]/90 text-white overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <div
@@ -29,12 +29,12 @@ export function AboutHeroSection() {
             About Chenaniah
           </Badge> */}
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-8 text-balance">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 sm:mb-8 text-balance">
             Equipping Worship Leaders
             <span className="block text-[#E5C985]">Across Ethiopia</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto text-pretty leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-12 max-w-3xl mx-auto text-pretty leading-relaxed px-4">
             Since our founding, we have been dedicated to training worship leaders through biblical education, musical
             excellence, and spiritual formation, impacting churches throughout Ethiopia and beyond.
           </p>

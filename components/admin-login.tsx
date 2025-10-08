@@ -65,8 +65,8 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
             <Lock className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Chenaniah Worship</h1>
-          <p className="text-muted-foreground">Ministry Screening Portal</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Chenaniah Music Ministry</h1>
+          {/* <p className="text-muted-foreground">Ministry Screening Portal</p> */}
         </div>
 
         <Card className="border-border/50 shadow-xl shadow-black/5">
