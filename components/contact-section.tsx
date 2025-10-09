@@ -129,7 +129,7 @@ export function ContactSection() {
               <p className="text-gray-300 mb-4 text-sm sm:text-base">
                 For urgent matters or immediate support, please call us during business hours.
               </p>
-              <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] w-full sm:w-auto" onClick={() => window.open("tel:+251912345678", "_blank")}>
+              <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] w-full sm:w-auto" onClick={() => window.open("tel:+251998882041", "_blank")}>
                 <Phone className="w-4 h-4 mr-2" />
                 Call Now
               </Button>
