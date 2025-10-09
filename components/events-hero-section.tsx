@@ -18,7 +18,7 @@ export function EventsHeroSection() {
         <div
           className="w-full h-full bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/assets/image/photo_2_2025-09-19_23-11-01.jpg')`,
+            backgroundImage: `url('/assets/image/photo_1_2025-09-19_23-11-01.jpg')`,
           }}
         />
         <div className="absolute inset-0 bg-[#212E3E]/80" />
@@ -52,17 +52,17 @@ export function EventsHeroSection() {
               <Button size="lg" className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto">
                 View All Events
               </Button>
-              <Button
+              {/* <Button
                 size="lg"
                 variant="outline"
                 className="border-white text-white hover:bg-white hover:text-[#212E3E] text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-transparent w-full sm:w-auto"
               >
                 Register Now
-              </Button>
+              </Button> */}
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20">
+          {/* <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20">
             <div className="text-center mb-6">
               <Badge className="bg-[#E5C985] text-[#212E3E] mb-4">Next Event</Badge>
               <h3 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2">{upcomingHighlight.title}</h3>
@@ -90,7 +90,7 @@ export function EventsHeroSection() {
             <Button className="w-full mt-4 sm:mt-6 bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]">
               Register for This Event
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

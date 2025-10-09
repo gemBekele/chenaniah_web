@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, MapPin, Users, Play } from "lucide-react"
+import { Calendar, MapPin, Users, Play, Youtube } from "lucide-react"
 import { PhotoGalleryModal } from "@/components/photo-gallery-modal"
 
 export function PastEventsSection() {
@@ -40,84 +40,43 @@ export function PastEventsSection() {
       title: "Matsnanatih worship Night",
       description:
         "A night of worship with Zeritu Kebede, that was attended by thousands of people.",
-      date: "November 10-12, 2023",
+      date: "August 16, 2025",
       location: "Beza International church",
       attendees: "5000+ Participants",
-      type: "Conference",
+      type: "Worship Night",
       rating: 4.9,
       highlights: ["Zeritu Kebede", "Illasha Fekadu", "Hana Tekle"],
       resources: {
-        photos: 45,
+        photos: 21,
         videos: 8,
         recordings: 12,
       },
-      image: "/assets/image/photo_15_2025-09-19_23-11-01.jpg",
+      image: "/assets/image/photo_1_2025-10-03_16-43-26.jpg",
       photos: [
+        "/assets/image/photo_1_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_2_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_3_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_4_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_5_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_6_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_7_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_8_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_9_2025-09-19_23-11-01.jpg",
         "/assets/image/photo_10_2025-09-19_23-11-01.jpg",
         "/assets/image/photo_11_2025-09-19_23-11-01.jpg",
         "/assets/image/photo_12_2025-09-19_23-11-01.jpg",
         "/assets/image/photo_13_2025-09-19_23-11-01.jpg",
         "/assets/image/photo_14_2025-09-19_23-11-01.jpg",
         "/assets/image/photo_15_2025-09-19_23-11-01.jpg",
+        "/assets/image/photo_1_2025-10-03_16-43-26.jpg",
+        "/assets/image/photo_2_2025-10-03_16-43-26.jpg",
+        "/assets/image/photo_3_2025-10-03_16-43-26.jpg",
+        "/assets/image/photo_5_2025-10-03_16-43-26.jpg",
+        "/assets/image/photo_6_2025-10-03_16-43-26.jpg",
+        "/assets/image/photo_7_2025-10-03_16-43-26.jpg",
       ],
       featured: true,
     },
-    // {
-    //   id: 2,
-    //   title: "Traditional Instruments Workshop",
-    //   description: "Hands-on training with traditional Ethiopian instruments including harps, drums, and flutes.",
-    //   date: "September 15, 2023",
-    //   location: "Chenaniah Training Center",
-    //   attendees: "45 Participants",
-    //   type: "Workshop",
-    //   rating: 4.8,
-    //   highlights: ["Traditional Harp Techniques", "Cultural Context Teaching", "Instrument Crafting Demo"],
-    //   resources: {
-    //     photos: 28,
-    //     videos: 3,
-    //     recordings: 5,
-    //   },
-    //   image: "/ethiopian-traditional-harps-and-musical-instrument.jpg",
-    //   featured: false,
-    // },
-    // {
-    //   id: 3,
-    //   title: "Youth Worship Training",
-    //   description:
-    //     "Empowering the next generation of worship leaders through biblical foundation and practical skills.",
-    //   date: "August 5-6, 2023",
-    //   location: "St. Gabriel Church",
-    //   attendees: "85 Youth",
-    //   type: "Training",
-    //   rating: 4.7,
-    //   highlights: ["Youth Leadership Development", "Modern Worship Techniques", "Mentorship Program Launch"],
-    //   resources: {
-    //     photos: 32,
-    //     videos: 4,
-    //     recordings: 7,
-    //   },
-    //   image: "/ethiopian-church-congregation-worshiping-with-rais.jpg",
-    //   featured: false,
-    // },
-    // {
-    //   id: 4,
-    //   title: "Biblical Worship Foundations Seminar",
-    //   description:
-    //     "Deep dive into the scriptural basis of worship and its practical application in modern church settings.",
-    //   date: "June 20, 2023",
-    //   location: "Online (Zoom)",
-    //   attendees: "150 Online",
-    //   type: "Seminar",
-    //   rating: 4.6,
-    //   highlights: ["Scripture-Based Teaching", "Interactive Q&A Sessions", "Resource Library Access"],
-    //   resources: {
-    //     photos: 12,
-    //     videos: 6,
-    //     recordings: 8,
-    //   },
-    //   image: "/ethiopian-pastor-teaching-biblical-worship-princip.jpg",
-    //   featured: false,
-    // },
   ]
 
   return (
@@ -168,7 +127,7 @@ export function PastEventsSection() {
                           >
                             {event.type}
                           </Badge>
-                          {event.featured && <Badge className="bg-[#212E3E] text-white">Featured</Badge>}
+                          {/* {event.featured && <Badge className="bg-[#212E3E] text-white">Featured</Badge>} */}
                           {/* <div className="flex items-center space-x-1">
                             <Star className="w-4 h-4 fill-[#E5C985] text-[#E5C985]" />
                             <span className="text-sm font-semibold text-[#212E3E]">{event.rating}</span>
@@ -194,7 +153,7 @@ export function PastEventsSection() {
                           <span className="text-xs sm:text-sm">{event.attendees}</span>
                         </div>
                       </div>
-                      <div>
+                      {/* <div>
                         <h4 className="font-semibold text-[#212E3E] mb-2 sm:mb-3 text-sm sm:text-base">Event Highlights</h4>
                         <ul className="space-y-1">
                           {event.highlights.map((highlight, index) => (
@@ -204,7 +163,7 @@ export function PastEventsSection() {
                             </li>
                           ))}
                         </ul>
-                      </div>
+                      </div> */}
                     </div>
 
                     {/* <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -226,8 +185,8 @@ export function PastEventsSection() {
                     </div> */}
 
                     <div className="flex flex-wrap gap-2 sm:gap-3">
-                      <Button size="sm" className="bg-[#212E3E] hover:bg-[#212E3E]/90 text-white text-xs sm:text-sm">
-                        <Play className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <Button size="sm" className="bg-[#212E3E] hover:bg-[#212E3E]/90 text-white text-xs sm:text-sm" onClick={() => window.open("https://www.youtube.com/@zeritu_kebede", "_blank")}>
+                        <Youtube className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                         Watch Highlights
                       </Button>
                       <Button

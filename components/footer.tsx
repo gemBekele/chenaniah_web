@@ -34,7 +34,7 @@ export function Footer() {
     { name: "Facebook", href: "https://web.facebook.com/chenaniahethiopia/", icon: Facebook },
     { name: "YouTube", href: "https://youtube.com/@chenaniahethiopia?feature=shared", icon: Youtube },
     { name: "Instagram", href: "https://instagram.com/chenaniahethiopia", icon: Instagram },
-    { name: "Email", href: "mailto:chenaniahethiopia@gmail.com", icon: Mail },
+    { name: "Email", href: "mailto:info@chenaniah.org", icon: Mail },
   ]
 
   return (
