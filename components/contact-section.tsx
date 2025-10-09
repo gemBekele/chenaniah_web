@@ -41,12 +41,12 @@ export function ContactSection() {
     {
       icon: Phone,
       title: "Call Us",
-      details: ["+251 11 123 4567", "+251 91 234 5678", "Mon-Fri: 9AM-5PM"],
+      details: ["+2519 9888 2041"],
     },
     {
       icon: Mail,
       title: "Email Us",
-      details: ["info@chenaniah.org", "training@chenaniah.org", "partnerships@chenaniah.org"],
+      details: ["info@chenaniah.org", "Illasha@chenaniah.org"],
     },
     // {
     //   icon: Clock,
@@ -112,7 +112,7 @@ export function ContactSection() {
                         <div>
                           <h4 className="font-semibold text-[#212E3E] mb-2 text-sm sm:text-base">{info.title}</h4>
                           {info.details.map((detail, idx) => (
-                            <p key={idx} className="text-gray-600 text-xs sm:text-sm">
+                            <p key={idx} className="text-gray-600 text-md italic sm:text-sm">
                               {detail}
                             </p>
                           ))}
