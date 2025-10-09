@@ -31,7 +31,7 @@ export function TeamSection() {
       name: "Bereket Demeke",
       role: "Leader",
       bio: "Musician, guitarist, born again. Passionate about worship, music and the Lord.",
-      image: "/placeholder.svg",
+      image: "/assets/leaders/natnael.jpg",
       specialties: ["Leadership", "Ministry"],
     },
     {
@@ -62,13 +62,7 @@ export function TeamSection() {
       image: "/assets/leaders/ermias.JPG",
       specialties: ["Leadership", "Ministry"],
     },
-    {
-      name:"Natnael",
-      role:"Leader",
-      bio:"Musician",
-      image:"/assets/leaders/natnael.jpg",
-      specialties:["Leadership","Ministry"],
-    }
+    
   ]
 
   return (
@@ -80,7 +74,7 @@ export function TeamSection() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {teamMembers.map((member, index) => (
             <Card
               key={index}
