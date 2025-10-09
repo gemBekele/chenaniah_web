@@ -52,6 +52,7 @@ export function HeroSection() {
             variant="outline"
             size="lg"
             className="border-white text-white hover:bg-white hover:text-foreground bg-transparent w-full sm:w-auto"
+            onClick={() => window.open("https://youtu.be/bcPyOwjA2_8", "_blank")}
           >
             <Play className="mr-2 h-5 w-5" />
             Watch Our Story
