@@ -1,6 +1,18 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Facebook, Youtube, Instagram, Mail, Music } from "lucide-react"
+import { Facebook, Youtube, Instagram, Mail } from "lucide-react"
+
+// Custom TikTok Icon Component
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+  </svg>
+)
 
 export function Footer() {
   const quickLinks = [
@@ -18,7 +30,7 @@ export function Footer() {
   ]
 
   const socialLinks = [
-    { name: "TikTok", href: "https://www.tiktok.com/@chenaniahethiopia?is_from_webapp=1&sender_device=pc", icon: Music },
+    { name: "TikTok", href: "https://www.tiktok.com/@chenaniahethiopia?is_from_webapp=1&sender_device=pc", icon: TikTokIcon },
     { name: "Facebook", href: "https://web.facebook.com/chenaniahethiopia/", icon: Facebook },
     { name: "YouTube", href: "https://youtube.com/@chenaniahethiopia?feature=shared", icon: Youtube },
     { name: "Instagram", href: "https://instagram.com/chenaniahethiopia", icon: Instagram },
@@ -53,10 +65,10 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/20 rounded-full flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className="group w-10 h-10 sm:w-12 sm:h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all duration-300 ease-out border border-white/20 hover:border-white/40"
                   aria-label={social.name}
                 >
-                  <social.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <social.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white/80 group-hover:text-white transition-colors duration-300" />
                 </Link>
               ))}
             </div>
@@ -93,7 +105,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-white/20 mt-8 sm:mt-12 pt-6 sm:pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-white/60 text-xs sm:text-sm">© 2024 Chenaniah.org. All rights reserved.</p>
+          <p className="text-white/60 text-xs sm:text-sm">© {new Date().getFullYear()} Chenaniah.org. All rights reserved.</p>
           <div className="flex space-x-4 sm:space-x-6 mt-4 md:mt-0">
             <Link href="/privacy" className="text-white/60 hover:text-primary text-xs sm:text-sm transition-colors">
               Privacy Policy
