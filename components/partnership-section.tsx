@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -83,16 +84,16 @@ export function PartnershipSection() {
             Ethiopia. Join our mission today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] w-full sm:w-auto">
+            <Button size="lg" className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] w-full sm:w-auto" onClick={() => window.open("https://docs.google.com/forms/d/e/1FAIpQLSc5-thQeLQhb8mqjCH-OOJwlz-JcNc0B9-cwstCaseSR56yhg/viewform?usp=sharing&ouid=118013297798426575369", "_blank")}>
               Start Partnership
             </Button>
-            <Button
+            {/* <Button
               size="lg"
               variant="outline"
               className="border-white text-white hover:bg-white hover:text-[#212E3E] bg-transparent w-full sm:w-auto"
             >
               Learn More
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
