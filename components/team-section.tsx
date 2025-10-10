@@ -49,7 +49,7 @@ export function TeamSection() {
       specialties: ["Leadership", "Ministry"],
     },
     {
-      name: "Abigiya Elias",
+      name: "Abigail Kassa",
       role: "Leader",
       bio: "Social media manager, content creator, event organizer",
       image: "/assets/leaders/abigia.jpg",
