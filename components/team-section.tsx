@@ -45,7 +45,7 @@ export function TeamSection() {
       name: "Abel Gashaw",
       role: "Leader",
       bio: "photographer",
-      image: "/placeholder.svg",
+      image: "/assets/leaders/abel.jpg",
       specialties: ["Leadership", "Ministry"],
     },
     {
