@@ -10,7 +10,7 @@ export function TeamSection() {
       name: "Illasha Fekadu",
       role: "Founder & Director",
       bio: "Founder",
-      image: "/assets/leaders/illasha.jpg",
+      image: "/assets/leaders/illasha.JPG",
       specialties: ["Singer", "Musician", "Church Planting"],
     },
     {
@@ -24,21 +24,21 @@ export function TeamSection() {
       name: "Kaleab Yinebeb",
       role: "Leader",
       bio: "Musician",
-      image: "/assets/leaders/bereket.jpg",
+      image: "/assets/leaders/bereket.JPG",
       specialties: ["Leadership", "Ministry"],
     },
     {
       name: "Bereket Demeke",
       role: "Leader",
       bio: "Musician, guitarist, born again. Passionate about worship, music and the Lord.",
-      image: "/assets/leaders/natnael.jpg",
+      image: "/assets/leaders/natnael.JPG",
       specialties: ["Leadership", "Ministry"],
     },
     {
       name: "Amanuel Wolde",
       role: "Leader",
       bio: "Musician.",
-      image: "/assets/leaders/amanuel.jpg",
+      image: "/assets/leaders/amnuael.JPG",
       specialties: ["Leadership", "Ministry"],
     },
     {
