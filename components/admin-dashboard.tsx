@@ -20,6 +20,10 @@ import {
   LogOut,
   Search,
   FileAudio,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -50,6 +54,16 @@ interface Stats {
   rejected: number
 }
 
+interface PaginationInfo {
+  current_page: number
+  total_pages: number
+  total_count: number
+  limit: number
+  offset: number
+  has_next: boolean
+  has_prev: boolean
+}
+
 interface AdminDashboardProps {
   onLogout: () => void
 }
@@ -57,6 +71,15 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0 })
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    current_page: 1,
+    total_pages: 1,
+    total_count: 0,
+    limit: 20,
+    offset: 0,
+    has_next: false,
+    has_prev: false
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState<string>("all")
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
@@ -96,11 +119,23 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   }
 
-  const fetchSubmissions = async (status?: string) => {
+  const fetchSubmissions = async (status?: string, page: number = 1, searchQuery?: string) => {
     setIsLoading(true)
     try {
-      const url =
-        status && status !== "all" ? `${API_BASE_URL}/submissions?status=${status}` : `${API_BASE_URL}/submissions`
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pagination.limit.toString()
+      })
+      
+      if (status && status !== "all") {
+        params.append('status', status)
+      }
+      
+      if (searchQuery && searchQuery.trim()) {
+        params.append('search', searchQuery.trim())
+      }
+
+      const url = `${API_BASE_URL}/submissions?${params.toString()}`
 
       const response = await fetch(url, {
         headers: {
@@ -110,6 +145,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       const data = await response.json()
       if (data.success) {
         setSubmissions(data.submissions)
+        setPagination(data.pagination)
       }
     } catch (error) {
       console.error("Error fetching submissions:", error)
@@ -125,7 +161,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   useEffect(() => {
     const statusFilter = selectedTab === "all" ? undefined : selectedTab
-    fetchSubmissions(statusFilter)
+    fetchSubmissions(statusFilter, 1, searchQuery) // Reset to page 1 when changing tabs
   }, [selectedTab])
 
   const handleStatusUpdate = async (submissionId: number, newStatus: "approved" | "rejected") => {
@@ -146,7 +182,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       if (data.success) {
         // Refresh data
         fetchStats()
-        fetchSubmissions(selectedTab === "all" ? undefined : selectedTab)
+        fetchSubmissions(selectedTab === "all" ? undefined : selectedTab, pagination.current_page, searchQuery)
         setSelectedSubmission(null)
         setComments("")
       }
@@ -231,12 +267,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     )
   }
 
-  const filteredSubmissions = submissions.filter(
-    (sub) =>
-      sub.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sub.phone?.includes(searchQuery) ||
-      sub.church?.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+  const filteredSubmissions = submissions
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes"
@@ -255,6 +286,31 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       minute: "2-digit",
     })
   }
+
+  const handlePageChange = (newPage: number) => {
+    const statusFilter = selectedTab === "all" ? undefined : selectedTab
+    fetchSubmissions(statusFilter, newPage, searchQuery)
+  }
+
+  const handlePageSizeChange = (newLimit: number) => {
+    setPagination(prev => ({ ...prev, limit: newLimit }))
+    const statusFilter = selectedTab === "all" ? undefined : selectedTab
+    fetchSubmissions(statusFilter, 1, searchQuery) // Reset to page 1 when changing page size
+  }
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+  }
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const statusFilter = selectedTab === "all" ? undefined : selectedTab
+      fetchSubmissions(statusFilter, 1, searchQuery) // Reset to page 1 when searching
+    }, 500) // 500ms delay
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -345,8 +401,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               type="text"
               placeholder="Search by name, phone, or church..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-14 h-14 bg-background/50 backdrop-blur-sm border-border/50 rounded-2xl text-base focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-14 h-14 bg-background/50 backdrop-blur-sm border-border/50 rounded-2xl text-base focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
             />
             </div>
           </div>
@@ -600,6 +656,106 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Pagination Controls */}
+        {!isLoading && filteredSubmissions.length > 0 && (
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-gradient-to-br from-background to-muted/20 border border-border/50 rounded-2xl">
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">Show:</span>
+              <select
+                value={pagination.limit}
+                onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                className="px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
+              >
+                <option value={10}>10 per page</option>
+                <option value={20}>20 per page</option>
+                <option value={50}>50 per page</option>
+                <option value={100}>100 per page</option>
+              </select>
+            </div>
+
+            {/* Pagination Info */}
+            <div className="text-sm text-muted-foreground">
+              Showing {((pagination.current_page - 1) * pagination.limit) + 1} to{' '}
+              {Math.min(pagination.current_page * pagination.limit, pagination.total_count)} of{' '}
+              {pagination.total_count} submissions
+            </div>
+
+            {/* Pagination Buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => handlePageChange(1)}
+                disabled={!pagination.has_prev}
+                size="sm"
+                variant="outline"
+                className="h-9 w-9 p-0"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={() => handlePageChange(pagination.current_page - 1)}
+                disabled={!pagination.has_prev}
+                size="sm"
+                variant="outline"
+                className="h-9 w-9 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                  let pageNum;
+                  if (pagination.total_pages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pagination.current_page <= 3) {
+                    pageNum = i + 1;
+                  } else if (pagination.current_page >= pagination.total_pages - 2) {
+                    pageNum = pagination.total_pages - 4 + i;
+                  } else {
+                    pageNum = pagination.current_page - 2 + i;
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      size="sm"
+                      variant={pageNum === pagination.current_page ? "default" : "outline"}
+                      className={`h-9 w-9 p-0 ${
+                        pageNum === pagination.current_page 
+                          ? "bg-amber-500 hover:bg-amber-600 text-white" 
+                          : ""
+                      }`}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                onClick={() => handlePageChange(pagination.current_page + 1)}
+                disabled={!pagination.has_next}
+                size="sm"
+                variant="outline"
+                className="h-9 w-9 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={() => handlePageChange(pagination.total_pages)}
+                disabled={!pagination.has_next}
+                size="sm"
+                variant="outline"
+                className="h-9 w-9 p-0"
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {selectedSubmission && (
