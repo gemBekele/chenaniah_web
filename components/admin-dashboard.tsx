@@ -24,6 +24,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Loader2,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -75,7 +76,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     current_page: 1,
     total_pages: 1,
     total_count: 0,
-    limit: 20,
+    limit: 100,
     offset: 0,
     has_next: false,
     has_prev: false
@@ -86,6 +87,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [comments, setComments] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [playingAudio, setPlayingAudio] = useState<number | null>(null)
+  const [loadingAudio, setLoadingAudio] = useState<number | null>(null)
+  const [audioDuration, setAudioDuration] = useState<number>(0)
+  const [audioCurrentTime, setAudioCurrentTime] = useState<number>(0)
+  const [audioProgress, setAudioProgress] = useState<number>(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const getToken = () => {
@@ -119,12 +124,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     }
   }
 
-  const fetchSubmissions = async (status?: string, page: number = 1, searchQuery?: string) => {
+  const fetchSubmissions = async (status?: string, page: number = 1, searchQuery?: string, limit?: number) => {
     setIsLoading(true)
     try {
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: pagination.limit.toString()
+        limit: (limit || pagination.limit).toString()
       })
       
       if (status && status !== "all") {
@@ -180,14 +185,91 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       const data = await response.json()
       if (data.success) {
-        // Refresh data
-        fetchStats()
-        fetchSubmissions(selectedTab === "all" ? undefined : selectedTab, pagination.current_page, searchQuery)
+        // Update only the specific submission in state
+        setSubmissions(prevSubmissions => 
+          prevSubmissions.map(submission => 
+            submission.id === submissionId 
+              ? { 
+                  ...submission, 
+                  status: newStatus,
+                  reviewer_comments: comments,
+                  reviewed_at: new Date().toISOString(),
+                  reviewed_by: "Admin"
+                }
+              : submission
+          )
+        )
+        
+        // Update stats without refetching all submissions
+        setStats(prevStats => {
+          // Find the current submission to determine what status it was before
+          const currentSubmission = submissions.find(s => s.id === submissionId)
+          if (!currentSubmission) return prevStats
+          
+          const wasPending = currentSubmission.status === "pending"
+          const isApproved = newStatus === "approved"
+          
+          return {
+            ...prevStats,
+            pending: wasPending ? prevStats.pending - 1 : prevStats.pending,
+            approved: isApproved ? prevStats.approved + 1 : prevStats.approved,
+            rejected: !isApproved ? prevStats.rejected + 1 : prevStats.rejected
+          }
+        })
+        
         setSelectedSubmission(null)
         setComments("")
       }
     } catch (error) {
       console.error("Error updating status:", error)
+    }
+  }
+
+  const handleStatusToggle = async (submissionId: number, currentStatus: string) => {
+    const newStatus = currentStatus === "approved" ? "rejected" : "approved"
+    try {
+      const response = await fetch(`${API_BASE_URL}/submissions/${submissionId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          comments: `Status changed from ${currentStatus} to ${newStatus}`,
+        }),
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        // Update only the specific submission in state
+        setSubmissions(prevSubmissions => 
+          prevSubmissions.map(submission => 
+            submission.id === submissionId 
+              ? { 
+                  ...submission, 
+                  status: newStatus as "approved" | "rejected",
+                  reviewer_comments: `Status changed from ${currentStatus} to ${newStatus}`,
+                  reviewed_at: new Date().toISOString(),
+                  reviewed_by: "Admin"
+                }
+              : submission
+          )
+        )
+        
+        // Update stats without refetching all submissions
+        setStats(prevStats => {
+          const delta = newStatus === "approved" ? 1 : -1
+          const oldDelta = currentStatus === "approved" ? -1 : 1
+          return {
+            ...prevStats,
+            approved: prevStats.approved + delta,
+            rejected: prevStats.rejected + oldDelta
+          }
+        })
+      }
+    } catch (error) {
+      console.error("Error toggling status:", error)
     }
   }
 
@@ -197,9 +279,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     if (playingAudio === submissionId) {
       audioRef.current?.pause()
       setPlayingAudio(null)
+      setAudioCurrentTime(0)
+      setAudioProgress(0)
     } else {
       if (audioRef.current) {
         try {
+          setLoadingAudio(submissionId)
           const audioUrl = `${API_BASE_URL}/audio/${audioPath}`
           console.log("Fetching audio from:", audioUrl)
 
@@ -222,22 +307,48 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           audioRef.current.src = blobUrl
           audioRef.current.load()
 
+          // Set up event listeners for progress tracking
+          audioRef.current.addEventListener('loadedmetadata', () => {
+            if (audioRef.current) {
+              setAudioDuration(audioRef.current.duration)
+            }
+          })
+
+          audioRef.current.addEventListener('timeupdate', () => {
+            if (audioRef.current) {
+              const currentTime = audioRef.current.currentTime
+              const duration = audioRef.current.duration
+              setAudioCurrentTime(currentTime)
+              setAudioProgress((currentTime / duration) * 100)
+            }
+          })
+
+          audioRef.current.addEventListener('ended', () => {
+            setPlayingAudio(null)
+            setAudioCurrentTime(0)
+            setAudioProgress(0)
+          })
+
           audioRef.current
             .play()
             .then(() => {
               console.log("Audio playback started successfully")
               setPlayingAudio(submissionId)
+              setLoadingAudio(null)
             })
             .catch((error) => {
               console.error("Audio playback failed:", error)
               setPlayingAudio(null)
+              setLoadingAudio(null)
             })
         } catch (error) {
           console.error("Error fetching audio:", error)
           setPlayingAudio(null)
+          setLoadingAudio(null)
         }
       } else {
         console.error("Audio element not found")
+        setLoadingAudio(null)
       }
     }
   }
@@ -287,15 +398,24 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     })
   }
 
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || !isFinite(seconds)) return "0:00"
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
   const handlePageChange = (newPage: number) => {
     const statusFilter = selectedTab === "all" ? undefined : selectedTab
     fetchSubmissions(statusFilter, newPage, searchQuery)
   }
 
   const handlePageSizeChange = (newLimit: number) => {
-    setPagination(prev => ({ ...prev, limit: newLimit }))
     const statusFilter = selectedTab === "all" ? undefined : selectedTab
-    fetchSubmissions(statusFilter, 1, searchQuery) // Reset to page 1 when changing page size
+    // Update pagination state and fetch with new limit
+    setPagination(prev => ({ ...prev, limit: newLimit, current_page: 1 }))
+    // Call fetchSubmissions with explicit parameters
+    fetchSubmissions(statusFilter, 1, searchQuery, newLimit)
   }
 
   const handleSearch = (query: string) => {
@@ -533,18 +653,42 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
                         {/* Audio Sample */}
                         <div className="col-span-2 flex items-center justify-center">
-                          <Button
-                            onClick={() => toggleAudio(submission.id, submission.audio_file_path || "")}
-                            size="icon"
-                            className="w-10 h-10 rounded-xl bg-primary-foreground shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all"
-                            disabled={!submission.audio_file_path}
-                          >
-                            {playingAudio === submission.id ? (
-                              <Pause className="h-4 w-4 text-primary" />
-                            ) : (
-                              <Play className="h-4 w-4 ml-0.5 text-primary" />
+                          <div className="flex flex-col items-center gap-2">
+                            <Button
+                              onClick={() => toggleAudio(submission.id, submission.audio_file_path || "")}
+                              size="icon"
+                              className="w-10 h-10 rounded-xl bg-primary-foreground shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all"
+                              disabled={!submission.audio_file_path || loadingAudio === submission.id}
+                            >
+                              {loadingAudio === submission.id ? (
+                                <Loader2 className="h-4 w-4 text-primary animate-spin hover:text-black" />
+                              ) : playingAudio === submission.id ? (
+                                <Pause className="h-4 w-4 text-primary hover:text-black" />
+                              ) : (
+                                <Play className="h-4 w-4 ml-0.5 text-primary hover:text-black" />
+                              )}
+                            </Button>
+                            
+                            {/* Audio Duration Display */}
+                            {submission.audio_duration && (
+                              <div className="text-xs text-muted-foreground">
+                                <span>{formatTime(submission.audio_duration)}</span>
+                              </div>
                             )}
-                          </Button>
+                            
+                              {/* Progress Bar - Only show when playing */}
+                              {playingAudio === submission.id && audioDuration > 0 && (
+                                <div className="w-full max-w-96">
+                                  <div className="w-full bg-muted rounded-full h-2">
+                                    <div 
+                                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                                      style={{ width: `${audioProgress}%` }}
+                                    />
+                                  </div>
+                                  
+                                </div>
+                              )}
+                          </div>
                         </div>
 
                         {/* Status */}
@@ -572,6 +716,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               className="h-9 px-3 hover:bg-muted/50 rounded-lg"
                             >
                               Review
+                            </Button>
+                          )}
+                          {(submission.status === "approved" || submission.status === "rejected") && (
+                            <Button
+                              onClick={() => handleStatusToggle(submission.id, submission.status)}
+                              size="sm"
+                              variant="outline"
+                              className={`h-9 px-3 rounded-lg transition-all ${
+                                submission.status === "approved" 
+                                  ? "border-rose-500/50 text-rose-600 hover:bg-rose-50 hover:border-rose-500" 
+                                  : "border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500"
+                              }`}
+                            >
+                              {submission.status === "approved" ? "Reject" : "Approve"}
                             </Button>
                           )}
                         </div>
@@ -618,35 +776,78 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                         </div>
                       )}
 
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <Button
-                          onClick={() => toggleAudio(submission.id, submission.audio_file_path || "")}
-                          size="sm"
-                          className="h-9 px-3 rounded-lg bg-primary-foreground"
-                          disabled={!submission.audio_file_path}
-                        >
-                          {playingAudio === submission.id ? (
-                            <div className="flex items-center gap-2">
-                              <Pause className="h-4 w-4 text-primary" />
-                              <span className="text-sm text-primary">Pause</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <Play className="h-4 w-4 ml-0.5 text-primary" />
-                              <span className="text-sm text-primary">Play</span>
-                            </div>
-                          )}
-                        </Button>
+                      <div className="mt-4 space-y-3">
+                        {/* Audio Controls */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <Button
+                              onClick={() => toggleAudio(submission.id, submission.audio_file_path || "")}
+                              size="sm"
+                              className="h-9 px-3 rounded-lg bg-primary-foreground"
+                              disabled={!submission.audio_file_path || loadingAudio === submission.id}
+                            >
+                              {loadingAudio === submission.id ? (
+                                <div className="flex items-center gap-2">
+                                  <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                                  <span className="text-sm text-primary">Loading...</span>
+                                </div>
+                              ) : playingAudio === submission.id ? (
+                                <div className="flex items-center gap-2">
+                                  <Pause className="h-4 w-4 text-primary" />
+                                  <span className="text-sm text-primary">Pause</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <Play className="h-4 w-4 ml-0.5 text-primary" />
+                                  <span className="text-sm text-primary">Play</span>
+                                </div>
+                              )}
+                            </Button>
+                            
+                            {/* Audio Duration Display */}
+                            {submission.audio_duration && (
+                              <div className="text-xs text-muted-foreground">
+                                <span>{formatTime(submission.audio_duration)}</span>
+                              </div>
+                            )}
+                          </div>
 
-                        {submission.status === "pending" && (
-                          <Button
-                            onClick={() => setSelectedSubmission(submission)}
-                            size="sm"
-                            variant="outline"
-                            className="h-9 px-3 rounded-lg"
-                          >
-                            Review
-                          </Button>
+                          {submission.status === "pending" && (
+                            <Button
+                              onClick={() => setSelectedSubmission(submission)}
+                              size="sm"
+                              variant="outline"
+                              className="h-9 px-3 rounded-lg"
+                            >
+                              Review
+                            </Button>
+                          )}
+                          {(submission.status === "approved" || submission.status === "rejected") && (
+                            <Button
+                              onClick={() => handleStatusToggle(submission.id, submission.status)}
+                              size="sm"
+                              variant="outline"
+                              className={`h-9 px-3 rounded-lg transition-all ${
+                                submission.status === "approved" 
+                                  ? "border-rose-500/50 text-rose-600 hover:bg-rose-50 hover:border-rose-500" 
+                                  : "border-emerald-500/50 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-500"
+                              }`}
+                            >
+                              {submission.status === "approved" ? "Reject" : "Approve"}
+                            </Button>
+                          )}
+                        </div>
+                        
+                        {/* Progress Bar - Only show when playing */}
+                        {playingAudio === submission.id && audioDuration > 0 && (
+                          <div className="w-full">
+                            <div className="w-full bg-muted rounded-full h-2">
+                              <div 
+                                className="bg-primary h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${audioProgress}%` }}
+                              />
+                            </div>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -689,7 +890,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_prev}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
               >
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
@@ -698,7 +899,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_prev}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -723,10 +924,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       onClick={() => handlePageChange(pageNum)}
                       size="sm"
                       variant={pageNum === pagination.current_page ? "default" : "outline"}
-                      className={`h-9 w-9 p-0 ${
+                      className={`h-9 w-9 p-0 rounded-xl transition-all ${
                         pageNum === pagination.current_page 
-                          ? "bg-amber-500 hover:bg-amber-600 text-white" 
-                          : ""
+                          ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20" 
+                          : "border-border/50 hover:bg-primary/10 hover:border-primary/50"
                       }`}
                     >
                       {pageNum}
@@ -740,7 +941,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_next}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -749,7 +950,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_next}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0"
+                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
               >
                 <ChevronsRight className="h-4 w-4" />
               </Button>
@@ -816,10 +1017,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       {/* Hidden Audio Element */}
       <audio
         ref={audioRef}
-        onEnded={() => setPlayingAudio(null)}
+        onEnded={() => {
+          setPlayingAudio(null)
+          setAudioCurrentTime(0)
+          setAudioProgress(0)
+        }}
         onError={(e) => {
           console.error("Audio element error:", e)
           setPlayingAudio(null)
+          setLoadingAudio(null)
+          setAudioCurrentTime(0)
+          setAudioProgress(0)
         }}
         onLoadStart={() => console.log("Audio loading started")}
         onCanPlay={() => console.log("Audio can play")}
