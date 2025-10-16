@@ -25,6 +25,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Loader2,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -91,6 +93,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [audioDuration, setAudioDuration] = useState<number>(0)
   const [audioCurrentTime, setAudioCurrentTime] = useState<number>(0)
   const [audioProgress, setAudioProgress] = useState<number>(0)
+  const [registrationOpen, setRegistrationOpen] = useState<boolean>(true)
+  const [isTogglingRegistration, setIsTogglingRegistration] = useState<boolean>(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const getToken = () => {
@@ -121,6 +125,46 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       }
     } catch (error) {
       console.error("Error fetching stats:", error)
+    }
+  }
+
+  const fetchRegistrationStatus = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/registration/status`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      })
+      const data = await response.json()
+      if (data.success) {
+        setRegistrationOpen(data.registration_open)
+      }
+    } catch (error) {
+      console.error("Error fetching registration status:", error)
+    }
+  }
+
+  const toggleRegistrationStatus = async () => {
+    setIsTogglingRegistration(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/registration/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({
+          registration_open: !registrationOpen,
+        }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        setRegistrationOpen(data.registration_open)
+      }
+    } catch (error) {
+      console.error("Error toggling registration status:", error)
+    } finally {
+      setIsTogglingRegistration(false)
     }
   }
 
@@ -161,6 +205,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   useEffect(() => {
     fetchStats()
+    fetchRegistrationStatus()
     fetchSubmissions()
   }, [])
 
@@ -450,17 +495,45 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   />
                 </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                  Screening Dashboard
-                </h1>
-                <p className="text-sm text-muted-foreground font-medium text-primary">Chenaniah Music Ministry</p>
-              </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Screening Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground font-medium text-primary">Chenaniah Music Ministry</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            {/* Registration Control */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Registration:</span>
+              <Button
+                onClick={toggleRegistrationStatus}
+                disabled={isTogglingRegistration}
+                variant="ghost"
+                size="sm"
+                className={`gap-2 transition-all ${
+                  registrationOpen 
+                    ? "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700" 
+                    : "text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                }`}
+              >
+                {isTogglingRegistration ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : registrationOpen ? (
+                  <ToggleRight className="h-4 w-4" />
+                ) : (
+                  <ToggleLeft className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {registrationOpen ? "Open" : "Closed"}
+                </span>
+              </Button>
             </div>
             <Button onClick={onLogout} variant="ghost" size="sm" className="gap-2 hover:bg-muted/50 transition-all">
               <LogOut className="h-4 w-4 text-primary" />
               <span className="hidden sm:inline">Logout</span>
             </Button>
+          </div>
           </div>
         </div>
       </div>
