@@ -102,6 +102,53 @@ export function ScheduleTimeSlotsSection({
       onTimeSelect(time)
     }
   }
+
+  // Classify time slots into morning and afternoon
+  const classifySlots = (slots: TimeSlot[]) => {
+    const morning: TimeSlot[] = []
+    const afternoon: TimeSlot[] = []
+    
+    slots.forEach(slot => {
+      // Parse time from HH:MM format
+      const match = slot.time.match(/(\d{1,2}):(\d{2})/)
+      if (match) {
+        const hours = parseInt(match[1], 10)
+        // Morning: 9:00 AM - 11:59 AM (09:00 - 11:59)
+        // Afternoon: 12:00 PM - 5:00 PM (12:00 - 17:00)
+        if (hours < 12) {
+          morning.push(slot)
+        } else {
+          afternoon.push(slot)
+        }
+      } else {
+        // If format doesn't match, try to determine from label
+        const labelLower = slot.label.toLowerCase()
+        if (labelLower.includes('am') || (labelLower.includes('9') || labelLower.includes('10') || labelLower.includes('11'))) {
+          morning.push(slot)
+        } else {
+          afternoon.push(slot)
+        }
+      }
+    })
+    
+    // Sort each group by time
+    const sortByTime = (a: TimeSlot, b: TimeSlot) => {
+      const timeA = a.time.match(/(\d{1,2}):(\d{2})/)
+      const timeB = b.time.match(/(\d{1,2}):(\d{2})/)
+      if (timeA && timeB) {
+        const hoursA = parseInt(timeA[1], 10)
+        const hoursB = parseInt(timeB[1], 10)
+        if (hoursA !== hoursB) return hoursA - hoursB
+        return parseInt(timeA[2], 10) - parseInt(timeB[2], 10)
+      }
+      return 0
+    }
+    
+    return {
+      morning: morning.sort(sortByTime),
+      afternoon: afternoon.sort(sortByTime)
+    }
+  }
   
   return (
     <section className="py-16 sm:py-24 bg-gradient-to-br from-muted/20 to-background">
@@ -196,28 +243,72 @@ export function ScheduleTimeSlotsSection({
                   <p className="text-muted-foreground">No available time slots for this date.</p>
                   <p className="text-sm text-muted-foreground mt-2">Please try selecting another date.</p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {timeSlots.map((slot) => (
-                    <Button
-                      key={slot.id}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleTimeClick(slot.time)}
-                      className={cn(
-                        "h-12 flex flex-col items-center justify-center gap-1 rounded-xl transition-all",
-                        selectedTime === slot.time && "bg-primary text-primary-foreground border-primary shadow-md hover:bg-primary/90",
-                        selectedTime !== slot.time && "hover:bg-primary/10 hover:border-primary/50 hover:text-primary"
-                      )}
-                    >
-                      <span className="text-sm font-medium">{slot.label}</span>
-                      {selectedTime === slot.time && (
-                        <CheckCircle className="h-3 w-3" />
-                      )}
-                    </Button>
-                  ))}
-                </div>
-              )}
+              ) : (() => {
+                const { morning, afternoon } = classifySlots(timeSlots)
+                return (
+                  <div className="space-y-8">
+                    {/* Morning Section */}
+                    {morning.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+                          <Clock className="h-5 w-5" />
+                          Morning Slots
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                          {morning.map((slot) => (
+                            <Button
+                              key={slot.id}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleTimeClick(slot.time)}
+                              className={cn(
+                                "h-12 flex flex-col items-center justify-center gap-1 rounded-xl transition-all",
+                                selectedTime === slot.time && "bg-primary text-primary-foreground border-primary shadow-md hover:bg-primary/90",
+                                selectedTime !== slot.time && "hover:bg-primary/10 hover:border-primary/50 hover:text-primary"
+                              )}
+                            >
+                              <span className="text-sm font-medium">{slot.label}</span>
+                              {selectedTime === slot.time && (
+                                <CheckCircle className="h-3 w-3" />
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Afternoon Section */}
+                    {afternoon.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-semibold mb-4 text-primary flex items-center gap-2">
+                          <Clock className="h-5 w-5" />
+                          Afternoon Slots
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                          {afternoon.map((slot) => (
+                            <Button
+                              key={slot.id}
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleTimeClick(slot.time)}
+                              className={cn(
+                                "h-12 flex flex-col items-center justify-center gap-1 rounded-xl transition-all",
+                                selectedTime === slot.time && "bg-primary text-primary-foreground border-primary shadow-md hover:bg-primary/90",
+                                selectedTime !== slot.time && "hover:bg-primary/10 hover:border-primary/50 hover:text-primary"
+                              )}
+                            >
+                              <span className="text-sm font-medium">{slot.label}</span>
+                              {selectedTime === slot.time && (
+                                <CheckCircle className="h-3 w-3" />
+                              )}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
               
               {/* Legend */}
               <div className="flex flex-wrap items-center justify-center gap-6 mt-8 pt-6 border-t border-border/50">
