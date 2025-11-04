@@ -7,25 +7,31 @@ import AdminLogin from '@/components/admin-login'
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
+    // Mark component as mounted to prevent hydration mismatches
+    setMounted(true)
+    
     // Check if user is already authenticated
-    let token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
-    
-    // If no full token, try to reconstruct from compressed storage
-    if (!token) {
-      const compressedToken = localStorage.getItem('admin_token_compressed')
-      const header = localStorage.getItem('admin_token_header')
-      if (compressedToken && header) {
-        token = `${header}.${compressedToken}`
+    if (typeof window !== 'undefined') {
+      let token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+      
+      // If no full token, try to reconstruct from compressed storage
+      if (!token) {
+        const compressedToken = localStorage.getItem('admin_token_compressed')
+        const header = localStorage.getItem('admin_token_header')
+        if (compressedToken && header) {
+          token = `${header}.${compressedToken}`
+        }
       }
-    }
-    
-    if (token) {
-      setIsAuthenticated(true)
-    } else {
-      setIsAuthenticated(false)
+      
+      if (token) {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+      }
     }
     setIsLoading(false)
   }, [])
@@ -86,7 +92,8 @@ export default function AdminPage() {
     setIsAuthenticated(false)
   }
 
-  if (isLoading) {
+  // Show loading state until mounted to prevent hydration mismatch
+  if (!mounted || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
