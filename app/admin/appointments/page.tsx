@@ -15,7 +15,8 @@ import {
   Loader2,
 } from "lucide-react"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
+import { getApiBaseUrl } from "@/lib/utils"
+const API_BASE_URL = getApiBaseUrl()
 
 interface InterviewAppointment {
   id: number

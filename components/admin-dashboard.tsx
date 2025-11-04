@@ -32,7 +32,8 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
+import { getApiBaseUrl } from "@/lib/utils"
+const API_BASE_URL = getApiBaseUrl()
 
 interface Submission {
   id: number

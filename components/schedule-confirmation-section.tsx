@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CheckCircle, Calendar, Clock, MapPin, User, Phone } from "lucide-react"
+import { getApiBaseUrl } from "@/lib/utils"
 
 interface ScheduleConfirmationSectionProps {
   selectedDate?: Date | null
@@ -44,7 +45,7 @@ export function ScheduleConfirmationSection({
   const verifyPhoneNumber = useCallback(async (phone: string) => {
     setIsVerifyingPhone(true)
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+      const API_BASE_URL = getApiBaseUrl()
       const response = await fetch(`${API_BASE_URL}/schedule/verify-applicant`, {
         method: 'POST',
         headers: {
@@ -110,7 +111,7 @@ export function ScheduleConfirmationSection({
     
     try {
       // Call the API to create the appointment
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+      const API_BASE_URL = getApiBaseUrl()
       const response = await fetch(`${API_BASE_URL}/schedule/appointments`, {
         method: 'POST',
         headers: {

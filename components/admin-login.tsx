@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Lock, UserIcon } from "lucide-react"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
+import { getApiBaseUrl } from "@/lib/utils"
+const API_BASE_URL = getApiBaseUrl()
 
 interface AdminLoginProps {
   onLoginSuccess: (token: string) => void

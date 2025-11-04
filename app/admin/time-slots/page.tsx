@@ -19,7 +19,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
+import { getApiBaseUrl } from "@/lib/utils"
+const API_BASE_URL = getApiBaseUrl()
 
 // Debug: Log the API URL being used
 console.log('API_BASE_URL:', API_BASE_URL)
