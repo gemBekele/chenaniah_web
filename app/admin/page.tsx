@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminLogin from '@/components/admin-login'
-import AdminDashboard from '@/components/admin-dashboard'
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -25,6 +24,8 @@ export default function AdminPage() {
     
     if (token) {
       setIsAuthenticated(true)
+    } else {
+      setIsAuthenticated(false)
     }
     setIsLoading(false)
   }, [])
@@ -93,12 +94,23 @@ export default function AdminPage() {
     )
   }
 
+  useEffect(() => {
+    if (isAuthenticated && typeof window !== 'undefined') {
+      router.push('/admin/applications')
+    }
+  }, [isAuthenticated, router])
+
   return (
     <div className="min-h-screen bg-gray-50">
       {!isAuthenticated ? (
         <AdminLogin onLoginSuccess={handleLoginSuccess} />
       ) : (
-        <AdminDashboard onLogout={handleLogout} />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-lg">Redirecting...</p>
+          </div>
+        </div>
       )}
     </div>
   )

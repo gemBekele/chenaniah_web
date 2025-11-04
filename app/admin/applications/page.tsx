@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { AdminLayout } from "@/components/admin-layout"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -17,7 +19,6 @@ import {
   Phone,
   MapPin,
   Church,
-  LogOut,
   Search,
   FileAudio,
   ChevronLeft,
@@ -27,10 +28,7 @@ import {
   Loader2,
   ToggleLeft,
   ToggleRight,
-  Calendar,
-  Settings,
 } from "lucide-react"
-import Image from "next/image"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api"
 
@@ -69,11 +67,8 @@ interface PaginationInfo {
   has_prev: boolean
 }
 
-interface AdminDashboardProps {
-  onLogout: () => void
-}
-
-export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
+export default function ApplicationsPage() {
+  const router = useRouter()
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0 })
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -90,8 +85,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null)
   const [comments, setComments] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
-  const [smsSettings, setSmsSettings] = useState<{enabled: boolean; sender_id: string; template_approved: string; template_rejected: string; provider_configured?: boolean} | null>(null)
-  const [isSavingSms, setIsSavingSms] = useState(false)
   const [playingAudio, setPlayingAudio] = useState<number | null>(null)
   const [loadingAudio, setLoadingAudio] = useState<number | null>(null)
   const [audioDuration, setAudioDuration] = useState<number>(0)
@@ -103,8 +96,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
-
-    // If no full token, try to reconstruct from compressed storage
     if (!token) {
       const compressedToken = localStorage.getItem("admin_token_compressed")
       const header = localStorage.getItem("admin_token_header")
@@ -112,7 +103,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         token = `${header}.${compressedToken}`
       }
     }
-
     return token
   }
 
@@ -145,20 +135,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       }
     } catch (error) {
       console.error("Error fetching registration status:", error)
-    }
-  }
-
-  const fetchSmsSettings = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/sms/settings`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      })
-      const data = await response.json()
-      if (data.success) {
-        setSmsSettings({ ...data.settings, provider_configured: data.provider_configured })
-      }
-    } catch (error) {
-      console.error("Error fetching SMS settings:", error)
     }
   }
 
@@ -222,15 +198,19 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }
 
   useEffect(() => {
+    const token = getToken()
+    if (!token) {
+      router.push("/admin")
+      return
+    }
     fetchStats()
     fetchRegistrationStatus()
     fetchSubmissions()
-    fetchSmsSettings()
-  }, [])
+  }, [router])
 
   useEffect(() => {
     const statusFilter = selectedTab === "all" ? undefined : selectedTab
-    fetchSubmissions(statusFilter, 1, searchQuery) // Reset to page 1 when changing tabs
+    fetchSubmissions(statusFilter, 1, searchQuery)
   }, [selectedTab])
 
   const handleStatusUpdate = async (submissionId: number, newStatus: "approved" | "rejected") => {
@@ -249,7 +229,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       const data = await response.json()
       if (data.success) {
-        // Update only the specific submission in state
         setSubmissions(prevSubmissions => 
           prevSubmissions.map(submission => 
             submission.id === submissionId 
@@ -264,9 +243,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           )
         )
         
-        // Update stats without refetching all submissions
         setStats(prevStats => {
-          // Find the current submission to determine what status it was before
           const currentSubmission = submissions.find(s => s.id === submissionId)
           if (!currentSubmission) return prevStats
           
@@ -306,7 +283,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       const data = await response.json()
       if (data.success) {
-        // Update only the specific submission in state
         setSubmissions(prevSubmissions => 
           prevSubmissions.map(submission => 
             submission.id === submissionId 
@@ -321,7 +297,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           )
         )
         
-        // Update stats without refetching all submissions
         setStats(prevStats => {
           const delta = newStatus === "approved" ? 1 : -1
           const oldDelta = currentStatus === "approved" ? -1 : 1
@@ -338,8 +313,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }
 
   const toggleAudio = async (submissionId: number, audioPath: string) => {
-    console.log("toggleAudio called:", { submissionId, audioPath, API_BASE_URL })
-
     if (playingAudio === submissionId) {
       audioRef.current?.pause()
       setPlayingAudio(null)
@@ -350,9 +323,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         try {
           setLoadingAudio(submissionId)
           const audioUrl = `${API_BASE_URL}/audio/${audioPath}`
-          console.log("Fetching audio from:", audioUrl)
 
-          // Fetch audio with authentication
           const response = await fetch(audioUrl, {
             headers: {
               Authorization: `Bearer ${getToken()}`,
@@ -363,15 +334,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             throw new Error(`HTTP error! status: ${response.status}`)
           }
 
-          // Create blob URL for the audio
           const audioBlob = await response.blob()
           const blobUrl = URL.createObjectURL(audioBlob)
 
-          console.log("Setting audio src to blob URL:", blobUrl)
           audioRef.current.src = blobUrl
           audioRef.current.load()
 
-          // Set up event listeners for progress tracking
           audioRef.current.addEventListener('loadedmetadata', () => {
             if (audioRef.current) {
               setAudioDuration(audioRef.current.duration)
@@ -396,7 +364,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           audioRef.current
             .play()
             .then(() => {
-              console.log("Audio playback started successfully")
               setPlayingAudio(submissionId)
               setLoadingAudio(null)
             })
@@ -442,16 +409,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     )
   }
 
-  const filteredSubmissions = submissions
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
-  }
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("en-US", {
       year: "numeric",
@@ -476,9 +433,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const handlePageSizeChange = (newLimit: number) => {
     const statusFilter = selectedTab === "all" ? undefined : selectedTab
-    // Update pagination state and fetch with new limit
     setPagination(prev => ({ ...prev, limit: newLimit, current_page: 1 }))
-    // Call fetchSubmissions with explicit parameters
     fetchSubmissions(statusFilter, 1, searchQuery, newLimit)
   }
 
@@ -486,96 +441,45 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     setSearchQuery(query)
   }
 
-  // Debounced search effect
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const statusFilter = selectedTab === "all" ? undefined : selectedTab
-      fetchSubmissions(statusFilter, 1, searchQuery) // Reset to page 1 when searching
-    }, 500) // 500ms delay
+      fetchSubmissions(statusFilter, 1, searchQuery)
+    }, 500)
 
     return () => clearTimeout(timeoutId)
   }, [searchQuery])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/40">
-        <div className="container mx-auto px-6 lg:px-8 py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                {/* <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl blur-lg opacity-40"></div> */}
-                <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl ">
-                  <Image 
-                    src="/assets/logo/logo_icon.png" 
-                    alt="Chenaniah Logo" 
-                    width={35} 
-                    height={35}
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Screening Dashboard
-              </h1>
-              <p className="text-sm text-muted-foreground font-medium text-primary">Chenaniah Music Ministry</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Registration Control */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-muted-foreground">Registration:</span>
-              <Button
-                onClick={toggleRegistrationStatus}
-                disabled={isTogglingRegistration}
-                variant="ghost"
-                size="sm"
-                className={`gap-2 transition-all ${
-                  registrationOpen 
-                    ? "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700" 
-                    : "text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-                }`}
-              >
-                {isTogglingRegistration ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : registrationOpen ? (
-                  <ToggleRight className="h-4 w-4" />
-                ) : (
-                  <ToggleLeft className="h-4 w-4" />
-                )}
-                <span className="hidden sm:inline">
-                  {registrationOpen ? "Open" : "Closed"}
-                </span>
-              </Button>
-            </div>
-            <Button 
-              onClick={() => window.location.href = '/admin/appointments'} 
-              variant="ghost" 
-              size="sm" 
-              className="gap-2 hover:bg-muted/50 transition-all"
-            >
-              <Calendar className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Interviews</span>
-            </Button>
-            <Button 
-              onClick={() => window.location.href = '/admin/schedule'} 
-              variant="ghost" 
-              size="sm" 
-              className="gap-2 hover:bg-muted/50 transition-all"
-            >
-              <Clock className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Time Slots</span>
-            </Button>
-            <Button onClick={onLogout} variant="ghost" size="sm" className="gap-2 hover:bg-muted/50 transition-all">
-              <LogOut className="h-4 w-4 text-primary" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
-          </div>
-        </div>
-      </div>
-
+    <AdminLayout>
       <div className="container mx-auto px-6 lg:px-8 py-8 lg:py-12">
+        {/* Registration Control */}
+        <div className="mb-6 flex items-center justify-end gap-3">
+          <span className="text-sm font-medium text-muted-foreground">Registration:</span>
+          <Button
+            onClick={toggleRegistrationStatus}
+            disabled={isTogglingRegistration}
+            variant="ghost"
+            size="sm"
+            className={`gap-2 transition-all ${
+              registrationOpen 
+                ? "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700" 
+                : "text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+            }`}
+          >
+            {isTogglingRegistration ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : registrationOpen ? (
+              <ToggleRight className="h-4 w-4" />
+            ) : (
+              <ToggleLeft className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">
+              {registrationOpen ? "Open" : "Closed"}
+            </span>
+          </Button>
+        </div>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-8 lg:mb-10">
           <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-gradient-to-br from-background to-muted/30 p-3 lg:p-6 border border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-muted/20">
             <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-violet-500/10 to-transparent rounded-full blur-2xl"></div>
@@ -624,16 +528,15 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
         <div className="mb-8">
           <div className="relative group">
-            {/* <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div> */}
-          <div className="relative">
-              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5  text-amber-500 " />
-            <Input
-              type="text"
-              placeholder="Search by name, phone, or church..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-14 h-14 bg-background/50 backdrop-blur-sm border-border/50 rounded-2xl text-base focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
-            />
+            <div className="relative">
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-amber-500" />
+              <Input
+                type="text"
+                placeholder="Search by name, phone, or church..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-14 h-14 bg-background/50 backdrop-blur-sm border-border/50 rounded-2xl text-base focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
+              />
             </div>
           </div>
         </div>
@@ -666,12 +569,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               >
                 Rejected
               </TabsTrigger>
-              <TabsTrigger
-                value="settings"
-                className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-3 lg:px-6 py-2 lg:py-2.5 font-medium transition-all text-sm lg:text-base whitespace-nowrap"
-              >
-                Settings
-              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -680,18 +577,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <div className="flex justify-center py-24">
                 <div className="flex flex-col items-center gap-4">
                   <div className="relative">
-                    {/* <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full blur-xl opacity-40"></div> */}
                     <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-muted border-t-amber-500"></div>
                   </div>
                   <p className="text-sm text-muted-foreground font-medium">Loading applications...</p>
                 </div>
               </div>
-            ) : filteredSubmissions.length === 0 ? (
+            ) : submissions.length === 0 ? (
               <div className="rounded-3xl bg-gradient-to-br from-background to-muted/30 border border-border/50 p-20 text-center">
                 <div className="flex flex-col items-center gap-4">
                   <div className="flex items-center justify-center w-20 h-20 rounded-3xl bg-muted/50">
                     <FileAudio className="h-10 w-10 text-muted-foreground" />
-                    </div>
+                  </div>
                   <div>
                     <p className="text-xl font-semibold text-foreground mb-2">No applications found</p>
                     <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
@@ -700,9 +596,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               </div>
             ) : (
               <div className="rounded-2xl bg-gradient-to-br from-background to-muted/20 border border-border/50 overflow-hidden">
-                {/* Desktop Table (lg and up) */}
+                {/* Desktop Table */}
                 <div className="hidden lg:block">
-                  {/* Table Header */}
                   <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 border-b border-border/50">
                     <div className="col-span-2">
                       <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Applicant</p>
@@ -727,20 +622,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     </div>
                   </div>
 
-                  {/* Table Body */}
                   <div className="divide-y divide-border/30">
-                    {filteredSubmissions.map((submission) => (
+                    {submissions.map((submission) => (
                       <div
                         key={submission.id}
                         className="group grid grid-cols-12 gap-4 px-6 py-5 hover:bg-muted/20 transition-colors"
                       >
-                        {/* Applicant Info */}
                         <div className="col-span-2 flex flex-col justify-center">
                           <p className="text-base font-semibold text-foreground mb-1 text-balance">{submission.name}</p>
                           <p className="text-sm text-muted-foreground">@{submission.telegram_username || "N/A"}</p>
                         </div>
 
-                        {/* Contact */}
                         <div className="col-span-2 flex flex-col justify-center">
                           <p className="text-base font-semibold text-foreground mb-1 flex items-center gap-1.5">
                             <Phone className="h-5 w-5 text-muted-foreground" />
@@ -752,7 +644,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                           </p>
                         </div>
 
-                        {/* Church */}
                         <div className="col-span-2 flex items-center">
                           <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
                             <Church className="h-5 w-5 text-muted-foreground flex-shrink-0" />
@@ -760,14 +651,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                           </p>
                         </div>
 
-                        {/* Submitted Date */}
                         <div className="col-span-1 flex items-center">
-                          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                          <p className="text-xs text-muted-foreground">
                             <span className="text-md font-medium">{formatDate(submission.submitted_at)}</span>
                           </p>
                         </div>
 
-                        {/* Audio Sample */}
                         <div className="col-span-2 flex items-center justify-center">
                           <div className="flex flex-col items-center gap-2">
                             <Button
@@ -785,29 +674,25 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               )}
                             </Button>
                             
-                            {/* Audio Duration Display */}
                             {submission.audio_duration && (
                               <div className="text-xs text-muted-foreground">
                                 <span>{formatTime(submission.audio_duration)}</span>
                               </div>
                             )}
                             
-                              {/* Progress Bar - Only show when playing */}
-                              {playingAudio === submission.id && audioDuration > 0 && (
-                                <div className="w-full max-w-96">
-                                  <div className="w-full bg-muted rounded-full h-2">
-                                    <div 
-                                      className="bg-primary h-2 rounded-full transition-all duration-300"
-                                      style={{ width: `${audioProgress}%` }}
-                                    />
-                                  </div>
-                                  
+                            {playingAudio === submission.id && audioDuration > 0 && (
+                              <div className="w-full max-w-96">
+                                <div className="w-full bg-muted rounded-full h-2">
+                                  <div 
+                                    className="bg-primary h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${audioProgress}%` }}
+                                  />
                                 </div>
-                              )}
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Status */}
                         <div className="col-span-2 flex items-center justify-center">
                           {getStatusBadge(submission.status)}
                           {submission.reviewer_comments && (
@@ -822,7 +707,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                           )}
                         </div>
 
-                        {/* Actions */}
                         <div className="col-span-1 flex items-center justify-center">
                           {submission.status === "pending" && (
                             <Button
@@ -854,9 +738,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   </div>
                 </div>
 
-                {/* Mobile Cards (below lg) */}
+                {/* Mobile Cards */}
                 <div className="lg:hidden divide-y divide-border/30">
-                  {filteredSubmissions.map((submission) => (
+                  {submissions.map((submission) => (
                     <div key={submission.id} className="p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
@@ -893,7 +777,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       )}
 
                       <div className="mt-4 space-y-3">
-                        {/* Audio Controls */}
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
                             <Button
@@ -920,7 +803,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               )}
                             </Button>
                             
-                            {/* Audio Duration Display */}
                             {submission.audio_duration && (
                               <div className="text-xs text-muted-foreground">
                                 <span>{formatTime(submission.audio_duration)}</span>
@@ -954,7 +836,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                           )}
                         </div>
                         
-                        {/* Progress Bar - Only show when playing */}
                         {playingAudio === submission.id && audioDuration > 0 && (
                           <div className="w-full">
                             <div className="w-full bg-muted rounded-full h-2">
@@ -972,102 +853,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               </div>
             )}
           </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="rounded-2xl bg-gradient-to-br from-background to-muted/20 border border-border/50 p-6 space-y-6">
-              <h2 className="text-xl font-semibold">SMS Settings</h2>
-              {smsSettings && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <input
-                        id="sms-enabled"
-                        type="checkbox"
-                        checked={smsSettings.enabled}
-                        onChange={(e) => setSmsSettings(prev => prev ? { ...prev, enabled: e.target.checked } : prev)}
-                      />
-                      <Label htmlFor="sms-enabled">Enable SMS on approve/reject</Label>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sender-id">Sender ID</Label>
-                      <Input id="sender-id" value={smsSettings.sender_id} onChange={(e) => setSmsSettings(prev => prev ? { ...prev, sender_id: e.target.value } : prev)} />
-                    </div>
-                    {!smsSettings.provider_configured && (
-                      <p className="text-xs text-rose-600">Provider API key not configured on server.</p>
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="tpl-approved">Approved Template</Label>
-                      <Textarea id="tpl-approved" rows={3} value={smsSettings.template_approved} onChange={(e) => setSmsSettings(prev => prev ? { ...prev, template_approved: e.target.value } : prev)} />
-                      <p className="text-xs text-muted-foreground">Available placeholders: {`{name}`}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="tpl-rejected">Rejected Template</Label>
-                      <Textarea id="tpl-rejected" rows={3} value={smsSettings.template_rejected} onChange={(e) => setSmsSettings(prev => prev ? { ...prev, template_rejected: e.target.value } : prev)} />
-                      <p className="text-xs text-muted-foreground">Available placeholders: {`{name}`}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="flex gap-3">
-                <Button
-                  disabled={!smsSettings || isSavingSms}
-                  onClick={async () => {
-                    if (!smsSettings) return
-                    setIsSavingSms(true)
-                    try {
-                      const resp = await fetch(`${API_BASE_URL}/sms/settings`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-                        body: JSON.stringify({
-                          enabled: smsSettings.enabled,
-                          sender_id: smsSettings.sender_id,
-                          template_approved: smsSettings.template_approved,
-                          template_rejected: smsSettings.template_rejected,
-                        })
-                      })
-                      await resp.json()
-                    } catch (e) {
-                      console.error('Failed saving SMS settings', e)
-                    } finally {
-                      setIsSavingSms(false)
-                    }
-                  }}
-                >
-                  Save Settings
-                </Button>
-              </div>
-              <div className="border-t border-border/50 pt-6 space-y-3">
-                <h3 className="font-medium">Send Test SMS</h3>
-                <div className="flex gap-3 max-w-lg">
-                  <Input placeholder="Phone number" id="test-phone" onKeyDown={() => {}} />
-                  <Button onClick={async () => {
-                    const input = document.getElementById('test-phone') as HTMLInputElement | null
-                    const phone = input?.value
-                    if (!phone) return
-                    try {
-                      const resp = await fetch(`${API_BASE_URL}/sms/test`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-                        body: JSON.stringify({ phone, message: 'Test SMS from Chenaniah' })
-                      })
-                      await resp.json()
-                    } catch (e) {
-                      console.error('Failed to send test SMS', e)
-                    }
-                  }}>Send</Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
         </Tabs>
 
         {/* Pagination Controls */}
-        {!isLoading && filteredSubmissions.length > 0 && (
+        {!isLoading && submissions.length > 0 && (
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-gradient-to-br from-background to-muted/20 border border-border/50 rounded-2xl">
-            {/* Page Size Selector */}
             <div className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground">Show:</span>
               <select
@@ -1082,14 +872,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               </select>
             </div>
 
-            {/* Pagination Info */}
             <div className="text-sm text-muted-foreground">
               Showing {((pagination.current_page - 1) * pagination.limit) + 1} to{' '}
               {Math.min(pagination.current_page * pagination.limit, pagination.total_count)} of{' '}
               {pagination.total_count} submissions
             </div>
 
-            {/* Pagination Buttons */}
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => handlePageChange(1)}
@@ -1110,7 +898,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               
-              {/* Page Numbers */}
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
                   let pageNum;
@@ -1169,7 +956,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
           <div className="w-full max-w-lg rounded-3xl bg-gradient-to-br from-background to-muted/30 border border-border/50 shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-300">
             <div className="p-8 pb-6 border-b border-border/50">
-              {/* <h2 className="text-2xl font-bold text-foreground mb-2">Review Application</h2> */}
               <p className="text-xl text-muted-foreground font-light">
                 {selectedSubmission.name} • {selectedSubmission.church}
               </p>
@@ -1220,7 +1006,6 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         </div>
       )}
 
-      {/* Hidden Audio Element */}
       <audio
         ref={audioRef}
         onEnded={() => {
@@ -1235,10 +1020,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
           setAudioCurrentTime(0)
           setAudioProgress(0)
         }}
-        onLoadStart={() => console.log("Audio loading started")}
-        onCanPlay={() => console.log("Audio can play")}
-        onLoadedData={() => console.log("Audio data loaded")}
       />
-    </div>
+    </AdminLayout>
   )
 }
+
