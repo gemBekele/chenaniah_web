@@ -7,8 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Get the API base URL for the current environment
- * Production: https://chenaniah.com/api
- * Development: Uses NEXT_PUBLIC_API_URL or falls back to localhost
+ * Default: https://chenaniah.com/api
+ * Development: Uses NEXT_PUBLIC_API_URL or localhost only if explicitly set
  */
 export function getApiBaseUrl(): string {
   // Use environment variable if set (highest priority)
@@ -18,19 +18,21 @@ export function getApiBaseUrl(): string {
   
   // Check if we're running in the browser
   if (typeof window !== 'undefined') {
-    // If on production domain, use production API
-    if (window.location.hostname === 'chenaniah.com' || window.location.hostname === 'www.chenaniah.com') {
-      return 'https://chenaniah.com/api'
+    // Only use localhost if explicitly running on localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5001/api'
     }
-    // For local development in browser
-    return 'http://localhost:5001/api'
-  }
-  
-  // Server-side: check NODE_ENV
-  if (process.env.NODE_ENV === 'production') {
+    // Default to production API for all other cases
     return 'https://chenaniah.com/api'
   }
   
-  // Development fallback
-  return 'http://localhost:5001/api'
+  // Server-side: default to production API
+  // Only use localhost if explicitly in development mode AND on localhost
+  if (process.env.NODE_ENV === 'development' && process.env.VERCEL !== '1') {
+    // Only use localhost in true local development
+    return 'http://localhost:5001/api'
+  }
+  
+  // Default fallback: production API
+  return 'https://chenaniah.com/api'
 }
