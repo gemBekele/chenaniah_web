@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Get the API base URL for the current environment
- * Default: https://chenaniah.com/api
+ * Default: https://chenaniah.org/api
  * Development: Uses NEXT_PUBLIC_API_URL or localhost only if explicitly set
  */
 export function getApiBaseUrl(): string {
@@ -23,7 +23,7 @@ export function getApiBaseUrl(): string {
       return 'http://localhost:5001/api'
     }
     // Default to production API for all other cases
-    return 'https://chenaniah.com/api'
+    return 'https://chenaniah.org/api'
   }
   
   // Server-side: default to production API
@@ -34,5 +34,5 @@ export function getApiBaseUrl(): string {
   }
   
   // Default fallback: production API
-  return 'https://chenaniah.com/api'
+  return 'https://chenaniah.org/api'
 }
