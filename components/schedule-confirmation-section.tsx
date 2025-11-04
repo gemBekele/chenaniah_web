@@ -144,6 +144,36 @@ export function ScheduleConfirmationSection({
     }
   }
   
+  // Convert 24-hour time format (HH:MM) to readable format (H:MM AM/PM)
+  const formatTime = (time: string | null | undefined): string => {
+    if (!time) return ''
+    
+    // Try to parse time in HH:MM format
+    const match = time.match(/(\d{1,2}):(\d{2})/)
+    if (!match) return time // Return as-is if format doesn't match
+    
+    const hours = parseInt(match[1], 10)
+    const minutes = match[2]
+    
+    // Convert to 12-hour format
+    const period = hours >= 12 ? 'PM' : 'AM'
+    const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
+    
+    // Determine time of day for better readability
+    let timeOfDay = ''
+    if (hours >= 5 && hours < 12) {
+      timeOfDay = 'morning'
+    } else if (hours >= 12 && hours < 17) {
+      timeOfDay = 'afternoon'
+    } else if (hours >= 17 && hours < 21) {
+      timeOfDay = 'evening'
+    } else {
+      timeOfDay = 'night'
+    }
+    
+    return `${displayHours}:${minutes} ${period} ${timeOfDay}`
+  }
+  
   const isFormValid = formData.name && formData.phone && selectedDate && selectedTime && phoneVerificationStatus.verified === true
   
   if (isSubmitted) {
@@ -158,7 +188,7 @@ export function ScheduleConfirmationSection({
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold mb-4">Interview Scheduled Successfully!</h2>
                 <p className="text-muted-foreground text-lg mb-6">
-                  Your interview has been confirmed. You will receive a confirmation email with all the details.
+                  Your interview has been confirmed. Please save the details below.
                 </p>
               </div>
               
@@ -176,7 +206,7 @@ export function ScheduleConfirmationSection({
                   </div>
                   <div className="flex items-center gap-3">
                     <Clock className="h-4 w-4 text-primary" />
-                    <span>{selectedTime}</span>
+                    <span>{formatTime(selectedTime)}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-primary" />
@@ -191,7 +221,6 @@ export function ScheduleConfirmationSection({
                   <li>• Please arrive 10 minutes early</li>
                   <li>• Bring a valid ID</li>
                   <li>• Prepare to discuss your musical background</li>
-                  <li>• The interview will last approximately 30 minutes</li>
                 </ul>
               </div>
             </Card>
