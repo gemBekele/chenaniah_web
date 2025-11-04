@@ -4,18 +4,22 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminLogin from '@/components/admin-login'
 
+// Force dynamic rendering to prevent static generation
+export const dynamic = 'force-dynamic'
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
 
+  // Check authentication after component mounts (client-side only)
   useEffect(() => {
-    // Mark component as mounted to prevent hydration mismatches
-    setMounted(true)
+    // Only run on client side
+    if (typeof window === 'undefined') return
     
-    // Check if user is already authenticated
-    if (typeof window !== 'undefined') {
+    // Use requestAnimationFrame to ensure this runs after React hydration
+    const rafId = requestAnimationFrame(() => {
       let token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
       
       // If no full token, try to reconstruct from compressed storage
@@ -27,13 +31,12 @@ export default function AdminPage() {
         }
       }
       
-      if (token) {
-        setIsAuthenticated(true)
-      } else {
-        setIsAuthenticated(false)
-      }
-    }
-    setIsLoading(false)
+      setIsAuthenticated(!!token)
+      setIsLoading(false)
+      setMounted(true)
+    })
+    
+    return () => cancelAnimationFrame(rafId)
   }, [])
 
   const handleLoginSuccess = (token: string) => {
@@ -92,20 +95,21 @@ export default function AdminPage() {
     setIsAuthenticated(false)
   }
 
+  useEffect(() => {
+    if (mounted && isAuthenticated && typeof window !== 'undefined') {
+      router.push('/admin/applications')
+    }
+  }, [mounted, isAuthenticated, router])
+
   // Show loading state until mounted to prevent hydration mismatch
+  // Always render the same structure on server and initial client render
   if (!mounted || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
   }
-
-  useEffect(() => {
-    if (isAuthenticated && typeof window !== 'undefined') {
-      router.push('/admin/applications')
-    }
-  }, [isAuthenticated, router])
 
   return (
     <div className="min-h-screen bg-gray-50">
