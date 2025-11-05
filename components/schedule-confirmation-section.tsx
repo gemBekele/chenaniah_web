@@ -34,6 +34,7 @@ export function ScheduleConfirmationSection({
     message: string
     applicantName?: string
   }>({ verified: null, message: "" })
+  const [slotLocation, setSlotLocation] = useState<string>("")
   
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -104,6 +105,52 @@ export function ScheduleConfirmationSection({
     
     return () => clearTimeout(timeoutId)
   }, [formData.phone, verifyPhoneNumber])
+
+  // Fetch location from time slot
+  useEffect(() => {
+    const fetchSlotLocation = async () => {
+      if (!selectedDate || !selectedTime) {
+        setSlotLocation("")
+        return
+      }
+      
+      try {
+        const API_BASE_URL = getApiBaseUrl()
+        const year = selectedDate.getFullYear()
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+        const day = String(selectedDate.getDate()).padStart(2, '0')
+        const dateStr = `${year}-${month}-${day}`
+        
+        const response = await fetch(`${API_BASE_URL}/schedule/time-slots?date=${dateStr}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.timeSlots) {
+            const slot = data.timeSlots.find((s: any) => s.time === selectedTime)
+            if (slot && slot.location && slot.location !== null && slot.location !== 'null') {
+              setSlotLocation(slot.location)
+            } else {
+              setSlotLocation("")
+            }
+          } else {
+            setSlotLocation("")
+          }
+        } else {
+          setSlotLocation("")
+        }
+      } catch (error) {
+        console.error('Error fetching slot location:', error)
+        setSlotLocation("")
+      }
+    }
+    
+    fetchSlotLocation()
+  }, [selectedDate, selectedTime])
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -210,7 +257,7 @@ export function ScheduleConfirmationSection({
                   </div>
                   <div className="flex items-center gap-3">
                     <MapPin className="h-4 w-4 text-primary" />
-                    <span>Chenaniah Ministry Office, Addis Ababa</span>
+                    <span>{slotLocation || "Location not specified"}</span>
                   </div>
                 </div>
               </div>

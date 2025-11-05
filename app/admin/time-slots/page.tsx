@@ -31,6 +31,8 @@ interface TimeSlot {
   label: string
   available: boolean
   date: string
+  location?: string
+  period?: 'morning' | 'afternoon'
 }
 
 interface InterviewAppointment {
@@ -71,11 +73,13 @@ export default function AdminSchedulePage() {
   const [showBulkCreator, setShowBulkCreator] = useState(false)
   const [bulkLoading, setBulkLoading] = useState(false)
   const [bulkConfig, setBulkConfig] = useState({
+    location: "",
     interval_minutes: "30",
     morning_start: "09:00",
     morning_end: "12:00",
     afternoon_start: "13:00",
     afternoon_end: "17:00",
+    number_of_slots: "",
   })
 
   const getToken = () => {
@@ -251,20 +255,33 @@ export default function AdminSchedulePage() {
       return
     }
 
+    if (!bulkConfig.location) {
+      alert("Please enter a location")
+      return
+    }
+
     setBulkLoading(true)
     try {
+      const requestBody: any = {
+        date: selectedDate,
+        location: bulkConfig.location,
+        start_time: startTime,
+        end_time: endTime,
+        interval_minutes: parseInt(bulkConfig.interval_minutes),
+      }
+
+      // Add number_of_slots if specified
+      if (bulkConfig.number_of_slots && bulkConfig.number_of_slots !== "") {
+        requestBody.number_of_slots = parseInt(bulkConfig.number_of_slots)
+      }
+
       const response = await fetch(`${API_BASE_URL}/schedule/time-slots/bulk`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getToken()}`,
         },
-        body: JSON.stringify({
-          date: selectedDate,
-          start_time: startTime,
-          end_time: endTime,
-          interval_minutes: parseInt(bulkConfig.interval_minutes),
-        }),
+        body: JSON.stringify(requestBody),
       })
       const data = await response.json()
       
@@ -399,9 +416,8 @@ export default function AdminSchedulePage() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Time Slot Management */}
-          <Card className="p-6 bg-background/50 backdrop-blur-sm border-border/50">
+        {/* Time Slot Management */}
+        <Card className="p-6 bg-background/50 backdrop-blur-sm border-border/50">
             <div className="mb-6">
               <h2 className="text-xl font-semibold mb-6">Time Slot Management</h2>
               
@@ -464,6 +480,19 @@ export default function AdminSchedulePage() {
                     </div>
                   )}
                   <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="location" className="text-xs">Location *</Label>
+                      <Input
+                        id="location"
+                        type="text"
+                        value={bulkConfig.location}
+                        onChange={(e) => setBulkConfig(prev => ({ ...prev, location: e.target.value }))}
+                        placeholder="Enter location (e.g., Main Office, Branch A)"
+                        className="h-9 text-sm"
+                        required
+                      />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <Label htmlFor="interval" className="text-xs">Interval (minutes)</Label>
@@ -472,14 +501,20 @@ export default function AdminSchedulePage() {
                           type="number"
                           value={bulkConfig.interval_minutes}
                           onChange={(e) => setBulkConfig(prev => ({ ...prev, interval_minutes: e.target.value }))}
-                          placeholder="15"
+                          placeholder="30"
                           className="h-9 text-sm"
                         />
                       </div>
-                      <div className="flex items-end">
-                        <span className="text-xs text-muted-foreground">
-                          {bulkConfig.interval_minutes} min slots
-                        </span>
+                      <div>
+                        <Label htmlFor="number_of_slots" className="text-xs">Number of Slots</Label>
+                        <Input
+                          id="number_of_slots"
+                          type="number"
+                          value={bulkConfig.number_of_slots}
+                          onChange={(e) => setBulkConfig(prev => ({ ...prev, number_of_slots: e.target.value }))}
+                          placeholder="25"
+                          className="h-9 text-sm"
+                        />
                       </div>
                     </div>
                     
@@ -529,7 +564,7 @@ export default function AdminSchedulePage() {
                       <Button
                         size="sm"
                         onClick={() => createBulkSlots(bulkConfig.morning_start, bulkConfig.morning_end)}
-                        disabled={bulkLoading || !selectedDate}
+                        disabled={bulkLoading || !selectedDate || !bulkConfig.location}
                         className="flex-1 h-9"
                       >
                         {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Morning"}
@@ -537,7 +572,7 @@ export default function AdminSchedulePage() {
                       <Button
                         size="sm"
                         onClick={() => createBulkSlots(bulkConfig.afternoon_start, bulkConfig.afternoon_end)}
-                        disabled={bulkLoading || !selectedDate}
+                        disabled={bulkLoading || !selectedDate || !bulkConfig.location}
                         className="flex-1 h-9"
                       >
                         {bulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Afternoon"}
@@ -606,7 +641,6 @@ export default function AdminSchedulePage() {
               </div>
             )}
           </Card>
-        </div>
       </div>
     </AdminLayout>
   )

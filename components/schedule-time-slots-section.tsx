@@ -16,6 +16,8 @@ interface TimeSlot {
   label: string
   available: boolean
   date: string
+  location?: string
+  period?: 'morning' | 'afternoon'
 }
 
 interface ScheduleTimeSlotsSectionProps {
@@ -71,7 +73,9 @@ export function ScheduleTimeSlotsSection({
               time: slot.time,
               label: slot.label,
               available: slot.available === 1 || slot.available === true,
-              date: slot.date
+              date: slot.date,
+              location: (slot.location && slot.location !== null && slot.location !== 'null') ? slot.location : undefined,
+              period: slot.period || undefined
             }))
             
             // Filter to show only available slots for better UX
@@ -103,30 +107,29 @@ export function ScheduleTimeSlotsSection({
     }
   }
 
-  // Classify time slots into morning and afternoon
+  // Classify time slots into morning and afternoon using period field
   const classifySlots = (slots: TimeSlot[]) => {
     const morning: TimeSlot[] = []
     const afternoon: TimeSlot[] = []
     
     slots.forEach(slot => {
-      // Parse time from HH:MM format
-      const match = slot.time.match(/(\d{1,2}):(\d{2})/)
-      if (match) {
-        const hours = parseInt(match[1], 10)
-        // Morning: 9:00 AM - 11:59 AM (09:00 - 11:59)
-        // Afternoon: 12:00 PM - 5:00 PM (12:00 - 17:00)
-        if (hours < 12) {
-          morning.push(slot)
-        } else {
-          afternoon.push(slot)
-        }
+      // Use period field from database if available, otherwise fallback to time calculation
+      if (slot.period === 'morning') {
+        morning.push(slot)
+      } else if (slot.period === 'afternoon') {
+        afternoon.push(slot)
       } else {
-        // If format doesn't match, try to determine from label
-        const labelLower = slot.label.toLowerCase()
-        if (labelLower.includes('am') || (labelLower.includes('9') || labelLower.includes('10') || labelLower.includes('11'))) {
-          morning.push(slot)
-        } else {
-          afternoon.push(slot)
+        // Fallback: calculate from time if period is not set
+        const match = slot.time.match(/(\d{1,2}):(\d{2})/)
+        if (match) {
+          const hours = parseInt(match[1], 10)
+          // Morning: 9:00 AM - 11:59 AM (09:00 - 11:59)
+          // Afternoon: 12:00 PM - 5:00 PM (12:00 - 17:00)
+          if (hours >= 9 && hours < 12) {
+            morning.push(slot)
+          } else if (hours >= 12 && hours <= 17) {
+            afternoon.push(slot)
+          }
         }
       }
     })
@@ -217,7 +220,8 @@ export function ScheduleTimeSlotsSection({
                                 time: slot.time,
                                 label: slot.label,
                                 available: slot.available === 1 || slot.available === true,
-                                date: slot.date
+                                date: slot.date,
+                                period: slot.period || undefined
                               }))
                               const availableSlots = allSlots.filter((slot: TimeSlot) => slot.available)
                               setTimeSlots(availableSlots)
