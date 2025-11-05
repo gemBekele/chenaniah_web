@@ -335,17 +335,23 @@ export function ScheduleConfirmationSection({
                   </div>
                   <div className="flex items-center gap-3">
                     <Clock className="h-4 w-4 text-primary" />
-                    <span>{formatTime(selectedTime)}</span>
+                    <span>{formatTime(selectedTime)} session</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span>{slotLocation || "Location not specified"}</span>
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <div className="bg-primary/10 rounded-lg p-4 border-2 border-primary/30">
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-6 w-6 text-primary mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <span className="text-xs font-semibold text-primary/90 block mb-2 uppercase tracking-wide">Interview Location</span>
+                          <span className="text-lg font-bold text-black-500">{slotLocation || "Location not specified"}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
               
               <div className="text-sm text-muted-foreground">
-                <p className="mb-2">What to expect:</p>
                 <ul className="text-left space-y-1">
                   <li>• Please arrive 10 minutes early</li>
                   <li>• Bring a valid ID</li>
@@ -398,6 +404,19 @@ export function ScheduleConfirmationSection({
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-primary" />
                       <span className="text-sm">{selectedTime}</span>
+                    </div>
+                  )}
+                  {slotLocation && (
+                    <div className="mt-3 pt-3 border-t border-primary/20">
+                      <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <span className="text-xs font-medium text-primary/80 block mb-1 uppercase tracking-wide">Interview Location</span>
+                            <span className="text-m font-semibold text-black">{slotLocation}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -476,7 +495,7 @@ export function ScheduleConfirmationSection({
                 <div className="space-y-2">
                   <Label htmlFor="selectedSong" className="text-sm font-medium">
                     Select One of the Required Songs *
-                  </Label>
+                  </Label>  
                   <Select
                     value={formData.selectedSong}
                     onValueChange={(value) => handleInputChange('selectedSong', value)}
@@ -492,13 +511,13 @@ export function ScheduleConfirmationSection({
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
-                    You will sing this song during your interview.
-                  </p>
+                
                 </div>
                 
                 {/* Additional Song Selection */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2"><p className="text-s text-muted-foreground mt-2 mb-2">
+                   ይህ በኢንተርቪው ቀን ከለይ ከመረጡተ ዝማሬ በተጨማሪ የሚዘምሩት መዝሙር ነው። 
+                  </p><div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="additionalSong" className="text-sm font-medium">
                       Additional Song Name *
@@ -526,10 +545,9 @@ export function ScheduleConfirmationSection({
                       required
                     />
                   </div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  This is your choice song that you will also sing during the interview.
-                </p>
+                </div></div>
+                
+                
               </div>
               
               <Button
