@@ -207,10 +207,12 @@ export function ScheduleConfirmationSection({
     const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours
     
     // Determine time of day for better readability
+    // Morning: 5:00 AM - 1:59 PM (05:00 - 13:59)
+    // Afternoon: 2:00 PM - 5:00 PM (14:00 - 17:00)
     let timeOfDay = ''
-    if (hours >= 5 && hours < 12) {
+    if (hours >= 5 && hours < 14) {
       timeOfDay = 'morning'
-    } else if (hours >= 12 && hours < 17) {
+    } else if (hours >= 14 && hours < 17) {
       timeOfDay = 'afternoon'
     } else if (hours >= 17 && hours < 21) {
       timeOfDay = 'evening'

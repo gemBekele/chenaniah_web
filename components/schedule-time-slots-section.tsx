@@ -108,28 +108,34 @@ export function ScheduleTimeSlotsSection({
   }
 
   // Classify time slots into morning and afternoon using period field
+  // Always verify period against time to ensure correctness (afternoon starts at 2:00 PM)
   const classifySlots = (slots: TimeSlot[]) => {
     const morning: TimeSlot[] = []
     const afternoon: TimeSlot[] = []
     
     slots.forEach(slot => {
-      // Use period field from database if available, otherwise fallback to time calculation
-      if (slot.period === 'morning') {
-        morning.push(slot)
-      } else if (slot.period === 'afternoon') {
-        afternoon.push(slot)
+      // Parse time to determine correct period
+      const match = slot.time.match(/(\d{1,2}):(\d{2})/)
+      if (match) {
+        const hours = parseInt(match[1], 10)
+        // Morning: 9:00 AM - 1:59 PM (09:00 - 13:59)
+        // Afternoon: 2:00 PM - 5:00 PM (14:00 - 17:00)
+        const correctPeriod = hours >= 9 && hours < 14 ? 'morning' : 
+                              hours >= 14 && hours <= 17 ? 'afternoon' : null
+        
+        // Use time-based calculation to ensure correctness
+        // This ensures slots are classified correctly even if database period is outdated
+        if (correctPeriod === 'morning') {
+          morning.push(slot)
+        } else if (correctPeriod === 'afternoon') {
+          afternoon.push(slot)
+        }
       } else {
-        // Fallback: calculate from time if period is not set
-        const match = slot.time.match(/(\d{1,2}):(\d{2})/)
-        if (match) {
-          const hours = parseInt(match[1], 10)
-          // Morning: 9:00 AM - 11:59 AM (09:00 - 11:59)
-          // Afternoon: 12:00 PM - 5:00 PM (12:00 - 17:00)
-          if (hours >= 9 && hours < 12) {
-            morning.push(slot)
-          } else if (hours >= 12 && hours <= 17) {
-            afternoon.push(slot)
-          }
+        // Fallback: use period field from database if time parsing fails
+        if (slot.period === 'morning') {
+          morning.push(slot)
+        } else if (slot.period === 'afternoon') {
+          afternoon.push(slot)
         }
       }
     })
@@ -165,7 +171,7 @@ export function ScheduleTimeSlotsSection({
               Choose Your Preferred Time
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Select a time slot that works best for you. Each interview session lasts approximately 30 minutes.
+              Select a time slot that works best for you.
             </p>
           </div>
           
