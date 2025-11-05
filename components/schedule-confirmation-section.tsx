@@ -46,6 +46,12 @@ export function ScheduleConfirmationSection({
     applicantName?: string
   }>({ verified: null, message: "" })
   const [slotLocation, setSlotLocation] = useState<string>("")
+  const [existingAppointment, setExistingAppointment] = useState<{
+    hasExisting: boolean
+    date?: string
+    time?: string
+  } | null>(null)
+  const [isCheckingAppointment, setIsCheckingAppointment] = useState(false)
   const successSectionRef = useRef<HTMLDivElement>(null)
   
   const handleInputChange = (field: string, value: string) => {
@@ -55,8 +61,45 @@ export function ScheduleConfirmationSection({
     }))
   }
   
+  const checkExistingAppointment = useCallback(async (phone: string) => {
+    setIsCheckingAppointment(true)
+    try {
+      const API_BASE_URL = getApiBaseUrl()
+      const response = await fetch(`${API_BASE_URL}/schedule/appointments/check`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        if (data.has_existing_appointment && data.appointments && data.appointments.length > 0) {
+          const latest = data.appointments[0]
+          setExistingAppointment({
+            hasExisting: true,
+            date: latest.scheduled_date,
+            time: latest.scheduled_time
+          })
+        } else {
+          setExistingAppointment({ hasExisting: false })
+        }
+      } else {
+        setExistingAppointment({ hasExisting: false })
+      }
+    } catch (error) {
+      console.error('Error checking existing appointment:', error)
+      setExistingAppointment({ hasExisting: false })
+    } finally {
+      setIsCheckingAppointment(false)
+    }
+  }, [])
+
   const verifyPhoneNumber = useCallback(async (phone: string) => {
     setIsVerifyingPhone(true)
+    setExistingAppointment(null) // Reset existing appointment check
     try {
       const API_BASE_URL = getApiBaseUrl()
       const response = await fetch(`${API_BASE_URL}/schedule/verify-applicant`, {
@@ -81,6 +124,8 @@ export function ScheduleConfirmationSection({
             ...prev,
             name: data.applicant_name || ""
           }))
+          // Check for existing appointments after successful verification
+          // await checkExistingAppointment(phone)
         } else {
           setPhoneVerificationStatus({
             verified: false,
@@ -102,12 +147,13 @@ export function ScheduleConfirmationSection({
     } finally {
       setIsVerifyingPhone(false)
     }
-  }, [])
+  }, [checkExistingAppointment])
   
   // Verify phone number when it changes (debounced)
   useEffect(() => {
     if (formData.phone.trim().length < 8) {
       setPhoneVerificationStatus({ verified: null, message: "" })
+      setExistingAppointment(null)
       return
     }
     
@@ -255,7 +301,17 @@ export function ScheduleConfirmationSection({
           if (onBooked) onBooked()
         }, 500)
       } else {
-        alert(`Failed to create appointment: ${data.error}`)
+        // If backend reports existing appointment, update state
+        if (data.error && data.error.includes('already have a scheduled')) {
+          if (data.existing_appointment) {
+            setExistingAppointment({
+              hasExisting: true,
+              date: data.existing_appointment.date,
+              time: data.existing_appointment.time
+            })
+          }
+        }
+        alert(`Failed to create appointment: ${data.error || 'Unknown error'}`)
         setIsSubmitting(false)
       }
     } catch (error) {
@@ -300,6 +356,7 @@ export function ScheduleConfirmationSection({
   const isFormValid = formData.name && formData.phone && selectedDate && selectedTime && 
                       phoneVerificationStatus.verified === true && formData.selectedSong && 
                       formData.additionalSong && formData.additionalSongSinger
+                      // && !existingAppointment?.hasExisting
   
   if (isSubmitted) {
     return (
@@ -462,6 +519,29 @@ export function ScheduleConfirmationSection({
                     }`}>
                       {phoneVerificationStatus.message}
                     </p>
+                  )}
+                  {existingAppointment?.hasExisting && (
+                    <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm font-semibold text-amber-800 mb-1">
+                        ⚠️ You already have a scheduled interview
+                      </p>
+                      <p className="text-xs text-amber-700">
+                        {existingAppointment.date && (
+                          <>
+                            Date: {new Date(existingAppointment.date).toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                            {existingAppointment.time && ` at ${formatTime(existingAppointment.time)}`}
+                          </>
+                        )}
+                      </p>
+                      <p className="text-xs text-amber-700 mt-1">
+                        You cannot schedule another appointment until your current one is completed or cancelled.
+                      </p>
+                    </div>
                   )}
                 </div>
                 

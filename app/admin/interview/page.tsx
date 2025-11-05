@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { AdminLayout } from "@/components/admin-layout"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import {
   Calendar,
   Clock,
@@ -14,7 +15,11 @@ import {
   User,
   Loader2,
   Music,
+  Shield,
+  ClipboardList,
+  Gavel,
 } from "lucide-react"
+import Link from "next/link"
 
 import { getApiBaseUrl } from "@/lib/utils"
 const API_BASE_URL = getApiBaseUrl()
@@ -31,6 +36,8 @@ interface InterviewAppointment {
   selected_song?: string
   additional_song?: string
   additional_song_singer?: string
+  coordinator_verified?: boolean
+  final_decision?: string | null
 }
 
 interface ScheduleStats {
@@ -193,6 +200,50 @@ export default function AdminAppointmentsPage() {
     <AdminLayout>
 
       <div className="container mx-auto px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Interview Management</h1>
+          <p className="text-muted-foreground mb-6">
+            Manage interview appointments, verifications, evaluations, and decisions.
+          </p>
+          
+          {/* Quick Links */}
+          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <Link href="/admin/interview/verify">
+              <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer border-primary/20 hover:border-primary/40">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-6 w-6 text-primary" />
+                  <div>
+                    <h3 className="font-semibold">Coordinator Verification</h3>
+                    <p className="text-xs text-muted-foreground">Verify applicants before evaluation</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+            <Link href="/admin/interview/evaluate">
+              <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer border-primary/20 hover:border-primary/40">
+                <div className="flex items-center gap-3">
+                  <ClipboardList className="h-6 w-6 text-primary" />
+                  <div>
+                    <h3 className="font-semibold">Interview Evaluation</h3>
+                    <p className="text-xs text-muted-foreground">Rate applicants on criteria (0-5)</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+            <Link href="/admin/interview/decisions">
+              <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer border-primary/20 hover:border-primary/40">
+                <div className="flex items-center gap-3">
+                  <Gavel className="h-6 w-6 text-primary" />
+                  <div>
+                    <h3 className="font-semibold">Final Decisions</h3>
+                    <p className="text-xs text-muted-foreground">Accept or reject applicants</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          </div> */}
+        </div>
+        
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6 mb-8">
           <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-gradient-to-br from-background to-muted/30 p-3 lg:p-6 border border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-muted/20">
             <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
@@ -286,7 +337,9 @@ export default function AdminAppointmentsPage() {
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Date & Time</th>
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Selected Song</th>
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Additional Song</th>
+                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Verified</th>
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Status</th>
+                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Decision</th>
                     <th className="text-right px-6 py-4 text-xs font-bold uppercase tracking-wide">Actions</th>
                   </tr>
                 </thead>
@@ -353,7 +406,40 @@ export default function AdminAppointmentsPage() {
                           )}
                         </div>
                       </td>
+                      <td className="px-6 py-4">
+                        {appointment.coordinator_verified ? (
+                          <Badge variant="outline" className="text-emerald-600 bg-emerald-50 border-emerald-200">
+                            <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                            Verified
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-amber-600 bg-amber-50 border-amber-200">
+                            Pending
+                          </Badge>
+                        )}
+                      </td>
                       <td className="px-6 py-4">{getStatusBadge(appointment.status)}</td>
+                      <td className="px-6 py-4">
+                        {appointment.final_decision ? (
+                          <Badge
+                            variant="outline"
+                            className={
+                              appointment.final_decision === "accepted"
+                                ? "text-emerald-600 bg-emerald-50 border-emerald-200"
+                                : "text-rose-600 bg-rose-50 border-rose-200"
+                            }
+                          >
+                            {appointment.final_decision === "accepted" ? (
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5 mr-1" />
+                            )}
+                            {appointment.final_decision.charAt(0).toUpperCase() + appointment.final_decision.slice(1)}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {appointment.status === "scheduled" && (
