@@ -26,9 +26,14 @@ export function AdminLayout({ children, onLogout }: AdminLayoutProps) {
     }
   }
 
-  const navItems = [
+  const navItems: Array<{
+    path: string
+    label: string
+    icon: any
+    matchPaths?: string[]
+  }> = [
     { path: '/admin/applications', label: 'Applications', icon: FileText },
-    { path: '/admin/interview', label: 'Interview', icon: Calendar },
+    { path: '/admin/interview', label: 'Interview', icon: Calendar, matchPaths: ['/admin/interview'] },
     { path: '/admin/time-slots', label: 'Time Slots', icon: Clock },
   ]
 
@@ -59,7 +64,7 @@ export function AdminLayout({ children, onLogout }: AdminLayoutProps) {
             <div className="flex items-center gap-4">
               {navItems.map((item) => {
                 const Icon = item.icon
-                const isActive = pathname === item.path
+                const isActive = pathname === item.path || (item.matchPaths && item.matchPaths.some(path => pathname.startsWith(path)))
                 return (
                   <Button
                     key={item.path}
