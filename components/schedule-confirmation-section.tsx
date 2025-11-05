@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +46,7 @@ export function ScheduleConfirmationSection({
     applicantName?: string
   }>({ verified: null, message: "" })
   const [slotLocation, setSlotLocation] = useState<string>("")
+  const successSectionRef = useRef<HTMLDivElement>(null)
   
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -163,6 +164,21 @@ export function ScheduleConfirmationSection({
     fetchSlotLocation()
   }, [selectedDate, selectedTime])
   
+  // Scroll to success message when submission is successful
+  useEffect(() => {
+    if (isSubmitted && successSectionRef.current) {
+      // Use a small delay to ensure the success section is rendered
+      const timer = setTimeout(() => {
+        successSectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        })
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isSubmitted])
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -252,7 +268,11 @@ export function ScheduleConfirmationSection({
   
   if (isSubmitted) {
     return (
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-background to-muted/20">
+      <section 
+        ref={successSectionRef}
+        className="py-16 sm:py-24 bg-gradient-to-br from-background to-muted/20"
+        id="appointment-success"
+      >
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center">
             <Card className="p-8 bg-background/50 backdrop-blur-sm border-border/50">
@@ -294,7 +314,7 @@ export function ScheduleConfirmationSection({
                 <ul className="text-left space-y-1">
                   <li>• Please arrive 10 minutes early</li>
                   <li>• Bring a valid ID</li>
-                  <li>• Prepare to discuss your musical background</li>
+                  <li>• Prepare to discuss your background</li>
                 </ul>
               </div>
             </Card>
