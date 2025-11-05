@@ -516,7 +516,7 @@ export function ScheduleConfirmationSection({
                 
                 {/* Additional Song Selection */}
                 <div className="space-y-2"><p className="text-s text-muted-foreground mt-2 mb-2">
-                   ይህ በኢንተርቪው ቀን ከለይ ከመረጡተ ዝማሬ በተጨማሪ የሚዘምሩት መዝሙር ነው። 
+                   ይህ በኢንተርቪው ቀን ከላይ ከመረጡት ዝማሬ በተጨማሪ የሚዘምሩት መዝሙር ነው። 
                   </p><div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="additionalSong" className="text-sm font-medium">
