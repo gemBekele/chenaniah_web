@@ -24,6 +24,7 @@ export function Header() {
     // { name: "Programs", href: "/programs" },
     { name: "Events", href: "/events" },
     { name: "Schedule", href: "/schedule" },
+    { name: "Result", href: "/result" },
     // { name: "Resources", href: "/resources" },
     { name: "Contact", href: "/contact" },
   ]
