@@ -520,7 +520,7 @@ export function ScheduleConfirmationSection({
                       {phoneVerificationStatus.message}
                     </p>
                   )}
-                  {existingAppointment?.hasExisting && (
+                  {/* {existingAppointment?.hasExisting && (
                     <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                       <p className="text-sm font-semibold text-amber-800 mb-1">
                         ⚠️ You already have a scheduled interview
@@ -542,7 +542,7 @@ export function ScheduleConfirmationSection({
                         You cannot schedule another appointment until your current one is completed or cancelled.
                       </p>
                     </div>
-                  )}
+                  )} */}
                 </div>
                 
                 <div className="space-y-2">
