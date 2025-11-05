@@ -387,13 +387,13 @@ export default function FinalDecisionsPage() {
                             <div key={judge} className="border rounded-lg p-4">
                               <h4 className="font-medium mb-2">{judge}</h4>
                               <div className="grid grid-cols-2 gap-2">
-                                {judgeEvaluations.map((eval) => (
-                                  <div key={eval.criteria_name} className="flex items-center justify-between">
+                                {judgeEvaluations.map((evaluation) => (
+                                  <div key={evaluation.criteria_name} className="flex items-center justify-between">
                                     <span className="text-xs text-muted-foreground">
-                                      {eval.criteria_name}
+                                      {evaluation.criteria_name}
                                     </span>
                                     <Badge variant="outline" className="text-xs">
-                                      {eval.rating}
+                                      {evaluation.rating}
                                     </Badge>
                                   </div>
                                 ))}
