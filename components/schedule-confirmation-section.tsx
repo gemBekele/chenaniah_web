@@ -167,15 +167,48 @@ export function ScheduleConfirmationSection({
   // Scroll to success message when submission is successful
   useEffect(() => {
     if (isSubmitted && successSectionRef.current) {
-      // Use a small delay to ensure the success section is rendered
-      const timer = setTimeout(() => {
-        successSectionRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start',
-          inline: 'nearest'
+      let scrollLocked = true
+      let targetScrollPosition: number | null = null
+      
+      // Lock scroll position temporarily
+      const lockScroll = () => {
+        if (scrollLocked && targetScrollPosition !== null) {
+          window.scrollTo({
+            top: targetScrollPosition,
+            behavior: 'auto' // Instant scroll to maintain position
+          })
+        }
+      }
+      
+      // Wait for DOM to update, then scroll
+      const scrollToSuccess = () => {
+        if (successSectionRef.current) {
+          const element = successSectionRef.current
+          const elementTop = element.getBoundingClientRect().top + window.pageYOffset
+          const offset = 20 // Small offset from top
+          targetScrollPosition = elementTop - offset
+          
+          // Scroll to the success message
+          window.scrollTo({
+            top: targetScrollPosition,
+            behavior: 'smooth'
+          })
+          
+          // Lock scroll for 1 second to prevent jumping
+          const scrollInterval = setInterval(lockScroll, 50)
+          setTimeout(() => {
+            scrollLocked = false
+            clearInterval(scrollInterval)
+          }, 1500)
+        }
+      }
+      
+      // Use multiple animation frames to ensure DOM is ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(scrollToSuccess, 300)
         })
-      }, 100)
-      return () => clearTimeout(timer)
+      })
     }
   }, [isSubmitted])
   
@@ -217,8 +250,10 @@ export function ScheduleConfirmationSection({
       
       if (data.success) {
         setIsSubmitted(true)
-        // Trigger parent to refresh slots
-        if (onBooked) onBooked()
+        // Delay the refresh to allow scroll to success message first
+        setTimeout(() => {
+          if (onBooked) onBooked()
+        }, 500)
       } else {
         alert(`Failed to create appointment: ${data.error}`)
         setIsSubmitting(false)
