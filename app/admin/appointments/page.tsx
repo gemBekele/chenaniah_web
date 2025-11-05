@@ -13,6 +13,7 @@ import {
   Phone,
   User,
   Loader2,
+  Music,
 } from "lucide-react"
 
 import { getApiBaseUrl } from "@/lib/utils"
@@ -27,6 +28,9 @@ interface InterviewAppointment {
   status: "scheduled" | "completed" | "cancelled" | "no_show"
   created_at: string
   updated_at?: string
+  selected_song?: string
+  additional_song?: string
+  additional_song_singer?: string
 }
 
 interface ScheduleStats {
@@ -280,6 +284,8 @@ export default function AdminAppointmentsPage() {
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Applicant</th>
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Phone</th>
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Date & Time</th>
+                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Selected Song</th>
+                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Additional Song</th>
                     <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Status</th>
                     <th className="text-right px-6 py-4 text-xs font-bold uppercase tracking-wide">Actions</th>
                   </tr>
@@ -316,6 +322,35 @@ export default function AdminAppointmentsPage() {
                             <Clock className="h-4 w-4 text-muted-foreground" />
                             <span className="text-foreground">{appointment.scheduled_time}</span>
                           </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          {appointment.selected_song ? (
+                            <div className="flex items-start gap-2 text-sm">
+                              <Music className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <p className="text-foreground text-xs">{appointment.selected_song}</p>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs">
+                          {appointment.additional_song ? (
+                            <div className="flex items-start gap-2 text-sm">
+                              <Music className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <div>
+                                <p className="text-foreground text-xs">{appointment.additional_song}</p>
+                                {appointment.additional_song_singer && (
+                                  <p className="text-xs text-muted-foreground">by {appointment.additional_song_singer}</p>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">{getStatusBadge(appointment.status)}</td>

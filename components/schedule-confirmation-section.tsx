@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CheckCircle, Calendar, Clock, MapPin, User, Phone } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CheckCircle, Calendar, Clock, MapPin, User, Phone, Music } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 
 interface ScheduleConfirmationSectionProps {
@@ -23,8 +24,18 @@ export function ScheduleConfirmationSection({
   
   const [formData, setFormData] = useState({
     name: "",
-    phone: ""
+    phone: "",
+    selectedSong: "",
+    additionalSong: "",
+    additionalSongSinger: ""
   })
+  
+  // Predefined songs that applicants must choose from
+  const predefinedSongs = [
+    "ደሙን ለእኔ አፍሱ (አዲሱ ወርቁ)",
+    "እውቀት ሳይኖረኝ (አብርሃም እና እያሱ)",
+    "መበርቻዬ (ተከስተ ጌትነት)"
+  ]
   
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -159,19 +170,31 @@ export function ScheduleConfirmationSection({
     try {
       // Call the API to create the appointment
       const API_BASE_URL = getApiBaseUrl()
+      const requestBody = {
+        applicant_name: formData.name,
+        applicant_email: "", // Not required, backend will handle
+        applicant_phone: formData.phone,
+        scheduled_date: selectedDate ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` : '',
+        scheduled_time: selectedTime,
+        notes: "", // Not required
+        selected_song: formData.selectedSong,
+        additional_song: formData.additionalSong,
+        additional_song_singer: formData.additionalSongSinger
+      }
+      
+      // Debug logging
+      console.log('Submitting appointment with song data:', {
+        selected_song: requestBody.selected_song,
+        additional_song: requestBody.additional_song,
+        additional_song_singer: requestBody.additional_song_singer
+      })
+      
       const response = await fetch(`${API_BASE_URL}/schedule/appointments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          applicant_name: formData.name,
-          applicant_email: "", // Not required, backend will handle
-          applicant_phone: formData.phone,
-          scheduled_date: selectedDate ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` : '',
-          scheduled_time: selectedTime,
-          notes: "" // Not required
-        })
+        body: JSON.stringify(requestBody)
       })
       
       const data = await response.json()
@@ -223,7 +246,9 @@ export function ScheduleConfirmationSection({
     return `${displayHours}:${minutes} ${period} ${timeOfDay}`
   }
   
-  const isFormValid = formData.name && formData.phone && selectedDate && selectedTime && phoneVerificationStatus.verified === true
+  const isFormValid = formData.name && formData.phone && selectedDate && selectedTime && 
+                      phoneVerificationStatus.verified === true && formData.selectedSong && 
+                      formData.additionalSong && formData.additionalSongSinger
   
   if (isSubmitted) {
     return (
@@ -385,6 +410,73 @@ export function ScheduleConfirmationSection({
                 </div>
               </div>
               
+              {/* Song Selection Section */}
+              <div className="space-y-6 border-t border-border/50 pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Music className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-semibold">Song Selection</h3>
+                </div>
+                
+                {/* Predefined Song Selection */}
+                <div className="space-y-2">
+                  <Label htmlFor="selectedSong" className="text-sm font-medium">
+                    Select One of the Required Songs *
+                  </Label>
+                  <Select
+                    value={formData.selectedSong}
+                    onValueChange={(value) => handleInputChange('selectedSong', value)}
+                  >
+                    <SelectTrigger id="selectedSong" className="w-full">
+                      <SelectValue placeholder="Choose a song from the list" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {predefinedSongs.map((song, index) => (
+                        <SelectItem key={index} value={song}>
+                          {song}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    You will sing this song during your interview.
+                  </p>
+                </div>
+                
+                {/* Additional Song Selection */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="additionalSong" className="text-sm font-medium">
+                      Additional Song Name *
+                    </Label>
+                    <Input
+                      id="additionalSong"
+                      type="text"
+                      placeholder="Enter song name"
+                      value={formData.additionalSong}
+                      onChange={(e) => handleInputChange('additionalSong', e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="additionalSongSinger" className="text-sm font-medium">
+                      Singer/Artist *
+                    </Label>
+                    <Input
+                      id="additionalSongSinger"
+                      type="text"
+                      placeholder="Enter singer/artist name"
+                      value={formData.additionalSongSinger}
+                      onChange={(e) => handleInputChange('additionalSongSinger', e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This is your choice song that you will also sing during the interview.
+                </p>
+              </div>
+              
               <Button
                 type="submit"
                 size="lg"
@@ -408,7 +500,7 @@ export function ScheduleConfirmationSection({
             {!isFormValid && (
               <div className="mt-4 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Please select a date and time, and fill in all required fields to proceed.
+                  Please select a date and time, verify your phone number, and fill in all required fields including song selections to proceed.
                 </p>
               </div>
             )}
