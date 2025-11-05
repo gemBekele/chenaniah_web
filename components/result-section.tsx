@@ -140,7 +140,7 @@ export function ResultSection() {
             <span className="block text-[#E5C985]">Result</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-3xl mx-auto text-pretty px-4">
-            Enter your phone number to check if you have been selected or rejected for our worship ministry program.
+            Enter your phone number to check if you have been selected for our worship ministry program.
           </p>
         </div>
       </section>
