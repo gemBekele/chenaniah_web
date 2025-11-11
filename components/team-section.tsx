@@ -16,7 +16,7 @@ export function TeamSection() {
     {
       name: "Zeritu Kebede",
       role: "Leader",
-      bio: "Singer, song writer, mother, disciple. Lives to love God and those he deid to save.",
+      bio: "Singer, song writer, mother, disciple.",
       image: "/assets/leaders/zeritu.jpg",
       specialties: ["Harp Performance", "Music Theory", "Vocal Training"],
     },

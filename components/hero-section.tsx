@@ -33,13 +33,12 @@ export function HeroSection() {
         </div> */}
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 text-balance">
-          Equipping Worship Leaders for
-          <span className="text-primary block mt-2">Musical Excellence</span>
+          Empowering worship leaders and musicians
+          <span className="text-primary block mt-2">to grow in faith and musical excellence.</span>
         </h1>
 
         <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto text-pretty px-4">
-          Join Chenaniah.org in our mission to train church musicians, singers, and worship leaders across Ethiopia and
-          beyond through biblical worship and musical excellence.
+          We are dedicated to raising a generation of church musicians, singers, and worship leaders, grounded in biblical worship and committed to musical excellence.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
