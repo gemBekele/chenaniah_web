@@ -37,7 +37,7 @@ export function HeroSection() {
           <span className="text-primary block mt-2">to grow in faith and musical excellence.</span>
         </h1>
 
-        <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto text-pretty px-4">
+        <p className="text-base sm:text-lg md:text-md text-white/90 mb-8 max-w-2xl mx-auto text-pretty px-4">
           We are dedicated to raising a generation of church musicians, singers, and worship leaders, grounded in biblical worship and committed to musical excellence.
         </p>
 
