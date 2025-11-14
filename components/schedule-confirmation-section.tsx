@@ -102,7 +102,8 @@ export function ScheduleConfirmationSection({
     setExistingAppointment(null) // Reset existing appointment check
     try {
       const API_BASE_URL = getApiBaseUrl()
-      const response = await fetch(`${API_BASE_URL}/schedule/verify-applicant`, {
+      // Use the applicant status endpoint which includes approval status
+      const response = await fetch(`${API_BASE_URL}/applicant/status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,18 +115,43 @@ export function ScheduleConfirmationSection({
       
       if (data.success) {
         if (data.is_applicant) {
-          setPhoneVerificationStatus({
-            verified: true,
-            message: `Phone verified! Welcome, ${data.applicant_name || 'applicant'}`,
-            applicantName: data.applicant_name
-          })
-          // Auto-fill name from backend
-          setFormData(prev => ({
-            ...prev,
-            name: data.applicant_name || ""
-          }))
-          // Check for existing appointments after successful verification
-          await checkExistingAppointment(phone)
+          // Check if the application is approved
+          const submissionStatus = data.submission_status?.toLowerCase()
+          const overallStatus = data.overall_status?.toLowerCase()
+          
+          // Only allow scheduling if status is approved (not pending, rejected, or accepted)
+          // Note: 'accepted' means they already went through interview, so they shouldn't schedule again
+          if (submissionStatus === 'approved' && overallStatus !== 'accepted' && overallStatus !== 'rejected') {
+            setPhoneVerificationStatus({
+              verified: true,
+              message: `Phone verified! Welcome, ${data.applicant_name || 'applicant'}`,
+              applicantName: data.applicant_name
+            })
+            // Auto-fill name from backend
+            setFormData(prev => ({
+              ...prev,
+              name: data.applicant_name || ""
+            }))
+            // Check for existing appointments after successful verification
+            await checkExistingAppointment(phone)
+          } else {
+            // Application not approved or in wrong status
+            let errorMessage = "This phone number is not registered as an applicant."
+            if (submissionStatus === 'pending') {
+              errorMessage = "Your application is still under review. Please wait for approval before scheduling an interview."
+            } else if (submissionStatus === 'rejected' || overallStatus === 'rejected') {
+              errorMessage = "Your application was not approved. You cannot schedule an interview at this time."
+            } else if (overallStatus === 'accepted') {
+              errorMessage = "You have already completed the interview process."
+            } else if (submissionStatus !== 'approved') {
+              errorMessage = "Your application must be approved before you can schedule an interview."
+            }
+            
+            setPhoneVerificationStatus({
+              verified: false,
+              message: errorMessage
+            })
+          }
         } else {
           setPhoneVerificationStatus({
             verified: false,
