@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { AdminLayout } from "@/components/admin-layout"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import {
   Calendar,
   Clock,
@@ -15,13 +15,20 @@ import {
   User,
   Loader2,
   Music,
-  Shield,
-  ClipboardList,
-  Gavel,
+  Search,
+  Filter,
+  MoreHorizontal
 } from "lucide-react"
-import Link from "next/link"
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { getApiBaseUrl } from "@/lib/utils"
+
+
 const API_BASE_URL = getApiBaseUrl()
 
 interface InterviewAppointment {
@@ -43,9 +50,9 @@ interface InterviewAppointment {
 interface ScheduleStats {
   total_appointments: number
   scheduled: number
-  completed: number
+  accepted: number
+  rejected: number
   cancelled: number
-  no_show: number
 }
 
 export default function AdminAppointmentsPage() {
@@ -54,11 +61,14 @@ export default function AdminAppointmentsPage() {
   const [scheduleStats, setScheduleStats] = useState<ScheduleStats>({
     total_appointments: 0,
     scheduled: 0,
-    completed: 0,
+    accepted: 0,
+    rejected: 0,
     cancelled: 0,
-    no_show: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
 
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
@@ -86,10 +96,15 @@ export default function AdminAppointmentsPage() {
     }
   }
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = async (search = "") => {
     setIsLoading(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/schedule/appointments`, {
+      const url = new URL(`${API_BASE_URL}/schedule/appointments`)
+      if (search) {
+        url.searchParams.append("search", search)
+      }
+      
+      const response = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${getToken()}` },
       })
       const data = await response.json()
@@ -127,43 +142,6 @@ export default function AdminAppointmentsPage() {
     }
   }
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, { color: string; icon: any; bg: string }> = {
-      scheduled: {
-        color: "text-blue-600",
-        icon: Clock,
-        bg: "bg-blue-50 border-blue-200",
-      },
-      completed: {
-        color: "text-emerald-600",
-        icon: CheckCircle,
-        bg: "bg-emerald-50 border-emerald-200",
-      },
-      cancelled: {
-        color: "text-amber-600",
-        icon: XCircle,
-        bg: "bg-amber-50 border-amber-200",
-      },
-      no_show: {
-        color: "text-rose-600",
-        icon: XCircle,
-        bg: "bg-rose-50 border-rose-200",
-      },
-    }
-    const variant = variants[status] || variants.scheduled
-    const Icon = variant.icon
-
-    return (
-      <Badge
-        variant="outline"
-        className={`${variant.color} ${variant.bg} border flex items-center gap-1.5 px-3 py-1.5 font-medium`}
-      >
-        <Icon className="h-3.5 w-3.5" />
-        {status.charAt(0).toUpperCase() + status.slice(1).replace("_", " ")}
-      </Badge>
-    )
-  }
-
   const formatDateTime = (date: string) => {
     const dateObj = new Date(date)
     return dateObj.toLocaleDateString("en-US", {
@@ -173,6 +151,30 @@ export default function AdminAppointmentsPage() {
     })
   }
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Filter appointments
+  const filteredAppointments = appointments.filter(app => {
+    const matchesSearch = 
+      app.applicant_name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      app.applicant_phone.includes(debouncedSearch)
+    
+    if (!matchesSearch) return false
+
+    if (statusFilter === "all") return true
+    if (statusFilter === "scheduled") return app.status === "scheduled"
+    if (statusFilter === "accepted") return app.final_decision === "accepted"
+    if (statusFilter === "rejected") return app.final_decision === "rejected"
+    
+    return true
+  })
+
   useEffect(() => {
     const token = getToken()
     if (!token) {
@@ -180,13 +182,13 @@ export default function AdminAppointmentsPage() {
       return
     }
     fetchScheduleStats()
-    fetchAppointments()
-  }, [router])
+    fetchAppointments(debouncedSearch)
+  }, [router, debouncedSearch])
 
-  if (isLoading) {
+  if (isLoading && !appointments.length) {
     return (
       <AdminLayout>
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center">
+        <div className="h-full flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-muted-foreground">Loading...</p>
@@ -198,279 +200,213 @@ export default function AdminAppointmentsPage() {
 
   return (
     <AdminLayout>
-
-      <div className="container mx-auto px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Interview Management</h1>
-          <p className="text-muted-foreground mb-6">
-            Manage interview appointments, verifications, evaluations, and decisions.
-          </p>
-          
-          {/* Quick Links */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Link href="/admin/interview/verify">
-              <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer border-primary/20 hover:border-primary/40">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-6 w-6 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">Coordinator Verification</h3>
-                    <p className="text-xs text-muted-foreground">Verify applicants before evaluation</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-            <Link href="/admin/interview/evaluate">
-              <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer border-primary/20 hover:border-primary/40">
-                <div className="flex items-center gap-3">
-                  <ClipboardList className="h-6 w-6 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">Interview Evaluation</h3>
-                    <p className="text-xs text-muted-foreground">Rate applicants on criteria (0-5)</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-            <Link href="/admin/interview/decisions">
-              <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer border-primary/20 hover:border-primary/40">
-                <div className="flex items-center gap-3">
-                  <Gavel className="h-6 w-6 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">Final Decisions</h3>
-                    <p className="text-xs text-muted-foreground">Accept or reject applicants</p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          </div> */}
+      <div className="container mx-auto px-6 lg:px-12 py-10 max-w-7xl">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Interview Management
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Manage interview appointments and track results.
+            </p>
+          </div>
         </div>
         
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-6 mb-8">
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-gradient-to-br from-background to-muted/30 p-3 lg:p-6 border border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-muted/20">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
-            <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">
-                Total
-              </p>
-              <p className="text-2xl lg:text-4xl font-bold text-foreground mb-2 lg:mb-3">
-                {scheduleStats.total_appointments}
-              </p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-muted/50 group-hover:bg-muted transition-colors">
-                <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-gray-500">Total</p>
+              <div className="p-2 bg-primary/10 rounded-full">
+                <Calendar className="h-4 w-4 text-primary" />
               </div>
             </div>
+            <p className="text-3xl font-bold tracking-tight text-gray-900">{scheduleStats.total_appointments}</p>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-blue-50 p-3 lg:p-6 border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-blue-500/20 to-transparent rounded-full blur-2xl"></div>
-            <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">
-                Scheduled
-              </p>
-              <p className="text-2xl lg:text-4xl font-bold text-blue-600 dark:text-blue-500 mb-2 lg:mb-3">
-                {scheduleStats.scheduled}
-              </p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                <Clock className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600 dark:text-blue-500" />
+          <div className="bg-blue-50/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-blue-100/50">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-blue-600">Scheduled</p>
+              <div className="p-2 bg-blue-100 rounded-full">
+                <Clock className="h-4 w-4 text-blue-600" />
               </div>
             </div>
+            <p className="text-3xl font-bold text-blue-700">{scheduleStats.scheduled}</p>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-emerald-50 p-3 lg:p-6 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-full blur-2xl"></div>
-            <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">
-                Completed
-              </p>
-              <p className="text-2xl lg:text-4xl font-bold text-emerald-600 dark:text-emerald-500 mb-2 lg:mb-3">
-                {scheduleStats.completed}
-              </p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
-                <CheckCircle className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 dark:text-emerald-500" />
+          <div className="bg-emerald-50/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-emerald-100/50">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-emerald-600">Accepted</p>
+              <div className="p-2 bg-emerald-100 rounded-full">
+                <CheckCircle className="h-4 w-4 text-emerald-600" />
               </div>
             </div>
+            <p className="text-3xl font-bold text-emerald-700">{scheduleStats.accepted}</p>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-amber-50 p-3 lg:p-6 border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/10">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-2xl"></div>
-            <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">
-                Cancelled
-              </p>
-              <p className="text-2xl lg:text-4xl font-bold text-amber-600 dark:text-amber-500 mb-2 lg:mb-3">
-                {scheduleStats.cancelled}
-              </p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
-                <XCircle className="h-4 w-4 lg:h-5 lg:w-5 text-amber-600 dark:text-amber-500" />
+          <div className="bg-rose-50/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-rose-100/50">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-medium text-rose-600">Rejected</p>
+              <div className="p-2 bg-rose-100 rounded-full">
+                <XCircle className="h-4 w-4 text-rose-600" />
               </div>
             </div>
-          </div>
-
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-rose-50 p-3 lg:p-6 border border-rose-500/20 hover:border-rose-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/10">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-rose-500/20 to-transparent rounded-full blur-2xl"></div>
-            <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">
-                No Show
-              </p>
-              <p className="text-2xl lg:text-4xl font-bold text-rose-600 dark:text-rose-500 mb-2 lg:mb-3">
-                {scheduleStats.no_show}
-              </p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-rose-500/10 group-hover:bg-rose-500/20 transition-colors">
-                <XCircle className="h-4 w-4 lg:h-5 lg:w-5 text-rose-600 dark:text-rose-500" />
-              </div>
-            </div>
+            <p className="text-3xl font-bold text-rose-700">{scheduleStats.rejected}</p>
           </div>
         </div>
 
-        <div className="rounded-2xl bg-gradient-to-br from-background to-muted/20 border border-border/50 overflow-hidden">
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="relative flex-1 md:max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by name or phone..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-gray-300 transition-all duration-200"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px] bg-white border-gray-200 text-gray-900">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="Filter by status" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Applications</SelectItem>
+                <SelectItem value="scheduled">Scheduled</SelectItem>
+                <SelectItem value="accepted">Accepted</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           {appointments.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No appointments scheduled yet</p>
+            <div className="text-center py-20">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/30 mb-6">
+                <Search className="h-8 w-8 text-muted-foreground/50" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">No appointments found</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto">
+                {searchQuery ? "We couldn't find any appointments matching your search." : "There are no appointments scheduled at the moment."}
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-muted/30 border-b border-border/50">
-                  <tr>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Applicant</th>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Phone</th>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Date & Time</th>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Selected Song</th>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Additional Song</th>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Verified</th>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Status</th>
-                    <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wide">Decision</th>
-                    <th className="text-right px-6 py-4 text-xs font-bold uppercase tracking-wide">Actions</th>
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Applicant</th>
+                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Contact</th>
+                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Schedule</th>
+                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Songs</th>
+                    <th className="text-right px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/30">
+                <tbody className="divide-y divide-gray-100">
                   {appointments.map((appointment) => (
-                    <tr key={appointment.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-                            <User className="h-5 w-5 text-primary" />
+                    <tr key={appointment.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-bold text-lg shadow-sm group-hover:scale-105 transition-transform">
+                            {appointment.applicant_name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground">{appointment.applicant_name}</p>
-                            <p className="text-xs text-muted-foreground">ID: {appointment.id}</p>
+                            <p className="font-semibold text-foreground text-base">{appointment.applicant_name}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">ID: #{appointment.id}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-foreground">{appointment.applicant_phone}</span>
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="p-2 rounded-lg bg-muted/30">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <span className="text-foreground font-medium">{appointment.applicant_phone}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
+                      <td className="px-8 py-5">
+                        <div className="space-y-1.5">
                           <div className="flex items-center gap-2 text-sm">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-foreground">
+                            <span className="text-foreground font-medium">
                               {formatDateTime(appointment.scheduled_date)}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-foreground">{appointment.scheduled_time}</span>
+                            <span className="text-muted-foreground">{appointment.scheduled_time}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="max-w-xs">
-                          {appointment.selected_song ? (
-                            <div className="flex items-start gap-2 text-sm">
-                              <Music className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                              <p className="text-foreground text-xs">{appointment.selected_song}</p>
+                      <td className="px-8 py-5">
+                        <div className="max-w-xs space-y-2">
+                          {appointment.selected_song && (
+                            <div className="flex items-start gap-2 text-sm group/song">
+                              <Music className="h-4 w-4 text-primary/70 mt-0.5 flex-shrink-0 group-hover/song:text-primary transition-colors" />
+                              <span className="text-sm font-medium">{appointment.selected_song}</span>
                             </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="max-w-xs">
-                          {appointment.additional_song ? (
-                            <div className="flex items-start gap-2 text-sm">
-                              <Music className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div>
-                                <p className="text-foreground text-xs">{appointment.additional_song}</p>
+                          {appointment.additional_song && (
+                            <div className="flex items-start gap-2 text-sm group/song">
+                              <Music className="h-4 w-4 text-muted-foreground/70 mt-0.5 flex-shrink-0 group-hover/song:text-muted-foreground transition-colors" />
+                              <div className="flex flex-col">
+                                <span className="text-sm text-muted-foreground">{appointment.additional_song}</span>
                                 {appointment.additional_song_singer && (
-                                  <p className="text-xs text-muted-foreground">by {appointment.additional_song_singer}</p>
+                                  <span className="text-xs text-muted-foreground/60">by {appointment.additional_song_singer}</span>
                                 )}
                               </div>
                             </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                          {!appointment.selected_song && !appointment.additional_song && (
+                            <span className="text-sm text-muted-foreground/50 italic">No songs selected</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        {appointment.coordinator_verified ? (
-                          <Badge variant="outline" className="text-emerald-600 bg-emerald-50 border-emerald-200">
-                            <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                            Verified
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-amber-600 bg-amber-50 border-amber-200">
-                            Pending
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">{getStatusBadge(appointment.status)}</td>
-                      <td className="px-6 py-4">
-                        {appointment.final_decision ? (
-                          <Badge
-                            variant="outline"
-                            className={
-                              appointment.final_decision === "accepted"
-                                ? "text-emerald-600 bg-emerald-50 border-emerald-200"
-                                : "text-rose-600 bg-rose-50 border-rose-200"
-                            }
-                          >
-                            {appointment.final_decision === "accepted" ? (
-                              <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                            ) : (
-                              <XCircle className="h-3.5 w-3.5 mr-1" />
-                            )}
-                            {appointment.final_decision.charAt(0).toUpperCase() + appointment.final_decision.slice(1)}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {appointment.status === "scheduled" && (
+                      <td className="px-8 py-5 text-right">
+                        <div className="flex items-center justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
+                          {appointment.status === "scheduled" ? (
                             <>
                               <Button
                                 size="sm"
                                 onClick={() => updateAppointmentStatus(appointment.id, "completed")}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                                className="bg-emerald-600/90 hover:bg-emerald-600 text-white shadow-sm hover:shadow-emerald-500/20 h-9 px-4 rounded-lg transition-all"
                               >
-                                <CheckCircle className="h-4 w-4 mr-1" />
+                                <CheckCircle className="h-4 w-4 mr-2" />
                                 Accept
                               </Button>
                               <Button
                                 size="sm"
-                                variant="outline"
+                                variant="ghost"
                                 onClick={() => updateAppointmentStatus(appointment.id, "no_show")}
-                                className="border-rose-500 text-rose-600 hover:bg-rose-50"
+                                className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-9 px-4 rounded-lg"
                               >
-                                <XCircle className="h-4 w-4 mr-1" />
+                                <XCircle className="h-4 w-4 mr-2" />
                                 Reject
                               </Button>
                             </>
-                          )}
-                          {appointment.status === "completed" && (
-                            <Badge variant="outline" className="text-emerald-600 bg-emerald-50 border-emerald-200">
-                              Accepted
-                            </Badge>
-                          )}
-                          {appointment.status === "no_show" && (
-                            <Badge variant="outline" className="text-rose-600 bg-rose-50 border-rose-200">
-                              Rejected
+                          ) : (
+                            <Badge 
+                              variant="secondary" 
+                              className={
+                                appointment.status === "completed" 
+                                  ? "bg-emerald-100/50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-4 py-1.5 rounded-lg font-medium" 
+                                  : "bg-rose-100/50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 px-4 py-1.5 rounded-lg font-medium"
+                              }
+                            >
+                              {appointment.status === "completed" ? (
+                                <span className="flex items-center gap-1.5">
+                                  <CheckCircle className="h-3.5 w-3.5" />
+                                  Accepted
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1.5">
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  Rejected
+                                </span>
+                              )}
                             </Badge>
                           )}
                         </div>
