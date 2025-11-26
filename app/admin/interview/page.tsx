@@ -200,76 +200,77 @@ export default function AdminAppointmentsPage() {
 
   return (
     <AdminLayout>
-      <div className="container mx-auto px-6 lg:px-12 py-10 max-w-7xl">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Interview Management
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Manage interview appointments and track results.
-            </p>
-          </div>
-        </div>
-        
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-medium text-gray-500">Total</p>
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Calendar className="h-4 w-4 text-primary" />
-              </div>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="container mx-auto max-w-7xl">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight mb-2 text-[#1f2d3d]">
+                Interview Management
+              </h1>
+              <p className="text-gray-500">
+                Manage interview appointments and track results.
+              </p>
             </div>
-            <p className="text-3xl font-bold tracking-tight text-gray-900">{scheduleStats.total_appointments}</p>
+          </div>
+          
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-medium text-gray-500">Total</p>
+                <div className="p-2 bg-gray-50 rounded-lg">
+                  <Calendar className="h-4 w-4 text-[#1f2d3d]" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold tracking-tight text-[#1f2d3d]">{scheduleStats.total_appointments}</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-medium text-blue-600">Scheduled</p>
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-blue-700">{scheduleStats.scheduled}</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-medium text-emerald-600">Accepted</p>
+                <div className="p-2 bg-emerald-50 rounded-lg">
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-emerald-700">{scheduleStats.accepted}</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm font-medium text-rose-600">Rejected</p>
+                <div className="p-2 bg-rose-50 rounded-lg">
+                  <XCircle className="h-4 w-4 text-rose-600" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-rose-700">{scheduleStats.rejected}</p>
+            </div>
           </div>
 
-          <div className="bg-blue-50/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-blue-100/50">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-medium text-blue-600">Scheduled</p>
-              <div className="p-2 bg-blue-100 rounded-full">
-                <Clock className="h-4 w-4 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-blue-700">{scheduleStats.scheduled}</p>
-          </div>
-
-          <div className="bg-emerald-50/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-emerald-100/50">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-medium text-emerald-600">Accepted</p>
-              <div className="p-2 bg-emerald-100 rounded-full">
-                <CheckCircle className="h-4 w-4 text-emerald-600" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-emerald-700">{scheduleStats.accepted}</p>
-          </div>
-
-          <div className="bg-rose-50/50 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-rose-100/50">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-medium text-rose-600">Rejected</p>
-              <div className="p-2 bg-rose-100 rounded-full">
-                <XCircle className="h-4 w-4 text-rose-600" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-rose-700">{scheduleStats.rejected}</p>
-          </div>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          {/* Search and Filter */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1 md:max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search by name or phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-gray-300 transition-all duration-200"
+                className="pl-10 bg-white border-gray-200 text-[#1f2d3d] placeholder:text-gray-400 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px] bg-white border-gray-200 text-gray-900">
+              <SelectTrigger className="w-[180px] bg-white border-gray-200 text-[#1f2d3d] focus:ring-[#e8cb85]/20">
                 <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
+                  <Filter className="h-4 w-4 text-gray-500" />
                   <SelectValue placeholder="Filter by status" />
                 </div>
               </SelectTrigger>
@@ -282,141 +283,142 @@ export default function AdminAppointmentsPage() {
             </Select>
           </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-          {appointments.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted/30 mb-6">
-                <Search className="h-8 w-8 text-muted-foreground/50" />
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+            {appointments.length === 0 ? (
+              <div className="text-center py-20 bg-gray-50">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-6">
+                  <Search className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2 text-[#1f2d3d]">No appointments found</h3>
+                <p className="text-gray-500 max-w-sm mx-auto">
+                  {searchQuery ? "We couldn't find any appointments matching your search." : "There are no appointments scheduled at the moment."}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold mb-2">No appointments found</h3>
-              <p className="text-muted-foreground max-w-sm mx-auto">
-                {searchQuery ? "We couldn't find any appointments matching your search." : "There are no appointments scheduled at the moment."}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Applicant</th>
-                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Contact</th>
-                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Schedule</th>
-                    <th className="text-left px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Songs</th>
-                    <th className="text-right px-8 py-6 text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {appointments.map((appointment) => (
-                    <tr key={appointment.id} className="hover:bg-gray-50/50 transition-colors group">
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 text-primary font-bold text-lg shadow-sm group-hover:scale-105 transition-transform">
-                            {appointment.applicant_name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground text-base">{appointment.applicant_name}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">ID: #{appointment.id}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="p-2 rounded-lg bg-muted/30">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                          <span className="text-foreground font-medium">{appointment.applicant_phone}</span>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-foreground font-medium">
-                              {formatDateTime(appointment.scheduled_date)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">{appointment.scheduled_time}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5">
-                        <div className="max-w-xs space-y-2">
-                          {appointment.selected_song && (
-                            <div className="flex items-start gap-2 text-sm group/song">
-                              <Music className="h-4 w-4 text-primary/70 mt-0.5 flex-shrink-0 group-hover/song:text-primary transition-colors" />
-                              <span className="text-sm font-medium">{appointment.selected_song}</span>
-                            </div>
-                          )}
-                          {appointment.additional_song && (
-                            <div className="flex items-start gap-2 text-sm group/song">
-                              <Music className="h-4 w-4 text-muted-foreground/70 mt-0.5 flex-shrink-0 group-hover/song:text-muted-foreground transition-colors" />
-                              <div className="flex flex-col">
-                                <span className="text-sm text-muted-foreground">{appointment.additional_song}</span>
-                                {appointment.additional_song_singer && (
-                                  <span className="text-xs text-muted-foreground/60">by {appointment.additional_song_singer}</span>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {!appointment.selected_song && !appointment.additional_song && (
-                            <span className="text-sm text-muted-foreground/50 italic">No songs selected</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-8 py-5 text-right">
-                        <div className="flex items-center justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
-                          {appointment.status === "scheduled" ? (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => updateAppointmentStatus(appointment.id, "completed")}
-                                className="bg-emerald-600/90 hover:bg-emerald-600 text-white shadow-sm hover:shadow-emerald-500/20 h-9 px-4 rounded-lg transition-all"
-                              >
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Accept
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => updateAppointmentStatus(appointment.id, "no_show")}
-                                className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-9 px-4 rounded-lg"
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Reject
-                              </Button>
-                            </>
-                          ) : (
-                            <Badge 
-                              variant="secondary" 
-                              className={
-                                appointment.status === "completed" 
-                                  ? "bg-emerald-100/50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-4 py-1.5 rounded-lg font-medium" 
-                                  : "bg-rose-100/50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 px-4 py-1.5 rounded-lg font-medium"
-                              }
-                            >
-                              {appointment.status === "completed" ? (
-                                <span className="flex items-center gap-1.5">
-                                  <CheckCircle className="h-3.5 w-3.5" />
-                                  Accepted
-                                </span>
-                              ) : (
-                                <span className="flex items-center gap-1.5">
-                                  <XCircle className="h-3.5 w-3.5" />
-                                  Rejected
-                                </span>
-                              )}
-                            </Badge>
-                          )}
-                        </div>
-                      </td>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50">
+                      <th className="text-left px-8 py-4 text-xs font-medium uppercase tracking-wider text-gray-500">Applicant</th>
+                      <th className="text-left px-8 py-4 text-xs font-medium uppercase tracking-wider text-gray-500">Contact</th>
+                      <th className="text-left px-8 py-4 text-xs font-medium uppercase tracking-wider text-gray-500">Schedule</th>
+                      <th className="text-left px-8 py-4 text-xs font-medium uppercase tracking-wider text-gray-500">Songs</th>
+                      <th className="text-right px-8 py-4 text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {appointments.map((appointment) => (
+                      <tr key={appointment.id} className="hover:bg-gray-50 transition-colors group">
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#1f2d3d]/10 text-[#1f2d3d] font-bold text-sm">
+                              {appointment.applicant_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-medium text-[#1f2d3d] text-base">{appointment.applicant_name}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">ID: #{appointment.id}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-3 text-sm">
+                            <div className="p-1.5 rounded-md bg-gray-50">
+                              <Phone className="h-3.5 w-3.5 text-gray-500" />
+                            </div>
+                            <span className="text-gray-600 font-medium">{appointment.applicant_phone}</span>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                              <span className="text-[#1f2d3d] font-medium">
+                                {formatDateTime(appointment.scheduled_date)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <Clock className="h-3.5 w-3.5 text-gray-400" />
+                              <span className="text-gray-500">{appointment.scheduled_time}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                          <div className="max-w-xs space-y-2">
+                            {appointment.selected_song && (
+                              <div className="flex items-start gap-2 text-sm group/song">
+                                <Music className="h-3.5 w-3.5 text-[#e8cb85] mt-0.5 flex-shrink-0" />
+                                <span className="text-sm font-medium text-gray-700">{appointment.selected_song}</span>
+                              </div>
+                            )}
+                            {appointment.additional_song && (
+                              <div className="flex items-start gap-2 text-sm group/song">
+                                <Music className="h-3.5 w-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
+                                <div className="flex flex-col">
+                                  <span className="text-sm text-gray-600">{appointment.additional_song}</span>
+                                  {appointment.additional_song_singer && (
+                                    <span className="text-xs text-gray-400">by {appointment.additional_song_singer}</span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {!appointment.selected_song && !appointment.additional_song && (
+                              <span className="text-sm text-gray-400 italic">No songs selected</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {appointment.status === "scheduled" ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => updateAppointmentStatus(appointment.id, "completed")}
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm h-8 px-3 rounded-md transition-all"
+                                >
+                                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                                  Accept
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => updateAppointmentStatus(appointment.id, "no_show")}
+                                  className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 h-8 px-3 rounded-md border border-transparent hover:border-rose-100"
+                                >
+                                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                                  Reject
+                                </Button>
+                              </>
+                            ) : (
+                              <Badge 
+                                variant="secondary" 
+                                className={
+                                  appointment.status === "completed" 
+                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-md font-medium" 
+                                    : "bg-rose-50 text-rose-700 border border-rose-100 px-3 py-1 rounded-md font-medium"
+                                }
+                              >
+                                {appointment.status === "completed" ? (
+                                  <span className="flex items-center gap-1.5">
+                                    <CheckCircle className="h-3 w-3" />
+                                    Accepted
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center gap-1.5">
+                                    <XCircle className="h-3 w-3" />
+                                    Rejected
+                                  </span>
+                                )}
+                              </Badge>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AdminLayout>

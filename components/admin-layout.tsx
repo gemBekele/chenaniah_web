@@ -11,7 +11,7 @@ export function AdminLayout({ children, onLogout }: AdminLayoutProps) {
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar onLogout={onLogout} />
-      <main className="flex-1 overflow-y-auto h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <main className="flex-1 overflow-y-auto h-screen bg-gray-50">
         {children}
       </main>
     </div>

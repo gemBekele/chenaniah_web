@@ -20,7 +20,7 @@ export function getApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
     // Only use localhost if explicitly running on localhost
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5001/api'
+      return 'http://localhost:5000/api'
     }
     // Default to production API for all other cases
     return 'https://chenaniah.org/api'
@@ -30,7 +30,7 @@ export function getApiBaseUrl(): string {
   // Only use localhost if explicitly in development mode AND on localhost
   if (process.env.NODE_ENV === 'development' && process.env.VERCEL !== '1') {
     // Only use localhost in true local development
-    return 'http://localhost:5001/api'
+    return 'http://localhost:5000/api'
   }
   
   // Default fallback: production API
