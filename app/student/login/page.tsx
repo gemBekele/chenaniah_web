@@ -210,7 +210,7 @@ export default function StudentLoginPage() {
 
           <div className="text-center">
             <Link 
-              href="/register" 
+              href="/choir/signup" 
               className="inline-flex items-center justify-center w-full h-12 rounded-xl border border-border/60 bg-background hover:bg-muted/30 text-foreground font-medium transition-all duration-200 hover:border-primary/30"
             >
               Register as Student
