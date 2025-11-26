@@ -234,9 +234,9 @@ export default function StudentRegisterPage() {
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-background overflow-y-auto">
           <div className="w-full max-w-[520px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 my-auto">
             <div className="text-center lg:text-left">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground">Verify Eligibility</h2>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">Phone Verification</h2>
               <p className="mt-2 text-muted-foreground">
-                Enter your phone number to check if you're eligible to register
+                Provide your phone number to continue
               </p>
             </div>
 
@@ -328,7 +328,7 @@ export default function StudentRegisterPage() {
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Check Eligibility <ArrowRight className="h-4 w-4" />
+                    Continue <ArrowRight className="h-4 w-4" />
                   </span>
                 )}
               </Button>

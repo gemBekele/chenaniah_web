@@ -74,7 +74,7 @@ After deployment, test these flows:
 
 ### 1. Registration Flow
 ```
-1. Visit https://chenaniah.org/register
+1. Visit https://chenaniah.org/choir/signup
 2. Enter a phone number that has an accepted interview
 3. Fill in the form (including Gender dropdown)
 4. Submit registration

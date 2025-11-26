@@ -191,7 +191,7 @@ export default function StudentDashboardPage() {
             <div className="hidden md:flex items-center gap-3 pl-4 border-l border-gray-200">
               <div className="text-right">
                 <p className="text-sm font-medium leading-none text-[#1f2d3d]">{user.username}</p>
-                <p className="text-xs text-gray-500 mt-1">Student</p>
+                <p className="text-xs text-gray-500 mt-1">Choir Portal</p>
               </div>
               <div className="w-9 h-9 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-medium">
                 {user.username.charAt(0).toUpperCase()}
@@ -236,7 +236,7 @@ export default function StudentDashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium leading-none text-[#1f2d3d]">{user.username}</p>
-                  <p className="text-xs text-gray-500 mt-1">Student</p>
+                  <p className="text-xs text-gray-500 mt-1">Choir Portal</p>
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-rose-600 hover:bg-rose-50 hover:text-rose-700">

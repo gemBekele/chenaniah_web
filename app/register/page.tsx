@@ -272,12 +272,12 @@ export default function StudentRegisterPage() {
             />
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            {step === 'verify' ? 'Check Eligibility' : 
+            {step === 'verify' ? 'Phone Verification' : 
              step === 'personal' ? 'Personal Details' : 
              'Account Security'}
           </h2>
           <p className="mt-2 text-muted-foreground">
-            {step === 'verify' ? 'Enter your phone number to start' :
+            {step === 'verify' ? 'Provide your phone number to continue' :
              step === 'personal' ? 'Tell us about yourself' :
              'Secure your account'}
           </p>
@@ -375,7 +375,7 @@ export default function StudentRegisterPage() {
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  Check Eligibility <ArrowRight className="h-4 w-4" />
+                  Continue <ArrowRight className="h-4 w-4" />
                 </span>
               )}
             </Button>
