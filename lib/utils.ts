@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Get the API base URL for the current environment
- * Default: https://chenaniah.org/api
+ * Default: https://chenaniah.org/api/v2
  * Development: Uses NEXT_PUBLIC_API_URL or localhost only if explicitly set
  */
 export function getApiBaseUrl(): string {
@@ -20,19 +20,19 @@ export function getApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
     // Only use localhost if explicitly running on localhost
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:5000/api'
+      return 'http://localhost:5001/api'
     }
-    // Default to production API for all other cases
-    return 'https://chenaniah.org/api'
+    // Default to production API v2 for all other cases
+    return 'https://chenaniah.org/api/v2/api'
   }
   
-  // Server-side: default to production API
+  // Server-side: default to production API v2
   // Only use localhost if explicitly in development mode AND on localhost
   if (process.env.NODE_ENV === 'development' && process.env.VERCEL !== '1') {
     // Only use localhost in true local development
-    return 'http://localhost:5000/api'
+    return 'http://localhost:5001/api'
   }
   
-  // Default fallback: production API
-  return 'https://chenaniah.org/api'
+  // Default fallback: production API v2
+  return 'https://chenaniah.org/api/v2/api'
 }
