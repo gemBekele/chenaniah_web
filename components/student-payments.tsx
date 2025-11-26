@@ -367,6 +367,7 @@ export default function StudentPayments({ user }: StudentPaymentsProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => {
+                          if (!payment.depositSlipPath) return
                           const url = `${API_BASE_URL}/${payment.depositSlipPath}`
                           if (payment.depositSlipPath.toLowerCase().endsWith('.pdf')) {
                             setPdfViewer({ url, title: `Deposit Slip - ${payment.month}` })

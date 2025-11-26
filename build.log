@@ -1,0 +1,120 @@
+
+> my-v0-project@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.25
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./app/admin/payments/page.tsx:383:41
+Type error: 'payment.depositSlipPath' is possibly 'undefined'.
+
+[0m [90m 381 |[39m                                   onClick[33m=[39m{() [33m=>[39m {[0m
+[0m [90m 382 |[39m                                     [36mconst[39m url [33m=[39m [32m`${API_BASE_URL}/${payment.depositSlipPath}`[39m[0m
+[0m[31m[1m>[22m[39m[90m 383 |[39m                                     [36mif[39m (payment[33m.[39mdepositSlipPath[33m.[39mtoLowerCase()[33m.[39mendsWith([32m'.pdf'[39m)) {[0m
+[0m [90m     |[39m                                         [31m[1m^[22m[39m[0m
+[0m [90m 384 |[39m                                       setPdfViewer({ url[33m,[39m title[33m:[39m [32m`Deposit Slip - ${payment.student.fullNameEnglish || payment.student.username} - ${payment.month}`[39m })[0m
+[0m [90m 385 |[39m                                     } [36melse[39m {[0m
+[0m [90m 386 |[39m                                       window[33m.[39mopen(url[33m,[39m [32m'_blank'[39m)[0m
+Next.js build worker exited with code: 1 and signal: null
+
+> my-v0-project@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.25
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./components/student-payments.tsx:371:31
+Type error: 'payment.depositSlipPath' is possibly 'undefined'.
+
+[0m [90m 369 |[39m                         onClick[33m=[39m{() [33m=>[39m {[0m
+[0m [90m 370 |[39m                           [36mconst[39m url [33m=[39m [32m`${API_BASE_URL}/${payment.depositSlipPath}`[39m[0m
+[0m[31m[1m>[22m[39m[90m 371 |[39m                           [36mif[39m (payment[33m.[39mdepositSlipPath[33m.[39mtoLowerCase()[33m.[39mendsWith([32m'.pdf'[39m)) {[0m
+[0m [90m     |[39m                               [31m[1m^[22m[39m[0m
+[0m [90m 372 |[39m                             setPdfViewer({ url[33m,[39m title[33m:[39m [32m`Deposit Slip - ${payment.month}`[39m })[0m
+[0m [90m 373 |[39m                           } [36melse[39m {[0m
+[0m [90m 374 |[39m                             window[33m.[39mopen(url[33m,[39m [32m'_blank'[39m)[0m
+Next.js build worker exited with code: 1 and signal: null
+
+> my-v0-project@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.25
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/39) ...
+   Generating static pages (9/39) 
+API_BASE_URL: http://localhost:5000/api
+   Generating static pages (19/39) 
+   Generating static pages (29/39) 
+ ✓ Generating static pages (39/39)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    6.06 kB         114 kB
+├ ○ /_not-found                          876 B            88 kB
+├ ○ /about                               2.85 kB         142 kB
+├ ○ /admin                               3.73 kB         100 kB
+├ ○ /admin/applications                  11.1 kB         123 kB
+├ ○ /admin/appointments                  5.45 kB         114 kB
+├ ○ /admin/assignments                   2.66 kB         130 kB
+├ ƒ /admin/assignments/[id]              5.44 kB         141 kB
+├ ○ /admin/interview                     6.71 kB         140 kB
+├ ○ /admin/interview/decisions           5.87 kB         114 kB
+├ ○ /admin/interview/evaluate            7.18 kB         141 kB
+├ ○ /admin/interview/verify              5.3 kB          114 kB
+├ ○ /admin/payments                      6.85 kB         153 kB
+├ ○ /admin/resources                     3.7 kB          125 kB
+├ ○ /admin/time-slots                    4.39 kB         116 kB
+├ ○ /admin/trainees                      5.2 kB          114 kB
+├ ƒ /admin/trainees/[id]                 6.5 kB          153 kB
+├ ○ /clear-auth                          1.93 kB        98.2 kB
+├ ○ /contact                             218 B           139 kB
+├ ○ /coordinator                         2.97 kB        99.3 kB
+├ ○ /coordinator/attendance              4.3 kB          101 kB
+├ ○ /dashboard                           3.42 kB         136 kB
+├ ○ /events                              4.41 kB         113 kB
+├ ○ /gallery                             3.6 kB          112 kB
+├ ○ /judge                               2.99 kB        99.3 kB
+├ ○ /judge/evaluate                      6 kB            127 kB
+├ ○ /login                               3.6 kB          112 kB
+├ ○ /privacy                             1.82 kB         110 kB
+├ ○ /programs                            5.74 kB         139 kB
+├ ○ /register                            6.34 kB         149 kB
+├ ○ /resources                           1.82 kB         110 kB
+├ ○ /result                              8.66 kB         120 kB
+├ ○ /schedule                            12.6 kB         146 kB
+├ ○ /student/clear-auth                  1.93 kB        98.2 kB
+├ ○ /student/dashboard                   4.01 kB         132 kB
+├ ○ /student/login                       4.29 kB         107 kB
+├ ○ /student/register                    6.02 kB         119 kB
+└ ○ /terms                               1.82 kB         110 kB
++ First Load JS shared by all            87.2 kB
+  ├ chunks/2117-6e9e33219bec9305.js      31.6 kB
+  ├ chunks/fd9d1056-60b369c71ec3d502.js  53.6 kB
+  └ other shared chunks (total)          1.92 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

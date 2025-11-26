@@ -267,7 +267,7 @@ export default function AssignmentAssessmentPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => openFile(submission.filePath!, submission.assignment.title)}
+                            onClick={() => openFile(submission.filePath!, assignment?.title || 'Assignment')}
                             className="gap-2"
                           >
                             {isPDF(submission.filePath) ? (
