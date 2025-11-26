@@ -439,9 +439,9 @@ export function ResultSection() {
                                       </p>
                                       <p className="text-base text-foreground/80 leading-relaxed">
                                        
-ከ(ህዳር 18/2018) ወደ  chenaniah.org/choir/signup በመሄድ የሚጠየቁትን መረጃ ሁሉ እንዲያስገቡ እና ምዝገባዎትን እንዲያጠናቅቁ እንጠይቃለን።
+ከህዳር 18/2018 ዓ.ም ጀምሮ ወደ  chenaniah.org/choir/signup በመሄድ የሚጠየቁትን መረጃ ሁሉ እንዲያስገቡ እና ምዝገባዎትን እንዲያጠናቅቁ እንጠይቃለን።
 
-የመጀመሪያ ስብሰባ ረቡዕ (ህዳር 24) ከቀኑ 11:00 ሰዓት፣ በቤዛ አለምአቀፍ ቤተክርስቲያን ይኖረናል:: </p>
+የመጀመሪያ ስብሰባ ረቡዕ (ህዳር 24) ከቀኑ 11:00 ሰዓት፣ በቤዛ አለምአቀፍ ቤተክርስቲያን ይኖረናል::</p>
                                       <p className="text-base text-foreground/80 leading-relaxed mt-4">
                                         ስለ ቀጣይ ፕሮግራሞች በቅርቡ እናሳውቀዎታለን::
                                       </p>
