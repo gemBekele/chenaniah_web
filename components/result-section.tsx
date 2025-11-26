@@ -237,18 +237,20 @@ export function ResultSection() {
               }} 
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-2 mb-12 h-14 p-1 bg-muted/50 backdrop-blur-sm rounded-full border border-border/50">
+              <TabsList className="grid w-full grid-cols-2 mb-12 h-12 sm:h-14 p-1 bg-muted/50 backdrop-blur-sm rounded-full border border-border/50">
                 <TabsTrigger 
                   value="screening"
-                  className="rounded-full h-full text-base font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md transition-all duration-300"
+                  className="rounded-full h-full text-xs sm:text-sm md:text-base font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md transition-all duration-300 px-2 sm:px-4"
                 >
-                  First Round Result
+                  <span className="hidden sm:inline">First Round Result</span>
+                  <span className="sm:hidden">First Round</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="interview"
-                  className="rounded-full h-full text-base font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md transition-all duration-300"
+                  className="rounded-full h-full text-xs sm:text-sm md:text-base font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-md transition-all duration-300 px-2 sm:px-4"
                 >
-                  In-Person Interview Result
+                  <span className="hidden sm:inline">In-Person Interview Result</span>
+                  <span className="sm:hidden">Interview</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -401,90 +403,162 @@ export function ResultSection() {
                         </div>
                       ) : (
                         <>
-                          {status?.final_decision === 'accepted' ? (
-                            <div className="text-center space-y-8">
-                              <div className="relative inline-block">
-                                <div className="absolute inset-0 bg-[#E5C985]/40 rounded-full animate-ping opacity-75"></div>
-                                <div className="relative inline-flex items-center justify-center w-28 h-28 bg-[#E5C985] rounded-full mb-4 shadow-lg">
-                                  <Trophy className="h-14 w-14 text-[#212E3E]" />
-                                </div>
-                              </div>
-                              <div className="space-y-6">
-                                <div>
-                                  <h3 className="text-3xl sm:text-4xl font-bold text-[#212E3E] mb-3">
-                                    🎉 እንኳን ደስ አልዎት!
-                                  </h3>
-                                  {status.applicant_name && (
-                                    <p className="text-xl text-[#212E3E]/80 font-semibold">
-                                      {status.applicant_name}
-                                    </p>
-                                  )}
-                                </div>
-                                <div className="bg-gradient-to-br from-[#E5C985]/10 to-transparent rounded-2xl p-8 border border-[#E5C985]/20">
-                                  <p className="text-lg text-foreground leading-relaxed font-medium mb-4">
-                                    የክናንያ የዝማሬ አገልግሎት ያዘጋጀውን የአካል (in-person) ቃለ-መጠይቅ በብቃት አልፈዋል::
-                                  </p>
-                                  <p className="text-base text-foreground/80 leading-relaxed">
-                                    Congratulations! You have passed the in-person interview and have been selected for the Chenaniah Music Ministry.
-                                  </p>
-                                  <p className="text-base text-foreground/80 leading-relaxed mt-4">
-                                    ስለ ቀጣይ ፕሮግራሞች በቅርቡ እናሳውቀዎታለን::
-                                  </p>
-                                </div>
-                                
-                                {status.decision_made_at && (
-                                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full border border-green-100">
-                                    <CheckCircle className="h-4 w-4" />
-                                    <span className="text-sm font-medium">Official Acceptance • {formatDate(status.decision_made_at)}</span>
+                          {(() => {
+                            // Use appointment status logic based on final_decision:
+                            // - If final_decision === 'accepted', status was 'completed' → accepted
+                            // - If final_decision === 'rejected', status was 'no_show' → rejected
+                            // - If appointment_date exists but final_decision is null → scheduled (not yet reviewed)
+                            const finalDecision = status?.final_decision?.toLowerCase()
+                            const hasAppointment = !!(status?.appointment_date)
+                            
+                            // Check if status was 'completed' (final_decision = 'accepted')
+                            if (finalDecision === 'accepted') {
+                              return (
+                                <div className="text-center space-y-8">
+                                  <div className="relative inline-block">
+                                    <div className="absolute inset-0 bg-[#E5C985]/40 rounded-full animate-ping opacity-75"></div>
+                                    <div className="relative inline-flex items-center justify-center w-28 h-28 bg-[#E5C985] rounded-full mb-4 shadow-lg">
+                                      <Trophy className="h-14 w-14 text-[#212E3E]" />
+                                    </div>
                                   </div>
-                                )}
-                              </div>
-                            </div>
-                          ) : status?.final_decision === 'rejected' ? (
-                            <div className="text-center space-y-8">
-                              <div className="inline-flex items-center justify-center w-24 h-24 bg-muted rounded-full mb-4">
-                                <XCircle className="h-12 w-12 text-muted-foreground" />
-                              </div>
-                              <div className="space-y-6">
-                                <h3 className="text-3xl font-bold text-[#212E3E] mb-3">
-                                  Interview Result
-                                </h3>
-                                <div className="bg-muted/30 rounded-2xl p-8 border border-border/50">
-                                  <p className="text-lg text-foreground leading-relaxed">
-                                    Thank you for interviewing with us. Unfortunately, you were not selected at this time.
-                                  </p>
+                                  <div className="space-y-6">
+                                    <div>
+                                      <h3 className="text-3xl sm:text-4xl font-bold text-[#212E3E] mb-3">
+                                        🎉 እንኳን ደስ አልዎት!
+                                      </h3>
+                                      {status?.applicant_name && (
+                                        <p className="text-xl text-[#212E3E]/80 font-semibold">
+                                          {status.applicant_name}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="bg-gradient-to-br from-[#E5C985]/10 to-transparent rounded-2xl p-8 border border-[#E5C985]/20">
+                                      <p className="text-lg text-foreground leading-relaxed font-medium mb-4">
+                                        
+የክናንያ የህብረት መዘምራንን የማጣሪያ ፈተናዎች ሁሉ አልፈዋል። 
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed">
+                                       
+ከነገ ጀምሮ (ህዳር 18/2018) ወደ  chenaniah.org/choir/signup በመሄድ የሚጠየቁትን መረጃ ሁሉ እንዲያስገቡ እና ምዝገባዎትን እንዲያጠናቅቁ እንጠይቃለን።
+
+የመጀመሪያ ስብሰባ ረቡዕ (ህዳር 24) ከቀኑ 11:00 ሰዓት፣ በቤዛ አለምአቀፍ ቤተክርስቲያን ይኖረናል:: </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed mt-4">
+                                        ስለ ቀጣይ ፕሮግራሞች በቅርቡ እናሳውቀዎታለን::
+                                      </p>
+                                    </div>
+                                    
+                                    {status?.decision_made_at && (
+                                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full border border-green-100">
+                                        <CheckCircle className="h-4 w-4" />
+                                        <span className="text-sm font-medium">Official Acceptance • {formatDate(status.decision_made_at)}</span>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                                <Button 
-                                  variant="outline" 
-                                  onClick={() => setHasSearched(false)}
-                                  className="mt-4"
-                                >
-                                  Check Another Number
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-center space-y-8">
-                              <div className="inline-flex items-center justify-center w-24 h-24 bg-muted rounded-full mb-4">
-                                <Clock className="h-12 w-12 text-muted-foreground" />
-                              </div>
-                              <div className="space-y-4">
-                                <h3 className="text-3xl font-bold text-[#212E3E] mb-2">No Interview Result Yet</h3>
-                                <p className="text-xl text-muted-foreground max-w-md mx-auto">
-                                  {status?.submission_status === 'approved' 
-                                    ? "You have been approved for an interview. Please schedule it if you haven't already." 
-                                    : "You are not currently eligible for an interview result."}
-                                </p>
-                                <Button 
-                                  variant="outline" 
-                                  onClick={() => setHasSearched(false)}
-                                  className="mt-4"
-                                >
-                                  Check Another Number
-                                </Button>
-                              </div>
-                            </div>
-                          )}
+                              )
+                            } 
+                            // Check if status was 'no_show' (final_decision = 'rejected')
+                            else if (finalDecision === 'rejected') {
+                              return (
+                                <div className="text-center space-y-8">
+                                  <div className="inline-flex items-center justify-center w-24 h-24 bg-muted rounded-full mb-4">
+                                    <XCircle className="h-12 w-12 text-muted-foreground" />
+                                  </div>
+                                  <div className="space-y-6">
+                                    <h3 className="text-3xl font-bold text-[#212E3E] mb-3">
+                                      Interview Result
+                                    </h3>
+                                    <div className="bg-muted/30 rounded-2xl p-8 border border-border/50">
+                                      <p className="text-lg text-foreground leading-relaxed">
+                                        Thank you for interviewing with us. Unfortunately, you were not selected at this time.
+                                      </p>
+                                    </div>
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={() => setHasSearched(false)}
+                                      className="mt-4"
+                                    >
+                                      Check Another Number
+                                    </Button>
+                                  </div>
+                                </div>
+                              )
+                            } 
+                            // If appointment exists but no final_decision → scheduled (not yet reviewed)
+                            else if (hasAppointment) {
+                              return (
+                                <div className="text-center space-y-8">
+                                  <div className="inline-flex items-center justify-center w-24 h-24 bg-[#E5C985]/20 rounded-full mb-4">
+                                    <Clock className="h-12 w-12 text-[#212E3E]" />
+                                  </div>
+                                  <div className="space-y-6">
+                                    <div>
+                                      <h3 className="text-3xl font-bold text-[#212E3E] mb-3">
+                                        Interview Scheduled
+                                      </h3>
+                                      {status?.applicant_name && (
+                                        <p className="text-xl text-[#212E3E]/80 font-semibold">
+                                          {status.applicant_name}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="bg-gradient-to-br from-[#E5C985]/10 to-transparent rounded-2xl p-8 border border-[#E5C985]/20">
+                                      <p className="text-lg text-foreground leading-relaxed font-medium mb-4">
+                                        Your interview has been scheduled but not yet reviewed.
+                                      </p>
+                                      {status?.appointment_date && (
+                                        <div className="mt-4 space-y-2">
+                                          <p className="text-base text-foreground/80">
+                                            <strong>Date:</strong> {formatDate(status.appointment_date)}
+                                          </p>
+                                          {status?.appointment_time && (
+                                            <p className="text-base text-foreground/80">
+                                              <strong>Time:</strong> {formatTime(status.appointment_time)}
+                                            </p>
+                                          )}
+                                        </div>
+                                      )}
+                                      <p className="text-base text-foreground/80 leading-relaxed mt-4">
+                                        Please wait for the review to be completed. Results will be available here once the interview has been reviewed.
+                                      </p>
+                                    </div>
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={() => setHasSearched(false)}
+                                      className="mt-4"
+                                    >
+                                      Check Another Number
+                                    </Button>
+                                  </div>
+                                </div>
+                              )
+                            } 
+                            // No appointment scheduled
+                            else {
+                              return (
+                                <div className="text-center space-y-8">
+                                  <div className="inline-flex items-center justify-center w-24 h-24 bg-muted rounded-full mb-4">
+                                    <Clock className="h-12 w-12 text-muted-foreground" />
+                                  </div>
+                                  <div className="space-y-4">
+                                    <h3 className="text-3xl font-bold text-[#212E3E] mb-2">No Interview Result Yet</h3>
+                                    <p className="text-xl text-muted-foreground max-w-md mx-auto">
+                                      {status?.submission_status === 'approved' 
+                                        ? "You have been approved for an interview. Please schedule it if you haven't already." 
+                                        : "You are not currently eligible for an interview result."}
+                                    </p>
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={() => setHasSearched(false)}
+                                      className="mt-4"
+                                    >
+                                      Check Another Number
+                                    </Button>
+                                  </div>
+                                </div>
+                              )
+                            }
+                          })()}
                         </>
                       )}
                     </div>
