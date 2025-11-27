@@ -37,6 +37,7 @@ interface Trainee {
 
 export default function AdminTraineesPage() {
   const [trainees, setTrainees] = useState<Trainee[]>([])
+  const [totalCount, setTotalCount] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -63,6 +64,8 @@ export default function AdminTraineesPage() {
       if (searchQuery) {
         params.append('search', searchQuery)
       }
+      // Request a high limit to get all trainees, or no limit if backend supports it
+      params.append('limit', '10000')
 
       const response = await fetch(`${API_BASE_URL}/admin/trainees?${params.toString()}`, {
         headers: {
@@ -80,6 +83,7 @@ export default function AdminTraineesPage() {
       const data = await response.json()
       if (data.success) {
         setTrainees(data.students || [])
+        setTotalCount(data.total || 0)
       }
     } catch (err) {
       console.error("Error loading trainees:", err)
@@ -117,7 +121,7 @@ export default function AdminTraineesPage() {
           </div>
           <div className="flex items-center gap-2">
              <div className="bg-white border border-gray-200 text-[#1f2d3d] px-4 py-2 rounded-lg font-medium shadow-sm">
-                Total: {trainees.length}
+                Total: {totalCount}
              </div>
           </div>
         </div>
@@ -130,7 +134,7 @@ export default function AdminTraineesPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-3xl font-bold text-[#1f2d3d]">{trainees.length}</div>
+                <div className="text-3xl font-bold text-[#1f2d3d]">{totalCount}</div>
                 <Users className="h-5 w-5 text-[#1f2d3d]" />
               </div>
             </CardContent>
