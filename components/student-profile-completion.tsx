@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Loader2, Upload, FileText, CheckCircle2, AlertCircle, FileCheck, Edit, User, Phone, Mail } from "lucide-react"
+import { Loader2, Upload, FileText, CheckCircle2, AlertCircle, FileCheck, Edit, User, Phone, Mail, Image } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -22,6 +22,8 @@ interface StudentUser {
   hasIdDocument?: boolean
   hasRecommendationLetter?: boolean
   hasEssay?: boolean
+  hasPortrait?: boolean
+  photoPath?: string
 }
 
 interface ProfileCompletionFormProps {
@@ -32,26 +34,39 @@ interface ProfileCompletionFormProps {
 export default function ProfileCompletionForm({ user, onUpdate }: ProfileCompletionFormProps) {
   const [idFile, setIdFile] = useState<File | null>(null)
   const [recommendationFile, setRecommendationFile] = useState<File | null>(null)
+  const [portraitFile, setPortraitFile] = useState<File | null>(null)
   const [essay, setEssay] = useState("")
   const [isUploading, setIsUploading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<{
     id: boolean
     recommendation: boolean
+    portrait: boolean
     essay: boolean
   }>({
     id: false,
     recommendation: false,
+    portrait: false,
     essay: false,
   })
 
-  const handleFileChange = (type: 'id' | 'recommendation', file: File | null) => {
+  const handleFileChange = (type: 'id' | 'recommendation' | 'portrait', file: File | null) => {
     if (file) {
       // Validate file type
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please upload a PDF or image file (JPG, PNG)')
-        return
+      if (type === 'portrait') {
+        // Portrait must be an image
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+        if (!allowedTypes.includes(file.type)) {
+          toast.error('Portrait must be an image file (JPG, PNG)')
+          return
+        }
+      } else {
+        // ID and recommendation can be PDF or image
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
+        if (!allowedTypes.includes(file.type)) {
+          toast.error('Please upload a PDF or image file (JPG, PNG)')
+          return
+        }
       }
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
@@ -62,12 +77,14 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
 
     if (type === 'id') {
       setIdFile(file)
-    } else {
+    } else if (type === 'recommendation') {
       setRecommendationFile(file)
+    } else if (type === 'portrait') {
+      setPortraitFile(file)
     }
   }
 
-  const uploadFile = async (type: 'id' | 'recommendation', file: File) => {
+  const uploadFile = async (type: 'id' | 'recommendation' | 'portrait', file: File) => {
     const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) {
       toast.error('Please login again')
@@ -90,7 +107,12 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
 
       const data = await response.json()
       if (data.success) {
-        toast.success(`${type === 'id' ? 'ID document' : 'Recommendation letter'} uploaded successfully`)
+        const messages: { [key: string]: string } = {
+          'id': 'ID document',
+          'recommendation': 'Recommendation letter',
+          'portrait': 'Portrait photo'
+        }
+        toast.success(`${messages[type]} uploaded successfully`)
         return true
       } else {
         toast.error(data.error || 'Upload failed')
@@ -155,10 +177,14 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
       if (recommendationFile) {
         uploads.push(uploadFile('recommendation', recommendationFile))
       }
+      if (portraitFile) {
+        uploads.push(uploadFile('portrait', portraitFile))
+      }
 
       await Promise.all(uploads)
       setIdFile(null)
       setRecommendationFile(null)
+      setPortraitFile(null)
       onUpdate()
     } catch (err) {
       console.error('Error uploading files:', err)
@@ -273,6 +299,23 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                   <div>
                     <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                       Recommendation Letter
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      <span className="text-sm font-medium text-emerald-700">Uploaded</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <Image className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
+                      Portrait Photo
                     </Label>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -473,6 +516,84 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
           </div>
         </div>
 
+        {/* Portrait Photo Upload */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="portrait" className="text-base font-semibold text-[#1f2d3d]">
+              Portrait Photo <span className="text-destructive">*</span>
+            </Label>
+            {user.hasPortrait && (
+              <span className="flex items-center text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                Uploaded
+              </span>
+            )}
+          </div>
+          
+          <div className={`
+            relative border-2 border-dashed rounded-xl p-6 transition-all duration-200
+            ${user.hasPortrait 
+              ? 'border-emerald-200 bg-emerald-50/30' 
+              : 'border-gray-200 hover:border-[#e8cb85] hover:bg-gray-50'
+            }
+          `}>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Input
+                  id="portrait"
+                  type="file"
+                  accept=".jpg,.jpeg,.png"
+                  onChange={(e) => handleFileChange('portrait', e.target.files?.[0] || null)}
+                  className="hidden"
+                  disabled={isUploading || uploadProgress.portrait || (user.hasPortrait && !isEditing)}
+                />
+                {!user.hasPortrait || isEditing ? (
+                  <label 
+                    htmlFor="portrait" 
+                    className="flex flex-col items-center justify-center cursor-pointer py-4"
+                  >
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                    <span className="text-sm font-medium text-[#1f2d3d]">
+                      {portraitFile ? portraitFile.name : "Click to upload Portrait Photo"}
+                    </span>
+                    <span className="text-xs text-gray-500 mt-1">
+                      JPG or PNG (max 5MB)
+                    </span>
+                  </label>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    {user.photoPath && (
+                      <img 
+                        src={`${API_BASE_URL}/${user.photoPath}`}
+                        alt="Portrait"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-emerald-200"
+                      />
+                    )}
+                    <div>
+                      <p className="font-medium text-[#1f2d3d]">Portrait Uploaded</p>
+                      <p className="text-xs text-gray-500">Your portrait photo has been submitted.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {portraitFile && (!user.hasPortrait || isEditing) && (
+                <Button
+                  onClick={() => uploadFile('portrait', portraitFile).then(() => onUpdate())}
+                  disabled={uploadProgress.portrait}
+                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm"
+                >
+                  {uploadProgress.portrait ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Upload"
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Essay */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -537,6 +658,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 setIsEditing(false)
                 setIdFile(null)
                 setRecommendationFile(null)
+                setPortraitFile(null)
                 setEssay("")
               }}
               variant="outline"

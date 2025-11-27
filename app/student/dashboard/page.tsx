@@ -45,6 +45,7 @@ interface StudentUser {
   hasIdDocument?: boolean
   hasRecommendationLetter?: boolean
   hasEssay?: boolean
+  hasPortrait?: boolean
 }
 
 export default function StudentDashboardPage() {
