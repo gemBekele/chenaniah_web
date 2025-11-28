@@ -83,7 +83,7 @@ After deployment, test these flows:
 
 ### 2. Login Flow
 ```
-1. Visit https://chenaniah.org/login or /student/login
+1. Visit https://chenaniah.org/login
 2. Enter username and password
 3. Should redirect to dashboard
 ```
