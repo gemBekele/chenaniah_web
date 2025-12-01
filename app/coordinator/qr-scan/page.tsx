@@ -243,7 +243,7 @@ export default function QRScanPage() {
       const html5QrCode = new Html5Qrcode("qr-reader")
 
       // Try back camera first (environment)
-      let cameraConfig = { facingMode: "environment" as const }
+      let cameraConfig: { facingMode: "environment" | "user" } = { facingMode: "environment" }
       let qrboxSize = { width: 250, height: 250 }
 
       // Adjust QR box size for mobile
@@ -276,7 +276,7 @@ export default function QRScanPage() {
         // If back camera fails, try front camera
         if (startError.message?.includes("environment") || startError.message?.includes("back")) {
           console.log("Back camera failed, trying front camera...")
-          cameraConfig = { facingMode: "user" as const }
+          cameraConfig = { facingMode: "user" }
           
           await html5QrCode.start(
             cameraConfig,
