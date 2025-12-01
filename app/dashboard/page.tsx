@@ -432,7 +432,7 @@ export default function StudentDashboardPage() {
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2 text-[#1f2d3d]">
                       <QrCode className="h-5 w-5" />
-                      Student ID Card
+                  CHOIR ID Card
                     </CardTitle>
                     <CardDescription className="text-gray-500">
                       Download your ID card with QR code
