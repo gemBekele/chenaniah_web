@@ -274,69 +274,137 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+              <div className={`p-4 border rounded-xl ${user.hasIdDocument ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'}`}>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-emerald-600" />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${user.hasIdDocument ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                    <FileText className={`h-5 w-5 ${user.hasIdDocument ? 'text-emerald-600' : 'text-red-600'}`} />
                   </div>
                   <div>
                     <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                       ID Document
                     </Label>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      <span className="text-sm font-medium text-emerald-700">Uploaded</span>
+                      {user.hasIdDocument ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <span className="text-sm font-medium text-emerald-700">Uploaded</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <span className="text-sm font-medium text-red-700">Missing</span>
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            className="h-auto p-0 ml-2 text-red-700 font-semibold hover:text-red-800"
+                            onClick={() => setIsEditing(true)}
+                          >
+                            Upload
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+              <div className={`p-4 border rounded-xl ${user.hasRecommendationLetter ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'}`}>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-emerald-600" />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${user.hasRecommendationLetter ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                    <FileText className={`h-5 w-5 ${user.hasRecommendationLetter ? 'text-emerald-600' : 'text-red-600'}`} />
                   </div>
                   <div>
                     <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                       Recommendation Letter
                     </Label>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      <span className="text-sm font-medium text-emerald-700">Uploaded</span>
+                      {user.hasRecommendationLetter ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <span className="text-sm font-medium text-emerald-700">Uploaded</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <span className="text-sm font-medium text-red-700">Missing</span>
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            className="h-auto p-0 ml-2 text-red-700 font-semibold hover:text-red-800"
+                            onClick={() => setIsEditing(true)}
+                          >
+                            Upload
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+              <div className={`p-4 border rounded-xl ${user.hasPortrait ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'}`}>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <Image className="h-5 w-5 text-emerald-600" />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${user.hasPortrait ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                    <Image className={`h-5 w-5 ${user.hasPortrait ? 'text-emerald-600' : 'text-red-600'}`} />
                   </div>
                   <div>
                     <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                       Portrait Photo
                     </Label>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      <span className="text-sm font-medium text-emerald-700">Uploaded</span>
+                      {user.hasPortrait ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <span className="text-sm font-medium text-emerald-700">Uploaded</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <span className="text-sm font-medium text-red-700">Missing</span>
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            className="h-auto p-0 ml-2 text-red-700 font-semibold hover:text-red-800"
+                            onClick={() => setIsEditing(true)}
+                          >
+                            Upload
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+              <div className={`p-4 border rounded-xl ${user.hasEssay ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'}`}>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-emerald-600" />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${user.hasEssay ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                    <FileText className={`h-5 w-5 ${user.hasEssay ? 'text-emerald-600' : 'text-red-600'}`} />
                   </div>
                   <div>
                     <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                       Personal Essay
                     </Label>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      <span className="text-sm font-medium text-emerald-700">Submitted</span>
+                      {user.hasEssay ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <span className="text-sm font-medium text-emerald-700">Submitted</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-4 w-4 text-red-600" />
+                          <span className="text-sm font-medium text-red-700">Missing</span>
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            className="h-auto p-0 ml-2 text-red-700 font-semibold hover:text-red-800"
+                            onClick={() => setIsEditing(true)}
+                          >
+                            Submit
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

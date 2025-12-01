@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Folder,
-  DollarSign
+  DollarSign,
+  CheckSquare
 } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
@@ -75,6 +76,12 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
       label: 'Payments', 
       icon: DollarSign,
       matchPaths: ['/admin/payments'] 
+    },
+    { 
+      path: '/admin/attendance', 
+      label: 'Attendance', 
+      icon: CheckSquare,
+      matchPaths: ['/admin/attendance'] 
     },
     { 
       path: '/admin/resources', 

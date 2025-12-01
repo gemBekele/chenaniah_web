@@ -22,7 +22,8 @@ import {
   X,
   ChevronRight,
   Sparkles,
-  DollarSign
+  DollarSign,
+  QrCode
 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { clearStudentAuth } from "@/lib/auth"
@@ -32,6 +33,7 @@ import ProfileCompletionForm from '@/components/student-profile-completion'
 import StudentAssignments from '@/components/student-assignments'
 import StudentResources from '@/components/student-resources'
 import StudentPayments from '@/components/student-payments'
+import StudentIDCard from '@/components/student-id-card'
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -46,6 +48,7 @@ interface StudentUser {
   hasRecommendationLetter?: boolean
   hasEssay?: boolean
   hasPortrait?: boolean
+  photoPath?: string
 }
 
 export default function StudentDashboardPage() {
@@ -54,6 +57,8 @@ export default function StudentDashboardPage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [qrCodeImage, setQrCodeImage] = useState<string | null>(null)
+  const [qrCodeLoading, setQrCodeLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -87,6 +92,8 @@ export default function StudentDashboardPage() {
         setUser(data.user)
         // Update localStorage
         localStorage.setItem('student_user', JSON.stringify(data.user))
+        // Load QR code
+        loadQRCode(token)
       } else {
         // Invalid response, clear token and redirect
         clearStudentAuth()
@@ -99,6 +106,29 @@ export default function StudentDashboardPage() {
       router.push('/login')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadQRCode = async (token: string) => {
+    setQrCodeLoading(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/attendance/student/qrcode`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.qrCodeImage) {
+          setQrCodeImage(data.qrCodeImage)
+        }
+      }
+    } catch (err) {
+      console.error("Error loading QR code:", err)
+    } finally {
+      setQrCodeLoading(false)
     }
   }
 
@@ -141,10 +171,11 @@ export default function StudentDashboardPage() {
   const completionSteps = [
     user.hasIdDocument,
     user.hasRecommendationLetter,
-    user.hasEssay
+    user.hasEssay,
+    !!user.photoPath
   ]
   const completedSteps = completionSteps.filter(Boolean).length
-  const completionPercentage = Math.round((completedSteps / 3) * 100)
+  const completionPercentage = Math.round((completedSteps / 4) * 100)
 
   const NavItem = ({ id, label }: { id: string, label: string }) => (
     <button
@@ -315,7 +346,7 @@ export default function StudentDashboardPage() {
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg text-[#1f2d3d] mb-1">Complete Your Profile</h3>
                   <p className="text-gray-500 text-sm">
-                    You need to upload your ID document, recommendation letter, and essay to access all features.
+                    You need to upload your ID document, recommendation letter, essay, and profile photo to access all features.
                   </p>
                 </div>
                 <Button 
@@ -395,63 +426,73 @@ export default function StudentDashboardPage() {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column - ID Card */}
+              <div className="space-y-6">
+                <Card className="border-gray-200 shadow-sm bg-white">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2 text-[#1f2d3d]">
+                      <QrCode className="h-5 w-5" />
+                      Student ID Card
+                    </CardTitle>
+                    <CardDescription className="text-gray-500">
+                      Download your ID card with QR code
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {qrCodeLoading ? (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-[#e8cb85] mb-4" />
+                        <p className="text-sm text-gray-500">Loading QR code...</p>
+                      </div>
+                    ) : qrCodeImage ? (
+                      <StudentIDCard 
+                        user={user} 
+                        qrCodeImage={qrCodeImage}
+                      />
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="text-center py-8">
+                          <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4 opacity-50" />
+                          <p className="text-sm font-medium text-[#1f2d3d] mb-2">QR code is loading</p>
+                          <p className="text-xs text-gray-500 mb-4">
+                            Please wait a moment or click retry to reload
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+                              if (token) {
+                                loadQRCode(token)
+                              }
+                            }}
+                            className="border-gray-300"
+                          >
+                            Retry Loading QR Code
+                          </Button>
+                        </div>
+                        {/* Show ID card preview even without QR code */}
+                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-gray-50"> 
+                          <p className="text-xs text-gray-500 text-center mb-2">
+                            ID Card Preview (QR code will appear when loaded)
+                          </p>
+                          <StudentIDCard 
+                            user={user} 
+                            qrCodeImage={null}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card> 
+              </div>
+
+              {/* Right Column - Profile Form */}
               <div className="lg:col-span-2">
                 <ProfileCompletionForm 
                   user={user} 
                   onUpdate={loadUserData}
                 />
-              </div>
-              <div className="space-y-6">
-                <Card className="border-gray-200 shadow-sm bg-white">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-[#1f2d3d]">Account Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Full Name</p>
-                      <p className="font-medium text-[#1f2d3d]">{user.fullNameEnglish || "Not set"}</p>
-                      <p className="text-sm text-gray-500 mt-1">{user.fullNameAmharic}</p>
-                    </div>
-                    <div className="h-px bg-gray-100" />
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Contact</p>
-                      <p className="font-medium text-[#1f2d3d]">{user.phone}</p>
-                    </div>
-                    <div className="h-px bg-gray-100" />
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Username</p>
-                      <p className="font-medium text-[#1f2d3d]">{user.username}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-gray-200 shadow-sm bg-white">
-                  <CardHeader className="bg-gray-50 border-b border-gray-100">
-                    <CardTitle className="text-lg flex items-center gap-2 text-[#1f2d3d]">
-                      <DollarSign className="h-5 w-5 text-[#e8cb85]" />
-                      Monthly Contributions
-                    </CardTitle>
-                    <CardDescription className="mt-1 text-gray-500">
-                      Submit your monthly contributions with deposit slip
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6">
-                    <Button
-                      onClick={() => {
-                        setActiveTab("payments")
-                        // Scroll to top to ensure form is visible
-                        window.scrollTo({ top: 0, behavior: 'smooth' })
-                      }}
-                      className="w-full bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white h-12 text-base font-semibold shadow-sm"
-                    >
-                      <DollarSign className="h-5 w-5 mr-2" />
-                      Go to Contributions
-                    </Button>
-                    <p className="text-xs text-gray-500 mt-3 text-center">
-                      Click to submit your monthly contribution
-                    </p>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           </div>
