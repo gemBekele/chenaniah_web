@@ -33,8 +33,11 @@ function isLocalIP(hostname: string): boolean {
 
 /**
  * Get the API base URL for the current environment
- * Default: https://chenaniah.org/api/v2
+ * Default: https://chenaniah.org/api/v2/api
  * Development: Uses NEXT_PUBLIC_API_URL or detects local development
+ * 
+ * Note: The backend now supports both /api/v2/* and /api/v2/api/* formats.
+ * Nginx rewrites /api/v2/api/* to /api/api/* which the backend handles.
  */
 export function getApiBaseUrl(): string {
   // Use environment variable if set (highest priority)
@@ -54,17 +57,17 @@ export function getApiBaseUrl(): string {
       return `http://${hostname}:5001/api`
     }
     
-    // Default to production API v2 for all other cases
-    return 'https://chenaniah.org/api/v2'
+    // Default to production API v2/api for all other cases
+    return 'https://chenaniah.org/api/v2/api'
   }
   
-  // Server-side: default to production API v2
+  // Server-side: default to production API v2/api
   // Only use localhost if explicitly in development mode AND on localhost
   if (process.env.NODE_ENV === 'development' && process.env.VERCEL !== '1') {
     // Only use localhost in true local development
     return 'http://localhost:5001/api'
   }
   
-  // Default fallback: production API v2
-  return 'https://chenaniah.org/api/v2'
+  // Default fallback: production API v2/api
+  return 'https://chenaniah.org/api/v2/api'
 }

@@ -4,7 +4,7 @@ This guide explains how to deploy the Next.js frontend to work with the backend 
 
 ## Configuration Changes Made
 
-1. **API URL updated** to point to `https://chenaniah.org/api/v2/api`
+1. **API URL updated** to point to `https://chenaniah.org/api/v2`
 2. **Gender field added** to registration form
 3. **Coming soon notices** added to student portal
 4. **Dev branch** created for deployment
@@ -12,7 +12,7 @@ This guide explains how to deploy the Next.js frontend to work with the backend 
 ## Environment Variables
 
 The frontend now uses:
-- **Production:** `https://chenaniah.org/api/v2/api`
+- **Production:** `https://chenaniah.org/api/v2` (note: without trailing `/api` - nginx handles the rewrite)
 - **Local Dev:** `http://localhost:5001/api` (when running on localhost)
 
 ## Deployment Options
@@ -32,7 +32,7 @@ git checkout dev
 vercel --prod
 
 # During setup, add environment variable:
-# NEXT_PUBLIC_API_URL=https://chenaniah.org/api/v2/api
+# NEXT_PUBLIC_API_URL=https://chenaniah.org/api/v2
 ```
 
 ### Option 2: Deploy to VPS with PM2
@@ -173,15 +173,17 @@ server {
 After deploying, check the browser console:
 
 ```javascript
-// Should show API calls to https://chenaniah.org/api/v2/api/...
+// Should show API calls to https://chenaniah.org/api/v2/...
 ```
 
 ## Environment Variable Priority
 
 The frontend checks in this order:
-1. `NEXT_PUBLIC_API_URL` environment variable (if set)
+1. `NEXT_PUBLIC_API_URL` environment variable (if set, will be normalized for production)
 2. If on localhost → `http://localhost:5001/api`
-3. Default → `https://chenaniah.org/api/v2/api`
+3. Default → `https://chenaniah.org/api/v2`
+
+Note: If `NEXT_PUBLIC_API_URL` is set to `https://chenaniah.org/api/v2/api`, it will be automatically normalized to `https://chenaniah.org/api/v2` to fix routing issues.
 
 ## For Local Development
 
@@ -191,7 +193,7 @@ To test locally with production backend:
 cd /home/barch/projects/chenaniah/web/chenaniah-web
 
 # Create .env.local (not tracked by git)
-echo "NEXT_PUBLIC_API_URL=https://chenaniah.org/api/v2/api" > .env.local
+echo "NEXT_PUBLIC_API_URL=https://chenaniah.org/api/v2" > .env.local
 
 # Run dev server
 npm run dev
@@ -217,10 +219,10 @@ npm run dev
 ## API URL Format
 
 Note the URL structure:
-- Backend base: `https://chenaniah.org/api/v2`
-- Nginx strips `/api/v2` → forwards to `http://localhost:5001`
-- Frontend adds `/api` → final URL: `/api/health`
-- Full path: `https://chenaniah.org/api/v2` + `/api/health` → `http://localhost:5001/api/health` ✓
+- Frontend calls: `https://chenaniah.org/api/v2/attendance/student/qrcode`
+- Nginx rewrites `/api/v2/*` → `/api/*` before forwarding to backend
+- Backend receives: `/api/attendance/student/qrcode` ✓
+- Backend has route mounted at `/api/attendance` → matches! ✓
 
-This is why the utils function returns `https://chenaniah.org/api/v2/api`
+The base URL should be `https://chenaniah.org/api/v2` (without trailing `/api`) because nginx handles the rewrite.
 
