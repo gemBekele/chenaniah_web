@@ -140,10 +140,13 @@ export async function getOfflineRecordCount(): Promise<number> {
   return new Promise((resolve, reject) => {
     const transaction = db!.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    const index = store.index('synced');
-    const request = index.count(IDBKeyRange.only(false));
+    const request = store.getAll();
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      const records = request.result as OfflineAttendanceRecord[];
+      const unsyncedCount = records.filter(r => !r.synced).length;
+      resolve(unsyncedCount);
+    };
     request.onerror = () => reject(request.error);
   });
 }
