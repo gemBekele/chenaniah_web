@@ -263,7 +263,6 @@ export default function QRScanPage() {
         
         if (data.successCount > 0) {
           console.log("[Sync] Successfully synced", data.successCount, "records")
-          toast.success(`Synced ${data.successCount} records`)
         }
       } else {
         console.warn("[Sync] Sync was not successful:", data)
@@ -425,7 +424,7 @@ export default function QRScanPage() {
     setScanFeedback("success")
     setScanMessage("Scanned!")
     setLastScanned({
-      name: "Recorded",
+      name: isOnline ? "Verifying..." : "Recorded (Offline)",
       time: new Date().toLocaleTimeString(),
     })
 
@@ -470,6 +469,27 @@ export default function QRScanPage() {
     handleQRScanRef.current = handleQRScan
     console.log("[Effect] handleQRScanRef updated, current exists:", !!handleQRScanRef.current)
   }, [handleQRScan])
+
+  // Update last scanned name when attendance records change
+  useEffect(() => {
+    if (lastScanned?.name === "Verifying..." && attendanceRecords.length > 0) {
+      // Find the most recent record
+      // We assume records are sorted by date desc, but let's be safe and find the max
+      const latestRecord = attendanceRecords.reduce((prev, current) => {
+        return (new Date(prev.scannedAt) > new Date(current.scannedAt)) ? prev : current
+      })
+      
+      // Check if this record is recent (within last 30 seconds)
+      const recordTime = new Date(latestRecord.scannedAt).getTime()
+      const now = Date.now()
+      if (now - recordTime < 30000) { 
+         setLastScanned(prev => prev ? ({
+           ...prev,
+           name: latestRecord.student.fullNameEnglish || latestRecord.student.username || "Unknown"
+         }) : null)
+      }
+    }
+  }, [attendanceRecords, lastScanned])
 
   const startScanning = async () => {
     console.log("[Start Scan] ========== START SCANNING ==========")
@@ -1043,11 +1063,6 @@ export default function QRScanPage() {
                <span className={isOnline ? "text-green-500" : "text-amber-500"}>
                  {isOnline ? "Online" : "Offline"}
                </span>
-               {offlineCount > 0 && (
-                 <span className="text-amber-600 font-medium">
-                   • {offlineCount} pending
-                 </span>
-               )}
             </div>
           </div>
         </div>
@@ -1055,8 +1070,9 @@ export default function QRScanPage() {
         <div className="flex items-center gap-2">
            <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <Settings className="h-5 w-5" />
+              <Button variant="outline" size="sm" className="shrink-0 gap-2">
+                <Calendar className="h-4 w-4" />
+                Sessions
               </Button>
             </SheetTrigger>
             <SheetContent>
@@ -1218,6 +1234,11 @@ export default function QRScanPage() {
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <History className="h-4 w-4" />
                 View Recent Scans ({attendanceRecords.length})
+                {offlineCount > 0 && (
+                  <span className="text-amber-600 ml-1">
+                    • {offlineCount} Pending
+                  </span>
+                )}
               </div>
             </div>
           </div>
