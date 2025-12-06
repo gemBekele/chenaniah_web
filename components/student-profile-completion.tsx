@@ -196,10 +196,11 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
   // If profile is complete and not editing, show user details
   if (user.profileComplete && !isEditing) {
     return (
-      <Card className="border-gray-200 shadow-sm overflow-hidden bg-white">
-        <CardHeader className="bg-[#1f2d3d] text-white p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 mb-2">
+
+      <Card className="border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] overflow-hidden bg-white">
+        <CardHeader className="bg-[#1f2d3d] text-white p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
                 <CheckCircle2 className="h-6 w-6 text-[#e8cb85]" />
               </div>
@@ -213,26 +214,26 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
             <Button
               onClick={() => setIsEditing(true)}
               variant="outline"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hover:text-white w-full md:w-auto"
             >
               <Edit className="h-4 w-4 mr-2" />
-              Edit
+              Edit Profile
             </Button>
           </div>
         </CardHeader>
         
-        <CardContent className="p-8 space-y-6">
+        <CardContent className="p-6 md:p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <div className="w-10 h-10 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0">
                   <User className="h-5 w-5 text-[#e8cb85]" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                     Full Name (English)
                   </Label>
-                  <p className="font-medium text-[#1f2d3d]">{user.fullNameEnglish || "Not set"}</p>
+                  <p className="font-medium text-[#1f2d3d] truncate">{user.fullNameEnglish || "Not set"}</p>
                 </div>
               </div>
 
@@ -240,11 +241,11 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 <div className="w-10 h-10 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0">
                   <User className="h-5 w-5 text-[#e8cb85]" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                     Full Name (Amharic)
                   </Label>
-                  <p className="font-medium text-[#1f2d3d]">{user.fullNameAmharic || "Not set"}</p>
+                  <p className="font-medium text-[#1f2d3d] truncate">{user.fullNameAmharic || "Not set"}</p>
                 </div>
               </div>
 
@@ -252,11 +253,11 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 <div className="w-10 h-10 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0">
                   <Phone className="h-5 w-5 text-[#e8cb85]" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                     Phone Number
                   </Label>
-                  <p className="font-medium text-[#1f2d3d]">{user.phone}</p>
+                  <p className="font-medium text-[#1f2d3d] truncate">{user.phone}</p>
                 </div>
               </div>
 
@@ -264,11 +265,11 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 <div className="w-10 h-10 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0">
                   <Mail className="h-5 w-5 text-[#e8cb85]" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
                     Username
                   </Label>
-                  <p className="font-medium text-[#1f2d3d]">{user.username}</p>
+                  <p className="font-medium text-[#1f2d3d] truncate">{user.username}</p>
                 </div>
               </div>
             </div>
@@ -417,8 +418,8 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
   }
 
   return (
-    <Card className="border-gray-200 shadow-sm overflow-hidden bg-white">
-      <CardHeader className="bg-[#1f2d3d] text-white p-8">
+    <Card className="border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] overflow-hidden bg-white">
+      <CardHeader className="bg-[#1f2d3d] text-white p-6 md:p-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
             <FileCheck className="h-6 w-6 text-[#e8cb85]" />
@@ -435,7 +436,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="p-8 space-y-8">
+      <CardContent className="p-6 md:p-8 space-y-8">
         {/* ID Document Upload */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -457,7 +458,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
               : 'border-gray-200 hover:border-[#e8cb85] hover:bg-gray-50'
             }
           `}>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="flex-1">
                 <Input
                   id="idDocument"
@@ -472,11 +473,13 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                     htmlFor="idDocument" 
                     className="flex flex-col items-center justify-center cursor-pointer py-4"
                   >
-                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                    <span className="text-sm font-medium text-[#1f2d3d]">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                      <Upload className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <span className="text-sm font-medium text-[#1f2d3d] text-center">
                       {idFile ? idFile.name : "Click to upload ID Document"}
                     </span>
-                    <span className="text-xs text-gray-500 mt-1">
+                    <span className="text-xs text-gray-500 mt-1 text-center">
                       PDF, JPG or PNG (max 5MB)
                     </span>
                   </label>
@@ -497,7 +500,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 <Button
                   onClick={() => uploadFile('id', idFile).then(() => onUpdate())}
                   disabled={uploadProgress.id}
-                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm"
+                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm w-full md:w-auto"
                 >
                   {uploadProgress.id ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -531,7 +534,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
               : 'border-gray-200 hover:border-[#e8cb85] hover:bg-gray-50'
             }
           `}>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="flex-1">
                 <Input
                   id="recommendationLetter"
@@ -546,11 +549,13 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                     htmlFor="recommendationLetter" 
                     className="flex flex-col items-center justify-center cursor-pointer py-4"
                   >
-                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                    <span className="text-sm font-medium text-[#1f2d3d]">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                      <Upload className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <span className="text-sm font-medium text-[#1f2d3d] text-center">
                       {recommendationFile ? recommendationFile.name : "Click to upload Recommendation Letter"}
                     </span>
-                    <span className="text-xs text-gray-500 mt-1">
+                    <span className="text-xs text-gray-500 mt-1 text-center">
                       PDF, JPG or PNG (max 5MB)
                     </span>
                   </label>
@@ -571,7 +576,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 <Button
                   onClick={() => uploadFile('recommendation', recommendationFile).then(() => onUpdate())}
                   disabled={uploadProgress.recommendation}
-                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm"
+                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm w-full md:w-auto"
                 >
                   {uploadProgress.recommendation ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -605,7 +610,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
               : 'border-gray-200 hover:border-[#e8cb85] hover:bg-gray-50'
             }
           `}>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
               <div className="flex-1">
                 <Input
                   id="portrait"
@@ -620,11 +625,13 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                     htmlFor="portrait" 
                     className="flex flex-col items-center justify-center cursor-pointer py-4"
                   >
-                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                    <span className="text-sm font-medium text-[#1f2d3d]">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                      <Upload className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <span className="text-sm font-medium text-[#1f2d3d] text-center">
                       {portraitFile ? portraitFile.name : "Click to upload Portrait Photo"}
                     </span>
-                    <span className="text-xs text-gray-500 mt-1">
+                    <span className="text-xs text-gray-500 mt-1 text-center">
                       JPG or PNG (max 5MB)
                     </span>
                   </label>
@@ -649,7 +656,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 <Button
                   onClick={() => uploadFile('portrait', portraitFile).then(() => onUpdate())}
                   disabled={uploadProgress.portrait}
-                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm"
+                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm w-full md:w-auto"
                 >
                   {uploadProgress.portrait ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -700,7 +707,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 <Button
                   onClick={submitEssay}
                   disabled={uploadProgress.essay || !essay.trim()}
-                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white rounded-xl px-8 shadow-sm"
+                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white rounded-xl px-8 shadow-sm w-full md:w-auto"
                 >
                   {uploadProgress.essay ? (
                     <>
@@ -730,7 +737,7 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                 setEssay("")
               }}
               variant="outline"
-              className="border-gray-200 text-gray-600 hover:bg-gray-50"
+              className="border-gray-200 text-gray-600 hover:bg-gray-50 w-full md:w-auto"
             >
               Cancel
             </Button>

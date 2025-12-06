@@ -34,6 +34,7 @@ import StudentAssignments from '@/components/student-assignments'
 import StudentResources from '@/components/student-resources'
 import StudentPayments from '@/components/student-payments'
 import StudentIDCard from '@/components/student-id-card'
+import StudentNoticeBoard from '@/components/student-notice-board'
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -185,8 +186,8 @@ export default function StudentDashboardPage() {
       }}
       className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
         activeTab === id 
-          ? "bg-[#1f2d3d] text-white shadow-sm" 
-          : "text-gray-600 hover:bg-gray-100 hover:text-[#1f2d3d]"
+          ? "bg-[#1f2d3d] text-white shadow-md" 
+          : "text-gray-500 hover:bg-gray-100 hover:text-[#1f2d3d]"
       }`}
     >
       {label}
@@ -194,38 +195,38 @@ export default function StudentDashboardPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col font-sans">
       {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-100 shadow-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-80">
               <Image 
                 src="/assets/logo/logo_full.png" 
                 alt="Chenaniah.org Logo" 
                 width={120} 
                 height={40} 
-                className="h-8 sm:h-10 w-auto"
+                className="h-8 w-auto"
               />
-            </div>
+            </Link>
             
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
               <NavItem id="overview" label="Overview" />
               <NavItem id="assignments" label="Assignments" />
-              <NavItem id="payments" label="Contributions" />
+              {/* <NavItem id="payments" label="Contributions" /> */}
               <NavItem id="resources" label="Resources" />
               <NavItem id="profile" label="My Profile" />
             </nav>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-3 pl-4 border-l border-gray-200">
+            <div className="hidden md:flex items-center gap-3 pl-4 border-l border-gray-100">
               <div className="text-right">
-                <p className="text-sm font-medium leading-none text-[#1f2d3d]">{user.username}</p>
-                <p className="text-xs text-gray-500 mt-1">Choir Portal</p>
+                <p className="text-sm font-semibold leading-none text-gray-900">{user.username}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Choir Member</p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-medium">
+              <div className="w-10 h-10 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-medium text-lg shadow-sm">
                 {user.username.charAt(0).toUpperCase()}
               </div>
             </div>
@@ -233,17 +234,17 @@ export default function StudentDashboardPage() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="md:hidden text-gray-600"
+              className="md:hidden text-gray-600 hover:bg-gray-50"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
             
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={handleLogout}
-              className="text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-colors hidden md:flex"
+              className="text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors hidden md:flex rounded-full"
               title="Sign Out"
             >
               <LogOut className="h-5 w-5" />
@@ -253,22 +254,22 @@ export default function StudentDashboardPage() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white p-4 space-y-4 animate-in slide-in-from-top-2 shadow-lg">
+          <div className="md:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-100 p-4 space-y-4 animate-in slide-in-from-top-2 shadow-xl z-50">
             <nav className="flex flex-col gap-2">
               <NavItem id="overview" label="Overview" />
               <NavItem id="assignments" label="Assignments" />
-              <NavItem id="payments" label="Contributions" />
+              {/* <NavItem id="payments" label="Contributions" /> */}
               <NavItem id="resources" label="Resources" />
               <NavItem id="profile" label="My Profile" />
             </nav>
-            <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-medium">
+                <div className="w-10 h-10 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-medium">
                   {user.username.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-medium leading-none text-[#1f2d3d]">{user.username}</p>
-                  <p className="text-xs text-gray-500 mt-1">Choir Portal</p>
+                  <p className="text-sm font-semibold leading-none text-[#1f2d3d]">{user.username}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Choir Member</p>
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-rose-600 hover:bg-rose-50 hover:text-rose-700">
@@ -280,78 +281,81 @@ export default function StudentDashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
         {activeTab === "overview" && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Welcome Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-2">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2 text-[#1f2d3d]">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-[#1f2d3d]">
                   Welcome back, {user.fullNameEnglish?.split(' ')[0] || user.username}
                 </h1>
-                <p className="text-gray-500">Here's what's happening with your courses today.</p>
+                <p className="text-gray-500 text-lg">Here's what's happening with your courses today.</p>
               </div>
               {!isProfileComplete && (
-                <div className="bg-[#e8cb85]/10 text-[#1f2d3d] px-4 py-2 rounded-full text-sm font-medium border border-[#e8cb85]/20 flex items-center gap-2">
+                <div className="bg-[#e8cb85]/10 text-[#1f2d3d] px-4 py-2 rounded-full text-sm font-medium border border-[#e8cb85]/20 flex items-center gap-2 shadow-sm">
                   <AlertCircle className="h-4 w-4 text-[#e8cb85]" />
                   Profile Incomplete ({completionPercentage}%)
                 </div>
               )}
             </div>
 
+            {/* Notice Board */}
+            <StudentNoticeBoard />
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-gray-200 shadow-sm bg-white">
+              <Card className="border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200 group">
                 <CardHeader className="pb-2">
-                  <CardDescription className="text-[#e8cb85] font-medium">Profile Status</CardDescription>
-                  <CardTitle className="text-3xl text-[#1f2d3d]">{completionPercentage}%</CardTitle>
+                  <CardDescription className="text-[#e8cb85] font-semibold uppercase tracking-wider text-xs group-hover:text-[#d4b770] transition-colors">Profile Status</CardDescription>
+                  <CardTitle className="text-4xl font-bold text-[#1f2d3d]">{completionPercentage}%</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden mt-2">
                     <div 
-                      className="h-full bg-[#e8cb85] transition-all duration-1000 ease-out" 
+                      className="h-full bg-[#e8cb85] transition-all duration-1000 ease-out rounded-full" 
                       style={{ width: `${completionPercentage}%` }}
                     />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="border-gray-200 shadow-sm bg-white">
+              <Card className="border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
                 <CardHeader className="pb-2">
-                  <CardDescription className="text-gray-500">Pending Assignments</CardDescription>
-                  <CardTitle className="text-3xl text-[#1f2d3d]">0</CardTitle>
+                  <CardDescription className="text-gray-500 font-semibold uppercase tracking-wider text-xs">Pending Assignments</CardDescription>
+                  <CardTitle className="text-4xl font-bold text-[#1f2d3d]">0</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-gray-400">You're all caught up!</p>
+                  <p className="text-sm text-gray-400 mt-2">You're all caught up!</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-gray-200 shadow-sm bg-white">
+              <Card className="border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
                 <CardHeader className="pb-2">
-                  <CardDescription className="text-gray-500">New Resources</CardDescription>
-                  <CardTitle className="text-3xl text-[#1f2d3d]">0</CardTitle>
+                  <CardDescription className="text-gray-500 font-semibold uppercase tracking-wider text-xs">New Resources</CardDescription>
+                  <CardTitle className="text-4xl font-bold text-[#1f2d3d]">0</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-xs text-gray-400">Check back later for updates</p>
+                  <p className="text-sm text-gray-400 mt-2">Check back later for updates</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Profile Completion Alert */}
             {!isProfileComplete && (
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center gap-6 shadow-sm">
-                <div className="w-12 h-12 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0 text-[#e8cb85]">
-                  <User className="h-6 w-6" />
+              <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]">
+                <div className="w-14 h-14 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0 text-[#e8cb85]">
+                  <User className="h-7 w-7" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg text-[#1f2d3d] mb-1">Complete Your Profile</h3>
-                  <p className="text-gray-500 text-sm">
+                  <h3 className="font-bold text-xl text-[#1f2d3d] mb-2">Complete Your Profile</h3>
+                  <p className="text-gray-500 leading-relaxed">
                     You need to upload your ID document, recommendation letter, essay, and profile photo to access all features.
                   </p>
                 </div>
                 <Button 
                   onClick={() => setActiveTab("profile")}
-                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white rounded-xl px-6 shadow-sm"
+                  className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white rounded-xl px-8 py-6 shadow-lg shadow-[#1f2d3d]/10 text-base font-medium transition-all hover:scale-105 active:scale-95 w-full md:w-auto"
                 >
                   Complete Now
                 </Button>
@@ -360,7 +364,7 @@ export default function StudentDashboardPage() {
 
             {/* Recent Activity / Quick Links */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="h-full border-gray-200 shadow-sm bg-white">
+              <Card className="h-full border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg text-[#1f2d3d]">
                     <FileCheck className="h-5 w-5 text-[#e8cb85]" />
@@ -368,16 +372,16 @@ export default function StudentDashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col items-center justify-center h-40 text-center p-4 border-2 border-dashed border-gray-100 rounded-xl bg-gray-50">
-                    <p className="text-gray-500 text-sm">No recent assignments</p>
-                    <Button variant="link" onClick={() => setActiveTab("assignments")} className="text-[#e8cb85] hover:text-[#dcb55d]">
+                  <div className="flex flex-col items-center justify-center h-48 text-center p-6 border-2 border-dashed border-gray-50 rounded-xl bg-gray-50/50">
+                    <p className="text-gray-500 text-sm mb-2">No recent assignments</p>
+                    <Button variant="link" onClick={() => setActiveTab("assignments")} className="text-[#e8cb85] hover:text-[#d4b770] font-medium">
                       View all assignments
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="h-full border-gray-200 shadow-sm bg-white">
+              {/* <Card className="h-full border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg text-[#1f2d3d]">
                     <DollarSign className="h-5 w-5 text-[#e8cb85]" />
@@ -385,20 +389,20 @@ export default function StudentDashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col items-center justify-center h-40 text-center p-4">
-                    <p className="text-gray-500 text-sm mb-4">Submit your monthly contributions</p>
+                  <div className="flex flex-col items-center justify-center h-48 text-center p-6">
+                    <p className="text-gray-500 text-sm mb-6">Submit your monthly contributions</p>
                     <Button 
                       onClick={() => setActiveTab("payments")} 
-                      className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white w-full shadow-sm"
+                      className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white w-full shadow-lg shadow-[#1f2d3d]/10 py-6 rounded-xl text-base"
                     >
                       <DollarSign className="h-4 w-4 mr-2" />
                       Go to Contributions
                     </Button>
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
 
-              <Card className="h-full border-gray-200 shadow-sm bg-white">
+              <Card className="h-full border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg text-[#1f2d3d]">
                     <BookOpen className="h-5 w-5 text-[#e8cb85]" />
@@ -406,9 +410,9 @@ export default function StudentDashboardPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col items-center justify-center h-40 text-center p-4 border-2 border-dashed border-gray-100 rounded-xl bg-gray-50">
-                    <p className="text-gray-500 text-sm">No recent resources</p>
-                    <Button variant="link" onClick={() => setActiveTab("resources")} className="text-[#e8cb85] hover:text-[#dcb55d]">
+                  <div className="flex flex-col items-center justify-center h-48 text-center p-6 border-2 border-dashed border-gray-50 rounded-xl bg-gray-50/50">
+                    <p className="text-gray-500 text-sm mb-2">No recent resources</p>
+                    <Button variant="link" onClick={() => setActiveTab("resources")} className="text-[#e8cb85] hover:text-[#d4b770] font-medium">
                       Browse library
                     </Button>
                   </div>
@@ -419,20 +423,20 @@ export default function StudentDashboardPage() {
         )}
 
         {activeTab === "profile" && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight mb-2 text-[#1f2d3d]">My Profile</h1>
-              <p className="text-gray-500">Manage your personal information and documents.</p>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">My Profile</h1>
+              <p className="text-gray-500 text-lg">Manage your personal information and documents.</p>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Left Column - ID Card */}
               <div className="space-y-6">
-                <Card className="border-gray-200 shadow-sm bg-white">
+                <Card className="border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2 text-[#1f2d3d]">
+                    <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
                       <QrCode className="h-5 w-5" />
-                  CHOIR ID Card
+                      CHOIR ID Card
                     </CardTitle>
                     <CardDescription className="text-gray-500">
                       Download your ID card with QR code
@@ -441,7 +445,7 @@ export default function StudentDashboardPage() {
                   <CardContent className="p-6">
                     {qrCodeLoading ? (
                       <div className="flex flex-col items-center justify-center py-12">
-                        <Loader2 className="h-8 w-8 animate-spin text-[#e8cb85] mb-4" />
+                        <Loader2 className="h-8 w-8 animate-spin text-amber-500 mb-4" />
                         <p className="text-sm text-gray-500">Loading QR code...</p>
                       </div>
                     ) : qrCodeImage ? (
@@ -452,8 +456,8 @@ export default function StudentDashboardPage() {
                     ) : (
                       <div className="space-y-4">
                         <div className="text-center py-8">
-                          <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4 opacity-50" />
-                          <p className="text-sm font-medium text-[#1f2d3d] mb-2">QR code is loading</p>
+                          <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                          <p className="text-sm font-medium text-gray-900 mb-2">QR code is loading</p>
                           <p className="text-xs text-gray-500 mb-4">
                             Please wait a moment or click retry to reload
                           </p>
@@ -466,13 +470,13 @@ export default function StudentDashboardPage() {
                                 loadQRCode(token)
                               }
                             }}
-                            className="border-gray-300"
+                            className="border-gray-200"
                           >
                             Retry Loading QR Code
                           </Button>
                         </div>
                         {/* Show ID card preview even without QR code */}
-                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-gray-50"> 
+                        <div className="border-2 border-dashed border-gray-100 rounded-xl p-4 bg-gray-50/50"> 
                           <p className="text-xs text-gray-500 text-center mb-2">
                             ID Card Preview (QR code will appear when loaded)
                           </p>
@@ -501,28 +505,28 @@ export default function StudentDashboardPage() {
         {activeTab === "assignments" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight mb-2 text-[#1f2d3d]">Assignments</h1>
-              <p className="text-gray-500">View and submit your course assignments.</p>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Assignments</h1>
+              <p className="text-gray-500 text-lg">View and submit your course assignments.</p>
             </div>
             <StudentAssignments user={user} />
           </div>
         )}
 
-        {activeTab === "payments" && (
+        {/* {activeTab === "payments" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight mb-2 text-[#1f2d3d]">Monthly Contributions</h1>
-              <p className="text-gray-500">Submit your monthly contributions with deposit slip.</p>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Monthly Contributions</h1>
+              <p className="text-gray-500 text-lg">Submit your monthly contributions with deposit slip.</p>
             </div>
             <StudentPayments user={user} />
           </div>
-        )}
+        )} */}
 
         {activeTab === "resources" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight mb-2 text-[#1f2d3d]">Learning Resources</h1>
-              <p className="text-gray-500">Access study materials and downloads.</p>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Learning Resources</h1>
+              <p className="text-gray-500 text-lg">Access study materials and downloads.</p>
             </div>
             <StudentResources user={user} />
           </div>

@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Folder,
   DollarSign,
-  CheckSquare
+  CheckSquare,
+  Bell
 } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
@@ -88,6 +89,12 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
       label: 'Resources', 
       icon: Folder,
       matchPaths: ['/admin/resources'] 
+    },
+    { 
+      path: '/admin/notices', 
+      label: 'Notices', 
+      icon: Bell,
+      matchPaths: ['/admin/notices'] 
     },
   ]
 
