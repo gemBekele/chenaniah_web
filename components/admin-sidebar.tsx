@@ -44,22 +44,22 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
   }
 
   const navItems = [
-    { 
-      path: '/admin/applications', 
-      label: 'Applications', 
-      icon: FileText 
-    },
+    // { 
+    //   path: '/admin/applications', 
+    //   label: 'Applications', 
+    //   icon: FileText 
+    // },
     { 
       path: '/admin/interview', 
       label: 'Interview', 
       icon: Calendar, 
       matchPaths: ['/admin/interview'] 
     },
-    { 
-      path: '/admin/time-slots', 
-      label: 'Time Slots', 
-      icon: Clock 
-    },
+    // { 
+    //   path: '/admin/time-slots', 
+    //   label: 'Time Slots', 
+    //   icon: Clock 
+    // },
     { 
       path: '/admin/trainees', 
       label: 'Trainees', 
