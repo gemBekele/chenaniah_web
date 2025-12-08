@@ -468,9 +468,30 @@ export function ResultSection() {
                                     <h3 className="text-3xl font-bold text-[#212E3E] mb-3">
                                       Interview Result
                                     </h3>
-                                    <div className="bg-muted/30 rounded-2xl p-8 border border-border/50">
-                                      <p className="text-lg text-foreground leading-relaxed">
-                                        Thank you for interviewing with us. Unfortunately, you were not selected at this time.
+                                    <div className="bg-muted/30 rounded-2xl p-8 border border-border/50 space-y-4">
+                                      <p className="text-lg text-foreground leading-relaxed font-medium">
+                                        ስለተሳተፋችሁ እናመሰግናለን!
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed">
+                                        ለሁለተኛ ዙር ማጣሪያ በጠየቅናችሁ ቦታ ስለተገኛችሁ እጅግ በጣም እናመሰግናለን።
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed">
+                                        ቃለመጠይቁን እና በአካል ተገኝታችሁ ያቀረባችሁትን ዝማሬ፣ ከአሰልጣኞች አስተያየት ጋር በጥንቃቄ ተመልክተን ውሳኔ ላይ ደርሰናል። ይኸውም ለዚህኛው ዙር ይዘናችሁ መቀጠል አለመቻላችን ነው።
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed">
+                                        ይህ ውሳኔ ከዋጋችሁ፣ ከጥሪያችሁ፣ እና ለጌታ ካላችሁ ፍቅር ጋር የተገናኘ አይደለም። ከክናንያ ፍላጎት፣ ከኳየር አባላት ከሚጠበቅ የመገኘት ነጻነት እና ልንገነባ ከምንፈልገው የኳየር ቅርጽ ጋር ብቻ የተገናኘ ነው።
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed">
+                                        በስጦታዎቻችሁ፣ በየአጥቢያችሁ በማገልገል እና በግል የህይወት ጉዟችሁ ከዚህ በበለጠ እንድታድጉ ልናበረታታችሁ እንፈልጋለን። የክርስቶስ አካል ታማኝ የሆኑ አገልጋዮችን ትፈልጋለች፣ በክናንያ ብቻ ሳይሆን በሁሉም ሥፍራ።
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed">
+                                        በድጋሜ ስላሳያችሁት ትጋት እና አክብሮት ከልብ እናመሰግናለን።
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed font-medium mt-4">
+                                        ከፍቅር እና አክብሮት ጋር!
+                                      </p>
+                                      <p className="text-base text-foreground/80 leading-relaxed">
+                                        ክናንያ የዝማሬ አገልግሎት
                                       </p>
                                     </div>
                                     <Button 

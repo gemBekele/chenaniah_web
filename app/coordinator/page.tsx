@@ -24,7 +24,7 @@ export default function CoordinatorLoginPage() {
     // Check if already authenticated
     const token = localStorage.getItem('coordinator_token') || sessionStorage.getItem('coordinator_token')
     if (token) {
-      router.push('/coordinator/attendance')
+      router.push('/coordinator/qr-scan')
     }
   }, [router])
 
@@ -47,7 +47,7 @@ export default function CoordinatorLoginPage() {
       if (data.success && data.token) {
         localStorage.setItem('coordinator_token', data.token)
         localStorage.setItem('coordinator_role', data.role)
-        router.push('/coordinator/attendance')
+        router.push('/coordinator/qr-scan')
       } else {
         setError(data.error || "Invalid credentials")
       }

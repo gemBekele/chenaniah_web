@@ -498,34 +498,31 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   }, [searchQuery])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border/40">
-        <div className="container mx-auto px-6 lg:px-8 py-2">
+    <div className="min-h-screen bg-gray-50">
+      <div className="sticky top-0 z-40 bg-white border-b border-gray-200">
+        <div className="container mx-auto px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="relative">
-                {/* <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl blur-lg opacity-40"></div> */}
-                <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl ">
-                  <Image 
-                    src="/assets/logo/logo_icon.png" 
-                    alt="Chenaniah Logo" 
-                    width={35} 
-                    height={35}
-                    className="object-contain"
-                  />
-                </div>
+              <div className="relative flex items-center justify-center w-12 h-12">
+                <Image 
+                  src="/assets/logo/logo_icon.png" 
+                  alt="Chenaniah Logo" 
+                  width={40} 
+                  height={40}
+                  className="object-contain"
+                />
               </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold text-[#1f2d3d]">
                 Screening Dashboard
               </h1>
-              <p className="text-sm text-muted-foreground font-medium text-primary">Chenaniah Music Ministry</p>
+              <p className="text-sm text-gray-500 font-medium">Chenaniah Music Ministry</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             {/* Registration Control */}
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-muted-foreground">Registration:</span>
+              <span className="text-sm font-medium text-gray-500">Registration:</span>
               <Button
                 onClick={toggleRegistrationStatus}
                 disabled={isTogglingRegistration}
@@ -533,8 +530,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 size="sm"
                 className={`gap-2 transition-all ${
                   registrationOpen 
-                    ? "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700" 
-                    : "text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                    ? "text-emerald-600 hover:bg-emerald-50" 
+                    : "text-rose-600 hover:bg-rose-50"
                 }`}
               >
                 {isTogglingRegistration ? (
@@ -553,22 +550,22 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               onClick={() => window.location.href = '/admin/appointments'} 
               variant="ghost" 
               size="sm" 
-              className="gap-2 hover:bg-muted/50 transition-all"
+              className="gap-2 hover:bg-gray-100 text-gray-600 transition-all"
             >
-              <Calendar className="h-4 w-4 text-primary" />
+              <Calendar className="h-4 w-4 text-[#1f2d3d]" />
               <span className="hidden sm:inline">Interviews</span>
             </Button>
             <Button 
               onClick={() => window.location.href = '/admin/schedule'} 
               variant="ghost" 
               size="sm" 
-              className="gap-2 hover:bg-muted/50 transition-all"
+              className="gap-2 hover:bg-gray-100 text-gray-600 transition-all"
             >
-              <Clock className="h-4 w-4 text-primary" />
+              <Clock className="h-4 w-4 text-[#1f2d3d]" />
               <span className="hidden sm:inline">Time Slots</span>
             </Button>
-            <Button onClick={onLogout} variant="ghost" size="sm" className="gap-2 hover:bg-muted/50 transition-all">
-              <LogOut className="h-4 w-4 text-primary" />
+            <Button onClick={onLogout} variant="ghost" size="sm" className="gap-2 hover:bg-gray-100 text-gray-600 transition-all">
+              <LogOut className="h-4 w-4 text-[#1f2d3d]" />
               <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
@@ -578,46 +575,50 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       <div className="container mx-auto px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-8 lg:mb-10">
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-gradient-to-br from-background to-muted/30 p-3 lg:p-6 border border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-muted/20">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-violet-500/10 to-transparent rounded-full blur-2xl"></div>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">Total Applications</p>
-              <p className="text-2xl lg:text-4xl font-bold text-foreground mb-2 lg:mb-3">{stats.total}</p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-muted/50 group-hover:bg-muted transition-colors">
-                <User className="h-4 w-4 lg:h-5 lg:w-5 text-muted-foreground" />
+              <p className="text-sm font-medium text-gray-500 mb-2">Total Applications</p>
+              <div className="flex items-center justify-between">
+                <p className="text-3xl font-bold text-[#1f2d3d]">{stats.total}</p>
+                <div className="p-2 rounded-lg bg-gray-50">
+                  <User className="h-5 w-5 text-[#1f2d3d]" />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-amber-50 p-3 lg:p-6 border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/10">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-2xl"></div>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">Pending Review</p>
-              <p className="text-2xl lg:text-4xl font-bold text-amber-600 dark:text-amber-500 mb-2 lg:mb-3">{stats.pending}</p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
-                <Clock className="h-4 w-4 lg:h-5 lg:w-5 text-amber-600 dark:text-amber-500" />
+              <p className="text-sm font-medium text-gray-500 mb-2">Pending Review</p>
+              <div className="flex items-center justify-between">
+                <p className="text-3xl font-bold text-amber-600">{stats.pending}</p>
+                <div className="p-2 rounded-lg bg-amber-50">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-emerald-50 p-3 lg:p-6 border border-emerald-500/20 hover:border-emerald-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-full blur-2xl"></div>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">Approved</p>
-              <p className="text-2xl lg:text-4xl font-bold text-emerald-600 dark:text-emerald-500 mb-2 lg:mb-3">{stats.approved}</p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
-                <CheckCircle className="h-4 w-4 lg:h-5 lg:w-5 text-emerald-600 dark:text-emerald-500" />
+              <p className="text-sm font-medium text-gray-500 mb-2">Approved</p>
+              <div className="flex items-center justify-between">
+                <p className="text-3xl font-bold text-emerald-600">{stats.approved}</p>
+                <div className="p-2 rounded-lg bg-emerald-50">
+                  <CheckCircle className="h-5 w-5 text-emerald-600" />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-xl lg:rounded-2xl bg-rose-50 p-3 lg:p-6 border border-rose-500/20 hover:border-rose-500/40 transition-all duration-300 hover:shadow-lg hover:shadow-rose-500/10">
-            <div className="absolute top-0 right-0 w-16 h-16 lg:w-32 lg:h-32 bg-gradient-to-br from-rose-500/20 to-transparent rounded-full blur-2xl"></div>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             <div className="relative">
-              <p className="text-xs lg:text-sm font-medium text-muted-foreground mb-1 lg:mb-2">Rejected</p>
-              <p className="text-2xl lg:text-4xl font-bold text-rose-600 dark:text-rose-500 mb-2 lg:mb-3">{stats.rejected}</p>
-              <div className="inline-flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-rose-500/10 group-hover:bg-rose-500/20 transition-colors">
-                <XCircle className="h-4 w-4 lg:h-5 lg:w-5 text-rose-600 dark:text-rose-500" />
+              <p className="text-sm font-medium text-gray-500 mb-2">Rejected</p>
+              <div className="flex items-center justify-between">
+                <p className="text-3xl font-bold text-rose-600">{stats.rejected}</p>
+                <div className="p-2 rounded-lg bg-rose-50">
+                  <XCircle className="h-5 w-5 text-rose-600" />
+                </div>
               </div>
             </div>
           </div>
@@ -625,51 +626,50 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
         <div className="mb-8">
           <div className="relative group">
-            {/* <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div> */}
-          <div className="relative">
-              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5  text-amber-500 " />
-            <Input
-              type="text"
-              placeholder="Search by name, phone, or church..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-14 h-14 bg-background/50 backdrop-blur-sm border-border/50 rounded-2xl text-base focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
-            />
+            <div className="relative">
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search by name, phone, or church..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-14 h-14 bg-white border-gray-200 rounded-xl text-base focus:border-[#e8cb85] focus:ring-[#e8cb85]/20 transition-all shadow-sm"
+              />
             </div>
           </div>
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
           <div className="mb-6 lg:mb-8 overflow-x-auto">
-            <TabsList className="bg-muted/50 backdrop-blur-sm p-1 rounded-xl border border-border/50 inline-flex min-w-max">
+            <TabsList className="bg-white p-1 rounded-xl border border-gray-200 inline-flex min-w-max shadow-sm">
               <TabsTrigger
                 value="all"
-                className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-3 lg:px-6 py-2 lg:py-2.5 font-medium transition-all text-sm lg:text-base whitespace-nowrap"
+                className="rounded-lg data-[state=active]:bg-[#e8cb85] data-[state=active]:text-[#1f2d3d] px-4 py-2 font-medium transition-all text-sm lg:text-base whitespace-nowrap text-gray-500 hover:text-[#1f2d3d]"
               >
                 <span className="hidden sm:inline">All Applications</span>
                 <span className="sm:hidden">All</span>
               </TabsTrigger>
               <TabsTrigger
                 value="pending"
-                className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-3 lg:px-6 py-2 lg:py-2.5 font-medium transition-all text-sm lg:text-base whitespace-nowrap"
+                className="rounded-lg data-[state=active]:bg-[#e8cb85] data-[state=active]:text-[#1f2d3d] px-4 py-2 font-medium transition-all text-sm lg:text-base whitespace-nowrap text-gray-500 hover:text-[#1f2d3d]"
               >
                 Pending
               </TabsTrigger>
               <TabsTrigger
                 value="approved"
-                className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-3 lg:px-6 py-2 lg:py-2.5 font-medium transition-all text-sm lg:text-base whitespace-nowrap"
+                className="rounded-lg data-[state=active]:bg-[#e8cb85] data-[state=active]:text-[#1f2d3d] px-4 py-2 font-medium transition-all text-sm lg:text-base whitespace-nowrap text-gray-500 hover:text-[#1f2d3d]"
               >
                 Approved
               </TabsTrigger>
               <TabsTrigger
                 value="rejected"
-                className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-3 lg:px-6 py-2 lg:py-2.5 font-medium transition-all text-sm lg:text-base whitespace-nowrap"
+                className="rounded-lg data-[state=active]:bg-[#e8cb85] data-[state=active]:text-[#1f2d3d] px-4 py-2 font-medium transition-all text-sm lg:text-base whitespace-nowrap text-gray-500 hover:text-[#1f2d3d]"
               >
                 Rejected
               </TabsTrigger>
               <TabsTrigger
                 value="settings"
-                className="rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-md data-[state=active]:shadow-muted/20 px-3 lg:px-6 py-2 lg:py-2.5 font-medium transition-all text-sm lg:text-base whitespace-nowrap"
+                className="rounded-lg data-[state=active]:bg-[#e8cb85] data-[state=active]:text-[#1f2d3d] px-4 py-2 font-medium transition-all text-sm lg:text-base whitespace-nowrap text-gray-500 hover:text-[#1f2d3d]"
               >
                 Settings
               </TabsTrigger>
@@ -681,90 +681,89 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <div className="flex justify-center py-24">
                 <div className="flex flex-col items-center gap-4">
                   <div className="relative">
-                    {/* <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full blur-xl opacity-40"></div> */}
-                    <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-muted border-t-amber-500"></div>
+                    <div className="relative animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-t-[#e8cb85]"></div>
                   </div>
-                  <p className="text-sm text-muted-foreground font-medium">Loading applications...</p>
+                  <p className="text-sm text-gray-500 font-medium">Loading applications...</p>
                 </div>
               </div>
             ) : filteredSubmissions.length === 0 ? (
-              <div className="rounded-3xl bg-gradient-to-br from-background to-muted/30 border border-border/50 p-20 text-center">
+              <div className="rounded-xl bg-white border border-gray-200 p-20 text-center shadow-sm">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="flex items-center justify-center w-20 h-20 rounded-3xl bg-muted/50">
-                    <FileAudio className="h-10 w-10 text-muted-foreground" />
-                    </div>
+                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-50">
+                    <FileAudio className="h-8 w-8 text-gray-400" />
+                  </div>
                   <div>
-                    <p className="text-xl font-semibold text-foreground mb-2">No applications found</p>
-                    <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+                    <p className="text-lg font-semibold text-[#1f2d3d] mb-1">No applications found</p>
+                    <p className="text-sm text-gray-500">Try adjusting your search or filters</p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl bg-gradient-to-br from-background to-muted/20 border border-border/50 overflow-hidden">
+              <div className="rounded-xl bg-white border border-gray-200 overflow-hidden shadow-sm">
                 {/* Desktop Table (lg and up) */}
                 <div className="hidden lg:block">
                   {/* Table Header */}
-                  <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-muted/30 border-b border-border/50">
+                  <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <div className="col-span-2">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Applicant</p>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Applicant</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Contact</p>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Contact</p>
                     </div>
                     <div className="col-span-2">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Church</p>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Church</p>
                     </div>
                     <div className="col-span-1">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Submitted</p>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Submitted</p>
                     </div>
                     <div className="col-span-2 flex justify-center">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Audio Sample</p>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Audio Sample</p>
                     </div>
                     <div className="col-span-2 flex justify-center">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Status</p>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Status</p>
                     </div>
                     <div className="col-span-1 flex justify-center">
-                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Actions</p>
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Actions</p>
                     </div>
                   </div>
 
                   {/* Table Body */}
-                  <div className="divide-y divide-border/30">
+                  <div className="divide-y divide-gray-100">
                     {filteredSubmissions.map((submission) => (
                       <div
                         key={submission.id}
-                        className="group grid grid-cols-12 gap-4 px-6 py-5 hover:bg-muted/20 transition-colors"
+                        className="group grid grid-cols-12 gap-4 px-6 py-5 hover:bg-gray-50 transition-colors"
                       >
                         {/* Applicant Info */}
                         <div className="col-span-2 flex flex-col justify-center">
-                          <p className="text-base font-semibold text-foreground mb-1 text-balance">{submission.name}</p>
-                          <p className="text-sm text-muted-foreground">@{submission.telegram_username || "N/A"}</p>
+                          <p className="text-base font-semibold text-[#1f2d3d] mb-1 text-balance">{submission.name}</p>
+                          <p className="text-sm text-gray-500">@{submission.telegram_username || "N/A"}</p>
                         </div>
 
                         {/* Contact */}
                         <div className="col-span-2 flex flex-col justify-center">
-                          <p className="text-base font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                            <Phone className="h-5 w-5 text-muted-foreground" />
+                          <p className="text-sm font-medium text-[#1f2d3d] mb-1 flex items-center gap-1.5">
+                            <Phone className="h-4 w-4 text-gray-400" />
                             {submission.phone}
                           </p>
-                          <p className="text-xs text-muted-foreground flex items-start gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+                          <p className="text-xs text-gray-500 flex items-start gap-1.5">
+                            <MapPin className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-gray-400" />
                             <span className="line-clamp-2">{submission.address}</span>
                           </p>
                         </div>
 
                         {/* Church */}
                         <div className="col-span-2 flex items-center">
-                          <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                            <Church className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                          <p className="text-sm font-medium text-[#1f2d3d] flex items-center gap-1.5">
+                            <Church className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             <span className="line-clamp-2">{submission.church}</span>
                           </p>
                         </div>
 
                         {/* Submitted Date */}
                         <div className="col-span-1 flex items-center">
-                          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <span className="text-md font-medium">{formatDate(submission.submitted_at)}</span>
+                          <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                            <span className="text-sm font-medium">{formatDate(submission.submitted_at)}</span>
                           </p>
                         </div>
 
@@ -774,21 +773,21 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             <Button
                               onClick={() => toggleAudio(submission.id, submission.audio_file_path || "")}
                               size="icon"
-                              className="w-10 h-10 rounded-xl bg-primary-foreground shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all"
+                              className="w-10 h-10 rounded-full bg-[#1f2d3d] text-white hover:bg-[#1f2d3d]/90 shadow-sm transition-all"
                               disabled={!submission.audio_file_path || loadingAudio === submission.id}
                             >
                               {loadingAudio === submission.id ? (
-                                <Loader2 className="h-4 w-4 text-primary animate-spin hover:text-black" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                               ) : playingAudio === submission.id ? (
-                                <Pause className="h-4 w-4 text-primary hover:text-black" />
+                                <Pause className="h-4 w-4" />
                               ) : (
-                                <Play className="h-4 w-4 ml-0.5 text-primary hover:text-black" />
+                                <Play className="h-4 w-4 ml-0.5" />
                               )}
                             </Button>
                             
                             {/* Audio Duration Display */}
                             {submission.audio_duration && (
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-gray-500">
                                 <span>{formatTime(submission.audio_duration)}</span>
                               </div>
                             )}
@@ -796,7 +795,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               {/* Progress Bar - Only show when playing */}
                               {playingAudio === submission.id && audioDuration > 0 && (
                                 <div className="w-full max-w-96">
-                                  <div className="w-full bg-muted rounded-full h-2">
+                                  <div className="w-full bg-gray-100 rounded-full h-1.5">
                                     <div 
                                       className="bg-primary h-2 rounded-full transition-all duration-300"
                                       style={{ width: `${audioProgress}%` }}
@@ -976,8 +975,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
           {/* Settings Tab */}
           <TabsContent value="settings">
-            <div className="rounded-2xl bg-gradient-to-br from-background to-muted/20 border border-border/50 p-6 space-y-6">
-              <h2 className="text-xl font-semibold">SMS Settings</h2>
+            <div className="rounded-xl bg-white border border-gray-200 p-6 space-y-6 shadow-sm">
+              <h2 className="text-xl font-semibold text-[#1f2d3d]">SMS Settings</h2>
               {smsSettings && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-4">
@@ -987,12 +986,18 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                         type="checkbox"
                         checked={smsSettings.enabled}
                         onChange={(e) => setSmsSettings(prev => prev ? { ...prev, enabled: e.target.checked } : prev)}
+                        className="h-4 w-4 rounded border-gray-300 text-[#e8cb85] focus:ring-[#e8cb85]"
                       />
-                      <Label htmlFor="sms-enabled">Enable SMS on approve/reject</Label>
+                      <Label htmlFor="sms-enabled" className="text-[#1f2d3d]">Enable SMS on approve/reject</Label>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="sender-id">Sender ID</Label>
-                      <Input id="sender-id" value={smsSettings.sender_id} onChange={(e) => setSmsSettings(prev => prev ? { ...prev, sender_id: e.target.value } : prev)} />
+                      <Label htmlFor="sender-id" className="text-[#1f2d3d]">Sender ID</Label>
+                      <Input 
+                        id="sender-id" 
+                        value={smsSettings.sender_id} 
+                        onChange={(e) => setSmsSettings(prev => prev ? { ...prev, sender_id: e.target.value } : prev)}
+                        className="bg-gray-50 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
+                      />
                     </div>
                     {!smsSettings.provider_configured && (
                       <p className="text-xs text-rose-600">Provider API key not configured on server.</p>
@@ -1000,14 +1005,26 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   </div>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="tpl-approved">Approved Template</Label>
-                      <Textarea id="tpl-approved" rows={3} value={smsSettings.template_approved} onChange={(e) => setSmsSettings(prev => prev ? { ...prev, template_approved: e.target.value } : prev)} />
-                      <p className="text-xs text-muted-foreground">Available placeholders: {`{name}`}</p>
+                      <Label htmlFor="tpl-approved" className="text-[#1f2d3d]">Approved Template</Label>
+                      <Textarea 
+                        id="tpl-approved" 
+                        rows={3} 
+                        value={smsSettings.template_approved} 
+                        onChange={(e) => setSmsSettings(prev => prev ? { ...prev, template_approved: e.target.value } : prev)}
+                        className="bg-gray-50 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
+                      />
+                      <p className="text-xs text-gray-500">Available placeholders: {`{name}`}</p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="tpl-rejected">Rejected Template</Label>
-                      <Textarea id="tpl-rejected" rows={3} value={smsSettings.template_rejected} onChange={(e) => setSmsSettings(prev => prev ? { ...prev, template_rejected: e.target.value } : prev)} />
-                      <p className="text-xs text-muted-foreground">Available placeholders: {`{name}`}</p>
+                      <Label htmlFor="tpl-rejected" className="text-[#1f2d3d]">Rejected Template</Label>
+                      <Textarea 
+                        id="tpl-rejected" 
+                        rows={3} 
+                        value={smsSettings.template_rejected} 
+                        onChange={(e) => setSmsSettings(prev => prev ? { ...prev, template_rejected: e.target.value } : prev)}
+                        className="bg-gray-50 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
+                      />
+                      <p className="text-xs text-gray-500">Available placeholders: {`{name}`}</p>
                     </div>
                   </div>
                 </div>
@@ -1036,29 +1053,41 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       setIsSavingSms(false)
                     }
                   }}
+                  className="bg-[#1f2d3d] text-white hover:bg-[#1f2d3d]/90"
                 >
                   Save Settings
                 </Button>
               </div>
-              <div className="border-t border-border/50 pt-6 space-y-3">
-                <h3 className="font-medium">Send Test SMS</h3>
+              <div className="border-t border-gray-200 pt-6 space-y-3">
+                <h3 className="font-medium text-[#1f2d3d]">Send Test SMS</h3>
                 <div className="flex gap-3 max-w-lg">
-                  <Input placeholder="Phone number" id="test-phone" onKeyDown={() => {}} />
-                  <Button onClick={async () => {
-                    const input = document.getElementById('test-phone') as HTMLInputElement | null
-                    const phone = input?.value
-                    if (!phone) return
-                    try {
-                      const resp = await fetch(`${API_BASE_URL}/sms/test`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-                        body: JSON.stringify({ phone, message: 'Test SMS from Chenaniah' })
-                      })
-                      await resp.json()
-                    } catch (e) {
-                      console.error('Failed to send test SMS', e)
-                    }
-                  }}>Send</Button>
+                  <Input 
+                    placeholder="Phone number" 
+                    id="test-phone" 
+                    onKeyDown={() => {}} 
+                    className="bg-gray-50 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
+                  />
+                  <Button 
+                    onClick={async () => {
+                      const input = document.getElementById('test-phone') as HTMLInputElement | null
+                      const phone = input?.value
+                      if (!phone) return
+                      try {
+                        const resp = await fetch(`${API_BASE_URL}/sms/test`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+                          body: JSON.stringify({ phone, message: 'Test SMS from Chenaniah' })
+                        })
+                        await resp.json()
+                      } catch (e) {
+                        console.error('Failed to send test SMS', e)
+                      }
+                    }}
+                    variant="outline"
+                    className="border-gray-200 hover:bg-gray-50 text-[#1f2d3d]"
+                  >
+                    Send
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1067,14 +1096,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
         {/* Pagination Controls */}
         {!isLoading && filteredSubmissions.length > 0 && (
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-gradient-to-br from-background to-muted/20 border border-border/50 rounded-2xl">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
             {/* Page Size Selector */}
             <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">Show:</span>
+              <span className="text-sm text-gray-500">Show:</span>
               <select
                 value={pagination.limit}
                 onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                className="px-3 py-2 bg-background border border-border/50 rounded-lg text-sm focus:border-amber-500/50 focus:ring-amber-500/20 transition-all"
+                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-[#e8cb85] focus:ring-[#e8cb85]/20 transition-all text-[#1f2d3d]"
               >
                 <option value={10}>10 per page</option>
                 <option value={20}>20 per page</option>
@@ -1084,7 +1113,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </div>
 
             {/* Pagination Info */}
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-gray-500">
               Showing {((pagination.current_page - 1) * pagination.limit) + 1} to{' '}
               {Math.min(pagination.current_page * pagination.limit, pagination.total_count)} of{' '}
               {pagination.total_count} submissions
@@ -1097,7 +1126,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_prev}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
+                className="h-9 w-9 p-0 rounded-lg border-gray-200 hover:bg-gray-50 text-[#1f2d3d]"
               >
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
@@ -1106,7 +1135,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_prev}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
+                className="h-9 w-9 p-0 rounded-lg border-gray-200 hover:bg-gray-50 text-[#1f2d3d]"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -1131,10 +1160,10 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       onClick={() => handlePageChange(pageNum)}
                       size="sm"
                       variant={pageNum === pagination.current_page ? "default" : "outline"}
-                      className={`h-9 w-9 p-0 rounded-xl transition-all ${
+                      className={`h-9 w-9 p-0 rounded-lg transition-all ${
                         pageNum === pagination.current_page 
-                          ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20" 
-                          : "border-border/50 hover:bg-primary/10 hover:border-primary/50"
+                          ? "bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 text-white shadow-sm" 
+                          : "border-gray-200 hover:bg-gray-50 text-[#1f2d3d]"
                       }`}
                     >
                       {pageNum}
@@ -1148,7 +1177,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_next}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
+                className="h-9 w-9 p-0 rounded-lg border-gray-200 hover:bg-gray-50 text-[#1f2d3d]"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -1157,7 +1186,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 disabled={!pagination.has_next}
                 size="sm"
                 variant="outline"
-                className="h-9 w-9 p-0 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/50 transition-all"
+                className="h-9 w-9 p-0 rounded-lg border-gray-200 hover:bg-gray-50 text-[#1f2d3d]"
               >
                 <ChevronsRight className="h-4 w-4" />
               </Button>
@@ -1167,17 +1196,16 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       </div>
 
       {selectedSubmission && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
-          <div className="w-full max-w-lg rounded-3xl bg-gradient-to-br from-background to-muted/30 border border-border/50 shadow-2xl shadow-black/20 animate-in zoom-in-95 duration-300">
-            <div className="p-8 pb-6 border-b border-border/50">
-              {/* <h2 className="text-2xl font-bold text-foreground mb-2">Review Application</h2> */}
-              <p className="text-xl text-muted-foreground font-light">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
+          <div className="w-full max-w-lg rounded-2xl bg-white border border-gray-200 shadow-xl animate-in zoom-in-95 duration-300">
+            <div className="p-8 pb-6 border-b border-gray-200">
+              <p className="text-xl text-[#1f2d3d] font-medium">
                 {selectedSubmission.name} • {selectedSubmission.church}
               </p>
             </div>
             <div className="p-8 space-y-6">
               <div>
-                <Label htmlFor="comments" className="text-sm font-semibold mb-3 block uppercase tracking-wide">
+                <Label htmlFor="comments" className="text-sm font-semibold mb-3 block uppercase tracking-wide text-gray-500">
                   Comments (optional)
                 </Label>
                 <Textarea
@@ -1186,20 +1214,20 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Add any comments about this application..."
                   rows={4}
-                  className="resize-none rounded-xl bg-muted/30 border-border/50 focus:border-violet-500/50 focus:ring-violet-500/20"
+                  className="resize-none rounded-xl bg-gray-50 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
                 />
               </div>
               <div className="flex gap-3">
                 <Button
                   onClick={() => handleStatusUpdate(selectedSubmission.id, "approved")}
-                  className="flex-1 h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/40 transition-all"
+                  className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-sm transition-all"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve
                 </Button>
                 <Button
                   onClick={() => handleStatusUpdate(selectedSubmission.id, "rejected")}
-                  className="flex-1 h-12 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 text-white font-semibold rounded-xl shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/40 transition-all"
+                  className="flex-1 h-12 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-sm transition-all"
                   variant="destructive"
                 >
                   <XCircle className="h-4 w-4 mr-2" />
@@ -1211,7 +1239,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   setSelectedSubmission(null)
                   setComments("")
                 }}
-                className="w-full h-12 rounded-xl font-semibold hover:bg-muted/50"
+                className="w-full h-12 rounded-xl font-semibold hover:bg-gray-50 text-gray-600 border-gray-200"
                 variant="outline"
               >
                 Cancel

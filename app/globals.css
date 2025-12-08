@@ -3,24 +3,24 @@
 @theme {
   /* Chenaniah.org brand colors */
   --color-background: #ffffff;
-  --color-foreground: #212E3E;
-  --color-card: #F7F2E7;
-  --color-card-foreground: #212E3E;
+  --color-foreground: #1f2d3d;
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2d3d;
   --color-popover: #ffffff;
-  --color-popover-foreground: #212E3E;
-  --color-primary: #E5C985;
-  --color-primary-foreground: #212E3E;
-  --color-secondary: #7A3B3B;
+  --color-popover-foreground: #1f2d3d;
+  --color-primary: #e8cb85;
+  --color-primary-foreground: #1f2d3d;
+  --color-secondary: #1f2d3d;
   --color-secondary-foreground: #ffffff;
-  --color-muted: #F7F2E7;
-  --color-muted-foreground: #212E3E;
-  --color-accent: #7A3B3B;
-  --color-accent-foreground: #ffffff;
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #1f2d3d;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e5e7eb;
-  --color-input: #F7F2E7;
-  --color-ring: #E5C985;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #e8cb85;
   
   /* Radius */
   --radius: 0.5rem;

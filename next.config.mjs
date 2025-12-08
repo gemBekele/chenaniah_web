@@ -37,6 +37,10 @@ const nextConfig = {
       },
     ];
   },
+  // Experimental features for better CSS handling
+  experimental: {
+    optimizeCss: false,
+  },
 };
 
 export default nextConfig;

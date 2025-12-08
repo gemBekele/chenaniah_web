@@ -59,7 +59,9 @@ export function Header() {
 
           {/* CTA Button */}
           <div className="hidden lg:block">
-            <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]" onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}>Join the choir</Button>
+            <Link href="/login">
+              <Button className="bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E]">Login</Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -90,12 +92,13 @@ export function Header() {
                     {item.name}
                   </Link>
                 ))}
-                <Button 
-                  className="w-fit bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] mt-2" 
-                  onClick={() => window.open("https://t.me/Chenaniah_Screening_Bot", "_blank")}
-                >
-                  Join the choir
-                </Button>
+                <Link href="/login">
+                  <Button 
+                    className="w-fit bg-[#E5C985] hover:bg-[#E5C985]/90 text-[#212E3E] mt-2"
+                  >
+                    Login
+                  </Button>
+                </Link>
               </div>
             </nav>
           </div>
