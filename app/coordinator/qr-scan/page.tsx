@@ -228,44 +228,65 @@ export default function QRScanPage() {
       const data = await response.json()
       console.log("[Sync] API response data:", data)
       
-      if (data.success) {
+      // Check if we have any successful records (newly created or already recorded)
+      const successCount = data.success || data.successCount || 0
+      const alreadyRecordedCount = (data.alreadyRecorded && data.alreadyRecorded.length) || 0
+      const hasSuccessfulRecords = successCount > 0 || alreadyRecordedCount > 0
+      
+      if (hasSuccessfulRecords) {
         console.log("[Sync] Marking records as synced...")
+        // Mark all records as synced if they were successfully processed
+        // (either newly created or already existed)
         for (const record of records) {
           if (record.id) await markRecordAsSynced(record.id)
         }
         console.log("[Sync] Updating offline count...")
         await updateOfflineCount()
         
-        console.log("[Sync] Scanner state before loadAttendance - isScanning:", isScanningRef.current)
-        if (scannerRef.current) {
-          try {
-            const state = scannerRef.current.getState()
-            console.log("[Sync] Scanner state before loadAttendance:", state)
-          } catch (e) {
-            console.log("[Sync] Could not get scanner state:", e)
+        // Update "Verifying..." message immediately if we have results
+        if (data.results && data.results.length > 0) {
+          const firstResult = data.results[0]
+          if (firstResult.student) {
+            setLastScanned(prev => {
+              if (prev?.name === "Verifying...") {
+                return {
+                  ...prev,
+                  name: firstResult.student.fullNameEnglish || firstResult.student.username || "Unknown"
+                }
+              }
+              return prev
+            })
           }
         }
         
+        // Always reload attendance to update the UI, even if some records failed
         if (currentSession) {
           console.log("[Sync] Loading attendance for session:", currentSession.id)
           loadAttendance(currentSession.id)
         }
         
-        console.log("[Sync] Scanner state after loadAttendance - isScanning:", isScanningRef.current)
-        if (scannerRef.current) {
-          try {
-            const state = scannerRef.current.getState()
-            console.log("[Sync] Scanner state after loadAttendance:", state)
-          } catch (e) {
-            console.log("[Sync] Could not get scanner state:", e)
-          }
+        if (successCount > 0) {
+          console.log("[Sync] Successfully synced", successCount, "new records")
         }
-        
-        if (data.successCount > 0) {
-          console.log("[Sync] Successfully synced", data.successCount, "records")
+        if (alreadyRecordedCount > 0) {
+          console.log("[Sync]", alreadyRecordedCount, "records were already recorded (treated as success)")
+        }
+        if (data.errors && data.errors.length > 0) {
+          console.warn("[Sync] Some records failed:", data.errors)
+        }
+      } else if (data.errors && data.errors.length > 0) {
+        // If all records failed, log the errors
+        console.warn("[Sync] All records failed:", data.errors)
+        // Still try to reload attendance in case some records were created
+        if (currentSession) {
+          loadAttendance(currentSession.id)
         }
       } else {
         console.warn("[Sync] Sync was not successful:", data)
+        // Still reload attendance to be safe
+        if (currentSession) {
+          loadAttendance(currentSession.id)
+        }
       }
     } catch (error) {
       console.error("[Sync] ✗ Sync error:", error)
