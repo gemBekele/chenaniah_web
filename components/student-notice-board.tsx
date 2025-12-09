@@ -16,6 +16,8 @@ interface Notice {
   active: boolean
   createdAt: string
   updatedAt: string
+  isPersonal?: boolean
+  targetStudentId?: number | null
 }
 
 export default function StudentNoticeBoard() {
@@ -26,6 +28,31 @@ export default function StudentNoticeBoard() {
   useEffect(() => {
     const fetchNotices = async () => {
       try {
+        const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+        
+        // If we have a token, try to get personal notices too
+        if (token) {
+          try {
+            // Parse the token to get user ID
+            const payload = JSON.parse(atob(token.split('.')[1]))
+            const userId = payload.userId
+            
+            const response = await fetch(`${API_BASE_URL}/notices/student/${userId}`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            })
+            
+            if (response.ok) {
+              const data = await response.json()
+              setNotices(data.notices || [])
+              setLoading(false)
+              return
+            }
+          } catch (e) {
+            console.error("Failed to fetch personal notices, falling back to public", e)
+          }
+        }
+        
+        // Fallback to public notices only
         const response = await fetch(`${API_BASE_URL}/notices`)
         if (response.ok) {
           const data = await response.json()
@@ -113,7 +140,14 @@ export default function StudentNoticeBoard() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
-                  <h4 className="font-bold text-[#1f2d3d] text-base">{notice.title}</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-[#1f2d3d] text-base">{notice.title}</h4>
+                    {notice.isPersonal && (
+                      <span className="bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                        Personal
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-gray-400 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {format(new Date(notice.createdAt), 'MMM d, yyyy')}

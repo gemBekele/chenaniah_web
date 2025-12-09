@@ -35,6 +35,9 @@ import StudentResources from '@/components/student-resources'
 import StudentPayments from '@/components/student-payments'
 import StudentIDCard from '@/components/student-id-card'
 import StudentNoticeBoard from '@/components/student-notice-board'
+import StudentNotes from '@/components/student-notes'
+import StudentTeams from '@/components/student-teams'
+import StudentPrayer from '@/components/student-prayer'
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -216,6 +219,9 @@ export default function StudentDashboardPage() {
               <NavItem id="assignments" label="Assignments" />
               {/* <NavItem id="payments" label="Contributions" /> */}
               <NavItem id="resources" label="Resources" />
+              <NavItem id="notes" label="Notes" />
+              <NavItem id="teams" label="Teams" />
+              <NavItem id="prayer" label="Prayer" />
               <NavItem id="profile" label="My Profile" />
             </nav>
           </div>
@@ -260,6 +266,9 @@ export default function StudentDashboardPage() {
               <NavItem id="assignments" label="Assignments" />
               {/* <NavItem id="payments" label="Contributions" /> */}
               <NavItem id="resources" label="Resources" />
+              <NavItem id="notes" label="Notes" />
+              <NavItem id="teams" label="Teams" />
+              <NavItem id="prayer" label="Prayer" />
               <NavItem id="profile" label="My Profile" />
             </nav>
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
@@ -529,6 +538,36 @@ export default function StudentDashboardPage() {
               <p className="text-gray-500 text-lg">Access study materials and downloads.</p>
             </div>
             <StudentResources user={user} />
+          </div>
+        )}
+
+        {activeTab === "notes" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Session Notes</h1>
+              <p className="text-gray-500 text-lg">Share and view notes from training sessions.</p>
+            </div>
+            <StudentNotes />
+          </div>
+        )}
+
+        {activeTab === "teams" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Teams</h1>
+              <p className="text-gray-500 text-lg">Join teams and view team notices.</p>
+            </div>
+            <StudentTeams />
+          </div>
+        )}
+
+        {activeTab === "prayer" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Chain Prayer</h1>
+              <p className="text-gray-500 text-lg">Claim your weekly prayer time slot.</p>
+            </div>
+            <StudentPrayer />
           </div>
         )}
       </main>

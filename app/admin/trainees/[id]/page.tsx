@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, ArrowLeft, User, FileText, DollarSign, CheckCircle2, XCircle, Clock, Save, ChevronDown, ChevronUp, Phone, MapPin, Calendar, Shield, GraduationCap } from "lucide-react"
+import { Loader2, ArrowLeft, User, FileText, DollarSign, CheckCircle2, XCircle, Clock, Save, ChevronDown, ChevronUp, Phone, MapPin, Calendar, Shield, GraduationCap, Users, Bell, Plus, Trash2 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -15,6 +15,8 @@ import { toast } from "sonner"
 import { PDFViewer } from "@/components/pdf-viewer"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Textarea } from "@/components/ui/textarea"
+import { format } from "date-fns"
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -81,10 +83,16 @@ export default function TraineeDetailPage() {
   const [grade, setGrade] = useState("")
   const [feedback, setFeedback] = useState("")
   const [pdfViewer, setPdfViewer] = useState<{ url: string; title: string } | null>(null)
+  const [studentTeams, setStudentTeams] = useState<Array<{id: number; name: string; color: string; joinReason: string; joinedAt: string}>>([])  
+  const [personalNotices, setPersonalNotices] = useState<Array<{id: number; title: string; content: string; type: string; createdAt: string}>>([])  
+  const [newNotice, setNewNotice] = useState({ title: "", content: "", type: "info" })
+  const [addingNotice, setAddingNotice] = useState(false)
 
   useEffect(() => {
     if (params.id) {
       loadTraineeStats()
+      loadStudentTeams()
+      loadPersonalNotices()
     }
   }, [params.id])
 
@@ -232,6 +240,115 @@ export default function TraineeDetailPage() {
       setPdfViewer({ url, title })
     } else {
       window.open(url, '_blank')
+    }
+  }
+
+  const loadStudentTeams = async () => {
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!token) return
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/teams/student/${params.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setStudentTeams(data.teams || [])
+      }
+    } catch (err) {
+      console.error("Error loading student teams:", err)
+    }
+  }
+
+  const loadPersonalNotices = async () => {
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!token) return
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/notices/student/${params.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Filter to only get personal notices for this student
+        setPersonalNotices((data.notices || []).filter((n: any) => n.isPersonal))
+      }
+    } catch (err) {
+      console.error("Error loading personal notices:", err)
+    }
+  }
+
+  const createPersonalNotice = async () => {
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!token) return
+
+    if (!newNotice.title.trim() || !newNotice.content.trim()) {
+      toast.error('Title and content are required')
+      return
+    }
+
+    setAddingNotice(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/notices/personal`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...newNotice,
+          studentId: params.id,
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('Personal notice created')
+        setNewNotice({ title: "", content: "", type: "info" })
+        loadPersonalNotices()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to create notice')
+      }
+    } catch (err) {
+      console.error("Error creating personal notice:", err)
+      toast.error('Failed to create notice')
+    } finally {
+      setAddingNotice(false)
+    }
+  }
+
+  const deletePersonalNotice = async (noticeId: number) => {
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!token) return
+
+    if (!confirm('Delete this personal notice?')) return
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/notices/${noticeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        toast.success('Notice deleted')
+        loadPersonalNotices()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to delete notice')
+      }
+    } catch (err) {
+      toast.error('Failed to delete notice')
     }
   }
 
@@ -425,6 +542,12 @@ export default function TraineeDetailPage() {
                   <TabsTrigger value="essay" className="px-6 py-2 data-[state=active]:bg-gray-100">Overview</TabsTrigger>
                   <TabsTrigger value="assignments" className="px-6 py-2 data-[state=active]:bg-gray-100">Assignments</TabsTrigger>
                   <TabsTrigger value="payments" className="px-6 py-2 data-[state=active]:bg-gray-100">Payments</TabsTrigger>
+                  <TabsTrigger value="teams" className="px-6 py-2 data-[state=active]:bg-gray-100">
+                    Teams {studentTeams.length > 0 && <span className="ml-1 bg-blue-100 text-blue-700 text-xs px-1.5 rounded-full">{studentTeams.length}</span>}
+                  </TabsTrigger>
+                  <TabsTrigger value="notices" className="px-6 py-2 data-[state=active]:bg-gray-100">
+                    Notices {personalNotices.length > 0 && <span className="ml-1 bg-purple-100 text-purple-700 text-xs px-1.5 rounded-full">{personalNotices.length}</span>}
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="essay" className="space-y-4">
@@ -617,6 +740,140 @@ export default function TraineeDetailPage() {
                               ))}
                             </tbody>
                           </table>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="teams" className="space-y-4">
+                  <Card className="border-none shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Users className="h-5 w-5 text-muted-foreground" />
+                        Joined Teams
+                      </CardTitle>
+                      <CardDescription>Teams this trainee has joined</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {studentTeams.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground bg-gray-50 rounded-lg border border-dashed">
+                          <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                          <p>Not a member of any teams</p>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {studentTeams.map((team) => (
+                            <div 
+                              key={team.id} 
+                              className="bg-gray-50 rounded-lg p-4"
+                              style={{ borderLeftWidth: '4px', borderLeftColor: team.color }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold text-foreground">{team.name}</h4>
+                                <span className="text-xs text-muted-foreground">
+                                  Joined {format(new Date(team.joinedAt), 'MMM d, yyyy')}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground italic">
+                                Reason: "{team.joinReason}"
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="notices" className="space-y-4">
+                  <Card className="border-none shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Bell className="h-5 w-5 text-muted-foreground" />
+                        Personal Notices
+                      </CardTitle>
+                      <CardDescription>Private notices visible only to this trainee</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Create Notice Form */}
+                      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                        <h4 className="font-medium text-sm text-foreground">Create New Notice</h4>
+                        <Input
+                          placeholder="Notice title"
+                          value={newNotice.title}
+                          onChange={(e) => setNewNotice({ ...newNotice, title: e.target.value })}
+                        />
+                        <Textarea
+                          placeholder="Notice content..."
+                          value={newNotice.content}
+                          onChange={(e) => setNewNotice({ ...newNotice, content: e.target.value })}
+                          rows={3}
+                        />
+                        <div className="flex items-center gap-3">
+                          <Select value={newNotice.type} onValueChange={(v) => setNewNotice({ ...newNotice, type: v })}>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="info">Info</SelectItem>
+                              <SelectItem value="warning">Warning</SelectItem>
+                              <SelectItem value="success">Success</SelectItem>
+                              <SelectItem value="urgent">Urgent</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button
+                            onClick={createPersonalNotice}
+                            disabled={addingNotice}
+                            size="sm"
+                          >
+                            {addingNotice ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                              <Plus className="h-4 w-4 mr-2" />
+                            )}
+                            Add Notice
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Existing Notices */}
+                      {personalNotices.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                          <p>No personal notices for this trainee</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {personalNotices.map((notice) => (
+                            <div 
+                              key={notice.id} 
+                              className={`rounded-lg p-4 border-l-4 ${
+                                notice.type === 'urgent' ? 'bg-red-50 border-l-red-500' :
+                                notice.type === 'warning' ? 'bg-amber-50 border-l-amber-500' :
+                                notice.type === 'success' ? 'bg-green-50 border-l-green-500' :
+                                'bg-blue-50 border-l-blue-500'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between mb-1">
+                                <h4 className="font-semibold text-foreground">{notice.title}</h4>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">
+                                    {format(new Date(notice.createdAt), 'MMM d, yyyy')}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deletePersonalNotice(notice.id)}
+                                    className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{notice.content}</p>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </CardContent>

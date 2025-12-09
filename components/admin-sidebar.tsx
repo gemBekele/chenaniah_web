@@ -91,10 +91,28 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
       matchPaths: ['/admin/resources'] 
     },
     { 
+      path: '/admin/notes', 
+      label: 'Notes', 
+      icon: FileText,
+      matchPaths: ['/admin/notes'] 
+    },
+    { 
       path: '/admin/notices', 
       label: 'Notices', 
       icon: Bell,
       matchPaths: ['/admin/notices'] 
+    },
+    { 
+      path: '/admin/teams', 
+      label: 'Teams', 
+      icon: Users,
+      matchPaths: ['/admin/teams'] 
+    },
+    { 
+      path: '/admin/prayer', 
+      label: 'Prayer', 
+      icon: Clock,
+      matchPaths: ['/admin/prayer'] 
     },
   ]
 
