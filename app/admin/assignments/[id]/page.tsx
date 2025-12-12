@@ -21,7 +21,7 @@ interface AssignmentSubmission {
   id: number
   studentId: number
   assignmentId: number
-  filePath?: string
+  filePaths?: string[]
   text?: string
   grade?: number
   feedback?: string
@@ -260,37 +260,77 @@ export default function AssignmentAssessmentPage() {
                       </div>
                     )}
 
-                    {submission.filePath && (
+                    {submission.filePaths && submission.filePaths.length > 0 && (
                       <div>
-                        <Label className="text-sm font-medium">File Submission</Label>
-                        <div className="mt-2 flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openFile(submission.filePath!, assignment?.title || 'Assignment')}
-                            className="gap-2"
-                          >
-                            {isPDF(submission.filePath) ? (
-                              <>
-                                <Eye className="h-4 w-4" />
-                                View PDF
-                              </>
-                            ) : (
-                              <>
-                                <Eye className="h-4 w-4" />
-                                Open File
-                              </>
-                            )}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => downloadFile(submission.filePath!)}
-                            className="gap-2"
-                          >
-                            <Download className="h-4 w-4" />
-                            Download
-                          </Button>
+                        <Label className="text-sm font-medium">File Submission{submission.filePaths.length > 1 ? 's' : ''}</Label>
+                        <div className="mt-2 space-y-3">
+                          {submission.filePaths.map((filePath, index) => {
+                            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(filePath);
+                            return (
+                              <div key={index} className="border border-border/40 rounded-lg p-3 bg-muted/30">
+                                {isImage ? (
+                                  <div className="space-y-2">
+                                    <img
+                                      src={`${API_BASE_URL}/${filePath}`}
+                                      alt={`Submission ${index + 1}`}
+                                      className="max-w-full max-h-96 object-contain rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                                      onClick={() => window.open(`${API_BASE_URL}/${filePath}`, '_blank')}
+                                    />
+                                    <div className="flex gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => window.open(`${API_BASE_URL}/${filePath}`, '_blank')}
+                                        className="gap-2"
+                                      >
+                                        <Eye className="h-4 w-4" />
+                                        View Image
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => downloadFile(filePath)}
+                                        className="gap-2"
+                                      >
+                                        <Download className="h-4 w-4" />
+                                        Download
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => openFile(filePath, `${assignment?.title || 'Assignment'} - File ${index + 1}`)}
+                                      className="gap-2"
+                                    >
+                                      {isPDF(filePath) ? (
+                                        <>
+                                          <Eye className="h-4 w-4" />
+                                          View PDF
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Eye className="h-4 w-4" />
+                                          Open File
+                                        </>
+                                      )}
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => downloadFile(filePath)}
+                                      className="gap-2"
+                                    >
+                                      <Download className="h-4 w-4" />
+                                      Download
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
