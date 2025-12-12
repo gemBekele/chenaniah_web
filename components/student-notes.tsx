@@ -521,7 +521,7 @@ export default function StudentNotes() {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9 border border-gray-100">
                       {firstNote.student?.photoPath ? (
-                        <AvatarImage src={`${API_BASE_URL}${firstNote.student.photoPath}`} objectFit="cover" />
+                        <AvatarImage src={`${API_BASE_URL}${firstNote.student.photoPath}`} className="object-cover" />
                       ) : (
                         <AvatarFallback className="bg-gray-50 text-gray-400">
                           <User className="h-4 w-4" />
