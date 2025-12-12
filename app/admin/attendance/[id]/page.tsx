@@ -6,6 +6,7 @@ import { AdminLayout } from "@/components/admin-layout"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import {
   ArrowLeft,
   Calendar,
@@ -15,6 +16,7 @@ import {
   Users,
   Loader2,
   CheckCircle,
+  Search,
 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { format } from "date-fns"
@@ -62,6 +64,7 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
   const [session, setSession] = useState<Session | null>(null)
   const [stats, setStats] = useState<SessionStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
@@ -168,6 +171,15 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
       </AdminLayout>
     )
   }
+
+  const filteredRecords = session?.attendanceRecords?.filter(record => {
+    const searchLower = searchQuery.toLowerCase()
+    return (
+      record.student.fullNameEnglish?.toLowerCase().includes(searchLower) ||
+      record.student.fullNameAmharic?.toLowerCase().includes(searchLower) ||
+      record.student.username.toLowerCase().includes(searchLower)
+    )
+  }) || []
 
   return (
     <AdminLayout onLogout={handleLogout}>
@@ -280,8 +292,18 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
             </Badge>
           </div>
 
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search students..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 max-w-sm bg-background border-border/60 focus:border-primary/50"
+            />
+          </div>
+
           <Card className="border-border/40 shadow-sm overflow-hidden bg-card">
-            {session.attendanceRecords && session.attendanceRecords.length > 0 ? (
+            {filteredRecords.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-muted/40 text-muted-foreground font-medium border-b border-border/40">
@@ -293,7 +315,7 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
-                    {session.attendanceRecords.map((record) => (
+                    {filteredRecords.map((record) => (
                       <tr key={record.id} className="hover:bg-muted/20 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -326,7 +348,7 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
                 <div className="bg-muted/50 p-3 rounded-full mb-3">
                   <Users className="h-6 w-6 opacity-40" />
                 </div>
-                <p>No attendance records yet</p>
+                <p>{session.attendanceRecords && session.attendanceRecords.length > 0 ? "No matching students found" : "No attendance records yet"}</p>
               </div>
             )}
           </Card>
