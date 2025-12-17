@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Users, UserPlus, LogOut, Bell, ChevronRight, Calendar, MessageCircle, Search, ArrowRight } from "lucide-react"
+import { Users, UserPlus, LogOut, Bell, ChevronRight, Calendar, MessageCircle, Search, ArrowRight, Loader2 } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -94,7 +94,7 @@ export default function StudentTeams() {
   const fetchTeamNotices = async (teamId: number) => {
     setLoadingNotices(true)
     try {
-      const token = localStorage.getItem('studentToken')
+      const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
       if (!token) return
 
       const response = await fetch(`${API_BASE_URL}/teams/${teamId}/notices`, {
