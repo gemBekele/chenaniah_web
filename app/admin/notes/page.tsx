@@ -62,6 +62,7 @@ export default function AdminNotesPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [noteType, setNoteType] = useState<"all" | "text" | "image">("all")
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest")
+  const [viewingImage, setViewingImage] = useState<string | null>(null)
   
   // Create Note State
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -500,13 +501,20 @@ export default function AdminNotesPage() {
                           )}
                           
                           {note.type === 'image' && note.imagePath && (
-                            <div className="relative rounded-xl overflow-hidden border border-gray-100 bg-gray-50 group/image">
+                            <div
+                              className="relative rounded-xl overflow-hidden border border-gray-100 bg-gray-50 group/image cursor-pointer"
+                              onClick={() => setViewingImage(`${API_BASE_URL}${note.imagePath}`)}
+                            >
                               <img 
                                 src={`${API_BASE_URL}${note.imagePath}`} 
                                 alt="Attachment" 
                                 className="w-full h-auto max-h-60 object-contain"
                               />
-                              <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/5 transition-colors" />
+                              <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover/image:opacity-100">
+                                <span className="bg-black/60 text-white text-xs px-3 py-1.5 rounded-full">
+                                  Click to expand
+                                </span>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -619,6 +627,31 @@ export default function AdminNotesPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Image Viewer Modal */}
+        {viewingImage && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+            onClick={() => setViewingImage(null)}
+          >
+            <div className="relative max-w-5xl w-full h-full flex items-center justify-center p-4">
+              <img
+                src={viewingImage}
+                alt="Full size note"
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 text-white/70 hover:text-white hover:bg-white/10 rounded-full h-10 w-10"
+                onClick={() => setViewingImage(null)}
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </AdminLayout>
   )

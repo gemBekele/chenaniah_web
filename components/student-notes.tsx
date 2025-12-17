@@ -412,7 +412,7 @@ export default function StudentNotes() {
               variant={noteType === 'text' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setNoteType('text')}
-              className={`rounded-full ${noteType === 'text' ? 'bg-[#1f2d3d] hover:bg-[#2a3f54]' : 'text-gray-500 hover:text-[#1f2d3d] hover:bg-gray-100'}`}
+              className={`rounded-full ${noteType === 'text' ? 'bg-[#1f2d3d] hover:bg-[#2a3f54] text-white' : 'text-gray-500 hover:text-[#1f2d3d] hover:bg-gray-100'}`}
             >
               <FileText className="h-4 w-4 mr-2" />
               Text Note
@@ -421,7 +421,7 @@ export default function StudentNotes() {
               variant={noteType === 'image' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setNoteType('image')}
-              className={`rounded-full ${noteType === 'image' ? 'bg-[#1f2d3d] hover:bg-[#2a3f54]' : 'text-gray-500 hover:text-[#1f2d3d] hover:bg-gray-100'}`}
+              className={`rounded-full ${noteType === 'image' ? 'bg-[#1f2d3d] hover:bg-[#2a3f54] text-white' : 'text-gray-500 hover:text-[#1f2d3d] hover:bg-gray-100'}`}
             >
               <Image className="h-4 w-4 mr-2" />
               Image Note
@@ -482,7 +482,7 @@ export default function StudentNotes() {
               size="icon"
               onClick={handleSubmitNote}
               disabled={submitting || (!newNoteContent.trim() && noteType === 'text') || (selectedImages.length === 0 && noteType === 'image')}
-              className="absolute bottom-2 right-2 h-8 w-8 bg-[#1f2d3d] hover:bg-[#2a3f54] rounded-lg shadow-sm"
+              className="absolute bottom-2 right-2 h-8 w-8 bg-[#1f2d3d] hover:bg-[#2a3f54] text-white rounded-lg shadow-sm"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
