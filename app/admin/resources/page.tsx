@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,7 +38,8 @@ export default function AdminResourcesPage() {
     type: "file" as "file" | "link",
     url: "",
   })
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -80,29 +81,61 @@ export default function AdminResourcesPage() {
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error('File size must be less than 50MB')
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files)
+      
+      // Validate file sizes
+      const oversizedFiles = newFiles.filter(file => file.size > 50 * 1024 * 1024)
+      if (oversizedFiles.length > 0) {
+        toast.error(`${oversizedFiles.length} file(s) exceed the 50MB limit`)
+        // Reset input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
         return
       }
-      setSelectedFile(file)
-      if (!formData.title) {
-        setFormData({ ...formData, title: file.name })
+      
+      // Add new files to existing list (accumulate)
+      setSelectedFiles(prev => [...prev, ...newFiles])
+      
+      // Set title only for first single file
+      if (selectedFiles.length === 0 && newFiles.length === 1 && !formData.title) {
+        setFormData({ ...formData, title: newFiles[0].name })
       }
+      
+      // Reset input to allow selecting the same file again or adding more
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const removeFile = (index: number) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index)
+    setSelectedFiles(newFiles)
+    if (newFiles.length === 0) {
+      setFormData(prev => ({ ...prev, title: "" }))
+    }
+  }
+
+  const clearAllFiles = () => {
+    setSelectedFiles([])
+    setFormData(prev => ({ ...prev, title: "" }))
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.title) {
+    if (selectedFiles.length <= 1 && !formData.title) {
       toast.error('Title is required')
       return
     }
 
-    if (formData.type === 'file' && !selectedFile) {
-      toast.error('Please select a file')
+    if (formData.type === 'file' && selectedFiles.length === 0) {
+      toast.error('Please select at least one file')
       return
     }
 
@@ -121,11 +154,32 @@ export default function AdminResourcesPage() {
     setUploadingFile(true)
 
     try {
-      if (formData.type === 'file' && selectedFile) {
+      if (formData.type === 'file' && selectedFiles.length > 0) {
         const uploadFormData = new FormData()
-        uploadFormData.append('file', selectedFile)
-        uploadFormData.append('title', formData.title)
-        uploadFormData.append('description', formData.description || '')
+        
+        // Append all files
+        selectedFiles.forEach(file => {
+          uploadFormData.append('files', file)
+        })
+        
+        // For multiple files, send titles and descriptions as arrays
+        // Use custom title if provided, otherwise use filename
+        const titles = selectedFiles.map((file, index) => {
+          if (selectedFiles.length === 1) {
+            return formData.title || file.name
+          }
+          // For multiple files, use filename but allow title as prefix if provided
+          if (formData.title && formData.title !== `${selectedFiles.length} files`) {
+            // Use the title as a base, append filename or number
+            return `${formData.title} - ${file.name}`
+          }
+          return file.name
+        })
+        // Use description for all files in the batch, or empty
+        const descriptions = selectedFiles.map(() => formData.description || '')
+        
+        uploadFormData.append('titles', JSON.stringify(titles))
+        uploadFormData.append('descriptions', JSON.stringify(descriptions))
 
         const response = await fetch(`${API_BASE_URL}/admin/resources/upload`, {
           method: 'POST',
@@ -137,13 +191,17 @@ export default function AdminResourcesPage() {
 
         const data = await response.json()
         if (data.success) {
-          toast.success('Resource uploaded successfully')
+          const count = data.count || data.resources?.length || selectedFiles.length
+          toast.success(`${count} resource${count > 1 ? 's' : ''} uploaded successfully`)
           setFormData({ title: "", description: "", type: "file", url: "" })
-          setSelectedFile(null)
+          setSelectedFiles([])
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+          }
           setShowCreateForm(false)
           loadResources()
         } else {
-          toast.error(data.error || 'Failed to upload resource')
+          toast.error(data.error || 'Failed to upload resource(s)')
         }
       } else if (formData.type === 'link') {
         const response = await fetch(`${API_BASE_URL}/admin/resources`, {
@@ -234,13 +292,15 @@ export default function AdminResourcesPage() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="title" className="text-[#1f2d3d]">Title *</Label>
+                      <Label htmlFor="title" className="text-[#1f2d3d]">
+                        Title {selectedFiles.length > 1 && <span className="text-xs text-gray-400 font-normal">(optional for multiple files)</span>} *
+                      </Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        placeholder="Resource title"
-                        required
+                        placeholder={selectedFiles.length > 1 ? "Optional - filenames will be used" : "Resource title"}
+                        required={selectedFiles.length === 0 || selectedFiles.length === 1}
                         className="bg-gray-50 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
                       />
                     </div>
@@ -259,21 +319,71 @@ export default function AdminResourcesPage() {
 
                   {formData.type === 'file' ? (
                     <div className="space-y-2">
-                      <Label htmlFor="file" className="text-[#1f2d3d]">File *</Label>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="file" className="text-[#1f2d3d]">Files *</Label>
+                        {selectedFiles.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={clearAllFiles}
+                            className="text-xs text-red-500 hover:text-red-600 font-medium"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
                         <Input
                           id="file"
+                          ref={fileInputRef}
                           type="file"
+                          multiple
                           onChange={handleFileChange}
-                          required
-                          className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#1f2d3d]/10 file:text-[#1f2d3d] hover:file:bg-[#1f2d3d]/20 bg-gray-50 border-gray-200"
+                          className="hidden"
                         />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="flex items-center gap-2 border-gray-200 hover:border-[#1f2d3d] hover:bg-gray-50"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Files
+                        </Button>
+                        {selectedFiles.length > 0 && (
+                          <span className="text-sm text-gray-500">
+                            {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} ready to upload
+                          </span>
+                        )}
                       </div>
-                      {selectedFile && (
-                        <p className="text-sm text-gray-500 mt-2 flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                        </p>
+                      {selectedFiles.length > 0 && (
+                        <div className="space-y-2 mt-3">
+                          <div className="flex flex-col gap-2 max-h-64 overflow-y-auto p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            {selectedFiles.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between gap-2 p-2 bg-white rounded border border-gray-200 hover:border-gray-300 transition-colors">
+                                <div className="flex items-center gap-2 min-w-0 flex-1">
+                                  <FileText className="h-4 w-4 text-gray-400 shrink-0" />
+                                  <span className="text-sm text-gray-700 truncate" title={file.name}>
+                                    {file.name}
+                                  </span>
+                                  <span className="text-xs text-gray-500 shrink-0">
+                                    ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(index)}
+                                  className="p-1 hover:bg-red-50 rounded text-red-500 hover:text-red-600 transition-colors shrink-0"
+                                  title="Remove file"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-400 text-center">
+                            Click "Add Files" to add more, or remove files using the × button
+                          </p>
+                        </div>
                       )}
                     </div>
                   ) : (

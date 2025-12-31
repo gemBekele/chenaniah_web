@@ -133,7 +133,16 @@ export default function StudentNotes() {
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
+    
+    // Reset the input value to allow re-selecting the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    
+    if (files.length === 0) {
+      // User cancelled or no files selected - this is normal, don't show error
+      return
+    }
 
     // Check limit
     if (selectedImages.length + files.length > 3) {
@@ -145,9 +154,12 @@ export default function StudentNotes() {
     const newPreviews: string[] = []
 
     for (const file of files) {
-      // Check if it's an image
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not an image`)
+      // Check if it's an image - be more lenient for mobile devices
+      const isImage = file.type.startsWith('image/') || 
+                     /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(file.name)
+      
+      if (!isImage) {
+        toast.error(`${file.name} is not a supported image file`)
         continue
       }
 
@@ -165,8 +177,10 @@ export default function StudentNotes() {
       newPreviews.push(URL.createObjectURL(processedFile))
     }
 
-    setSelectedImages([...selectedImages, ...newImages])
-    setImagePreviews([...imagePreviews, ...newPreviews])
+    if (newImages.length > 0) {
+      setSelectedImages([...selectedImages, ...newImages])
+      setImagePreviews([...imagePreviews, ...newPreviews])
+    }
   }
 
   const removeImage = (index: number) => {
@@ -433,7 +447,8 @@ export default function StudentNotes() {
               <input
                 type="file"
                 ref={fileInputRef}
-                accept="image/*"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/heic,image/heif"
+                capture="environment"
                 multiple
                 onChange={handleImageSelect}
                 className="hidden"
@@ -458,7 +473,15 @@ export default function StudentNotes() {
                 
                 {selectedImages.length < 3 && (
                   <button
-                    onClick={() => fileInputRef.current?.click()}
+                    type="button"
+                    onClick={() => {
+                      try {
+                        fileInputRef.current?.click()
+                      } catch (error) {
+                        console.error('Error opening file picker:', error)
+                        toast.error('Unable to open file picker. Please try again.')
+                      }
+                    }}
                     className="aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-[#1f2d3d] hover:bg-gray-50 transition-all flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-[#1f2d3d]"
                   >
                     <Image className="h-6 w-6" />
