@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Loader2, Folder, Plus, Upload, X, FileText, ExternalLink, Download } from "lucide-react"
+import { Loader2, Folder, Plus, Upload, X, FileText, ExternalLink, Download, Trash2 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { AdminLayout } from "@/components/admin-layout"
 import { toast } from "sonner"
@@ -24,6 +24,7 @@ interface Resource {
   fileName?: string
   fileSize?: number
   createdAt: string
+  batchId?: string
 }
 
 export default function AdminResourcesPage() {
@@ -32,6 +33,7 @@ export default function AdminResourcesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadingFile, setUploadingFile] = useState(false)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -234,6 +236,42 @@ export default function AdminResourcesPage() {
     } finally {
       setIsSubmitting(false)
       setUploadingFile(false)
+    }
+  }
+
+  const handleDelete = async (resourceId: number, resourceTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${resourceTitle}"? This action cannot be undone.`)) {
+      return
+    }
+
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!token) {
+      router.push('/admin')
+      return
+    }
+
+    setDeletingId(resourceId)
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/resources/${resourceId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        toast.success('Resource deleted successfully')
+        loadResources()
+      } else {
+        toast.error(data.error || 'Failed to delete resource')
+      }
+    } catch (err) {
+      console.error("Error deleting resource:", err)
+      toast.error('Failed to delete resource')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -505,6 +543,19 @@ export default function AdminResourcesPage() {
                                 Download
                               </Button>
                             )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(resource.id, resource.title)}
+                              disabled={deletingId === resource.id}
+                              className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
+                            >
+                              {deletingId === resource.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
