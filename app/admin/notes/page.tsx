@@ -20,6 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ReadMoreText } from "@/components/ui/read-more-text"
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -61,8 +62,23 @@ export default function AdminNotesPage() {
   const [selectedSessionId, setSelectedSessionId] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [noteType, setNoteType] = useState<"all" | "text" | "image">("all")
+  const [authorType, setAuthorType] = useState<"all" | "student" | "admin">("all")
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest")
   const [viewingImage, setViewingImage] = useState<string | null>(null)
+  const [counts, setCounts] = useState({
+    total: 0,
+    images: 0,
+    text: 0,
+    student: 0,
+    admin: 0,
+    filtered: 0,
+  })
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50,
+    total: 0,
+    totalPages: 0,
+  })
   
   // Create Note State
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -76,8 +92,22 @@ export default function AdminNotesPage() {
   const router = useRouter()
 
   useEffect(() => {
-    fetchData()
+    fetchSessions()
   }, [])
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPagination(prev => ({ ...prev, page: 1 }))
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  useEffect(() => {
+    fetchNotes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSessionId, noteType, authorType, pagination.page, searchQuery])
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
@@ -87,18 +117,57 @@ export default function AdminNotesPage() {
     }
   }
 
-  const fetchData = async () => {
+  const fetchSessions = async () => {
     try {
-      const [notesRes, sessionsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/notes`, { headers: getAuthHeaders() }),
-        fetch(`${API_BASE_URL}/notes/sessions`, { headers: getAuthHeaders() })
-      ])
-
-      if (notesRes.ok && sessionsRes.ok) {
-        const notesData = await notesRes.json()
+      const sessionsRes = await fetch(`${API_BASE_URL}/notes/sessions`, { headers: getAuthHeaders() })
+      if (sessionsRes.ok) {
         const sessionsData = await sessionsRes.json()
-        setNotes(notesData.notes || [])
         setSessions(sessionsData.sessions || [])
+      }
+    } catch (error) {
+      console.error("Failed to fetch sessions", error)
+    }
+  }
+
+  const fetchNotes = async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+      })
+      
+      if (selectedSessionId !== "all") {
+        params.append('sessionId', selectedSessionId)
+      }
+      
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim())
+      }
+      
+      if (noteType !== "all") {
+        params.append('noteType', noteType)
+      }
+      
+      if (authorType !== "all") {
+        params.append('authorType', authorType)
+      }
+
+      const notesRes = await fetch(`${API_BASE_URL}/notes?${params.toString()}`, { 
+        headers: getAuthHeaders() 
+      })
+
+      if (notesRes.ok) {
+        const notesData = await notesRes.json()
+        setNotes(notesData.notes || [])
+        if (notesData.counts) {
+          setCounts(notesData.counts)
+        }
+        if (notesData.pagination) {
+          setPagination(notesData.pagination)
+        }
+      } else {
+        toast.error("Failed to load notes")
       }
     } catch (error) {
       console.error("Failed to fetch notes data", error)
@@ -213,7 +282,8 @@ export default function AdminNotesPage() {
         setTargetSessionId("")
         setSelectedImages([])
         setImagePreviews([])
-        fetchData()
+        fetchNotes()
+        fetchSessions()
       } else {
         const data = await response.json()
         toast.error(data.error || "Failed to create note")
@@ -236,7 +306,7 @@ export default function AdminNotesPage() {
 
       if (response.ok) {
         toast.success("Note deleted")
-        setNotes(notes.filter(n => n.id !== noteId))
+        fetchNotes()
       } else {
         const data = await response.json()
         toast.error(data.error || "Failed to delete note")
@@ -249,20 +319,16 @@ export default function AdminNotesPage() {
   // Group notes by same author and timestamp (within 1 minute)
   const groupNotes = (notes: Note[]) => {
     const groups: Note[][] = []
-    const TIME_WINDOW_MS = 60 * 1000 // 1 minute
-
+    const TIME_WINDOW_MS = 60 * 1000
     notes.forEach((note) => {
       const noteTime = new Date(note.createdAt).getTime()
       const authorId = note.authorId
       const authorType = note.authorType
-
-      // Find existing group with same author and timestamp within window
       let foundGroup = false
       for (const group of groups) {
         const groupTime = new Date(group[0].createdAt).getTime()
         const groupAuthorId = group[0].authorId
         const groupAuthorType = group[0].authorType
-
         if (
           groupAuthorId === authorId &&
           groupAuthorType === authorType &&
@@ -273,34 +339,19 @@ export default function AdminNotesPage() {
           break
         }
       }
-
       if (!foundGroup) {
         groups.push([note])
       }
     })
-
     return groups
   }
 
-  const filteredNotes = notes.filter(note => {
-    const matchesSession = selectedSessionId === "all" || note.sessionId.toString() === selectedSessionId
-    const matchesSearch = searchQuery.toLowerCase() === "" || 
-      note.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.student?.fullNameEnglish?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.student?.fullNameAmharic?.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesType = noteType === "all" || note.type === noteType
-    
-    return matchesSession && matchesSearch && matchesType
-  }).sort((a, b) => {
-    if (sortOrder === "oldest") {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  })
-
-  const totalNotes = notes.length
-  const totalImages = notes.filter(n => n.type === "image").length
-  const totalSessions = sessions.length
+  let sortedNotes: Note[]
+  if (sortOrder === "oldest") {
+    sortedNotes = [...notes].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+  } else {
+    sortedNotes = [...notes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  }
 
   return (
     <AdminLayout>
@@ -327,12 +378,13 @@ export default function AdminNotesPage() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {[
-              { label: "Total Notes", value: totalNotes, sub: "All time", icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
-              { label: "Image Notes", value: totalImages, sub: "With attachments", icon: ImageIcon, color: "text-purple-600", bg: "bg-purple-50" },
-              { label: "Sessions", value: totalSessions, sub: "Active events", icon: Calendar, color: "text-amber-600", bg: "bg-amber-50" },
-              { label: "Visible Now", value: filteredNotes.length, sub: "After filters", icon: Filter, color: "text-emerald-600", bg: "bg-emerald-50" },
+              { label: "Total Notes", value: counts.total, sub: "All time", icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
+              { label: "Image Notes", value: counts.images, sub: "With attachments", icon: ImageIcon, color: "text-purple-600", bg: "bg-purple-50" },
+              { label: "Sessions", value: sessions.length, sub: "Active events", icon: Calendar, color: "text-amber-600", bg: "bg-amber-50" },
+              { label: "Filtered", value: counts.filtered, sub: "Matching filters", icon: Filter, color: "text-emerald-600", bg: "bg-emerald-50" },
+              { label: "Visible", value: notes.length, sub: "On this page", icon: CheckCircle2, color: "text-indigo-600", bg: "bg-indigo-50" },
             ].map((stat, idx) => (
               <Card key={idx} className="border-none shadow-sm hover:shadow-md transition-shadow duration-200">
                 <CardContent className="p-5 flex items-start justify-between">
@@ -358,11 +410,17 @@ export default function AdminNotesPage() {
                   <Input 
                     placeholder="Search content, student name..." 
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value)
+                      setPagination({ ...pagination, page: 1 })
+                    }}
                     className="pl-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors rounded-xl"
                   />
                 </div>
-                <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
+                <Select value={selectedSessionId} onValueChange={(v) => {
+                  setSelectedSessionId(v)
+                  setPagination({ ...pagination, page: 1 })
+                }}>
                   <SelectTrigger className="w-full sm:w-[200px] rounded-xl bg-gray-50 border-gray-200">
                     <SelectValue placeholder="Filter by Session" />
                   </SelectTrigger>
@@ -375,7 +433,10 @@ export default function AdminNotesPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={noteType} onValueChange={(v) => setNoteType(v as typeof noteType)}>
+                <Select value={noteType} onValueChange={(v) => {
+                  setNoteType(v as typeof noteType)
+                  setPagination({ ...pagination, page: 1 })
+                }}>
                   <SelectTrigger className="w-full sm:w-[150px] rounded-xl bg-gray-50 border-gray-200">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
@@ -383,6 +444,19 @@ export default function AdminNotesPage() {
                     <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="text">Text Only</SelectItem>
                     <SelectItem value="image">With Image</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={authorType} onValueChange={(v) => {
+                  setAuthorType(v as typeof authorType)
+                  setPagination({ ...pagination, page: 1 })
+                }}>
+                  <SelectTrigger className="w-full sm:w-[150px] rounded-xl bg-gray-50 border-gray-200">
+                    <SelectValue placeholder="Author" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Authors</SelectItem>
+                    <SelectItem value="student">Students</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -426,7 +500,7 @@ export default function AdminNotesPage() {
                 <div key={i} className="h-64 bg-gray-100 rounded-2xl animate-pulse" />
               ))}
             </div>
-          ) : filteredNotes.length === 0 ? (
+          ) : sortedNotes.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
               <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                 <FileText className="h-10 w-10 text-gray-300" />
@@ -443,8 +517,9 @@ export default function AdminNotesPage() {
               </Button>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {groupNotes(filteredNotes).map((noteGroup, groupIndex) => {
+              {groupNotes(sortedNotes).map((noteGroup, groupIndex) => {
                 const firstNote = noteGroup[0]
                 const isAuthorAdmin = firstNote.authorType === 'admin'
                 
@@ -511,9 +586,7 @@ export default function AdminNotesPage() {
                       {noteGroup.map((note) => (
                         <div key={note.id} className="space-y-3">
                           {note.content && (
-                            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
-                              {note.content}
-                            </p>
+                            <ReadMoreText text={note.content} className="text-gray-600 text-sm leading-relaxed" />
                           )}
                           
                           {note.type === 'image' && note.imagePath && (
@@ -540,6 +613,58 @@ export default function AdminNotesPage() {
                 )
               })}
             </div>
+            
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <div className="text-sm text-gray-600">
+                  Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} notes
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+                    disabled={pagination.page === 1}
+                  >
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (pagination.totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (pagination.page <= 3) {
+                        pageNum = i + 1;
+                      } else if (pagination.page >= pagination.totalPages - 2) {
+                        pageNum = pagination.totalPages - 4 + i;
+                      } else {
+                        pageNum = pagination.page - 2 + i;
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={pagination.page === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setPagination({ ...pagination, page: pageNum })}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+            </>
           )}
         </div>
 

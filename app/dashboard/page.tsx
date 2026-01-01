@@ -512,11 +512,7 @@ export default function StudentDashboardPage() {
         )}
 
         {activeTab === "assignments" && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Assignments</h1>
-              <p className="text-gray-500 text-lg">View and submit your course assignments.</p>
-            </div>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <StudentAssignments user={user} />
           </div>
         )}

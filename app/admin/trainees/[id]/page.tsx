@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, ArrowLeft, User, FileText, DollarSign, CheckCircle2, XCircle, Clock, Save, ChevronDown, ChevronUp, Phone, MapPin, Calendar, Shield, GraduationCap, Users, Bell, Plus, Trash2 } from "lucide-react"
+import { Loader2, ArrowLeft, User, FileText, DollarSign, CheckCircle2, XCircle, Clock, Save, ChevronDown, ChevronUp, Phone, MapPin, Calendar, Shield, GraduationCap, Users, Bell, Plus, Trash2, ClipboardList, StickyNote, Image as ImageIcon } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { format } from "date-fns"
+import { ReadMoreText } from "@/components/ui/read-more-text"
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -68,6 +69,38 @@ interface TraineeStats {
       status: string
       paidAt?: string
       notes?: string
+    }>
+  }
+  attendance: {
+    total: number
+    records: Array<{
+      id: number
+      sessionId: number
+      scannedAt: string
+      isOffline: boolean
+      notes?: string
+      session: {
+        id: number
+        name: string
+        date: string
+        location?: string
+      }
+    }>
+  }
+  notes: {
+    total: number
+    records: Array<{
+      id: number
+      content: string | null
+      imagePath: string | null
+      type: 'text' | 'image'
+      sessionId: number
+      createdAt: string
+      session: {
+        id: number
+        name: string
+        date: string
+      }
     }>
   }
 }
@@ -538,10 +571,16 @@ export default function TraineeDetailPage() {
               </div>
 
               <Tabs defaultValue="essay" className="space-y-4">
-                <TabsList className="w-full justify-start h-auto p-1 bg-white border rounded-lg">
+                <TabsList className="w-full justify-start h-auto p-1 bg-white border rounded-lg overflow-x-auto">
                   <TabsTrigger value="essay" className="px-6 py-2 data-[state=active]:bg-gray-100">Overview</TabsTrigger>
                   <TabsTrigger value="assignments" className="px-6 py-2 data-[state=active]:bg-gray-100">Assignments</TabsTrigger>
                   <TabsTrigger value="payments" className="px-6 py-2 data-[state=active]:bg-gray-100">Payments</TabsTrigger>
+                  <TabsTrigger value="attendance" className="px-6 py-2 data-[state=active]:bg-gray-100">
+                    Attendance {stats?.attendance.total > 0 && <span className="ml-1 bg-green-100 text-green-700 text-xs px-1.5 rounded-full">{stats.attendance.total}</span>}
+                  </TabsTrigger>
+                  <TabsTrigger value="notes" className="px-6 py-2 data-[state=active]:bg-gray-100">
+                    Notes {stats?.notes.total > 0 && <span className="ml-1 bg-yellow-100 text-yellow-700 text-xs px-1.5 rounded-full">{stats.notes.total}</span>}
+                  </TabsTrigger>
                   <TabsTrigger value="teams" className="px-6 py-2 data-[state=active]:bg-gray-100">
                     Teams {studentTeams.length > 0 && <span className="ml-1 bg-blue-100 text-blue-700 text-xs px-1.5 rounded-full">{studentTeams.length}</span>}
                   </TabsTrigger>
@@ -740,6 +779,116 @@ export default function TraineeDetailPage() {
                               ))}
                             </tbody>
                           </table>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="attendance" className="space-y-4">
+                  <Card className="border-none shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <ClipboardList className="h-5 w-5 text-muted-foreground" />
+                        Attendance Records
+                      </CardTitle>
+                      <CardDescription>Session attendance history for this trainee</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {!stats.attendance || stats.attendance.records.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground bg-gray-50 rounded-lg border border-dashed">
+                          <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                          <p>No attendance records found</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                          {stats.attendance.records.map((record) => (
+                            <div 
+                              key={record.id} 
+                              className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
+                            >
+                              <div className={`absolute top-0 right-0 w-3 h-3 rounded-bl-lg ${record.isOffline ? 'bg-amber-400' : 'bg-green-400'}`} title={record.isOffline ? 'Offline Scan' : 'Online Scan'} />
+                              
+                              <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                <Calendar className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+                              </div>
+                              
+                              <h4 className="font-semibold text-sm text-foreground line-clamp-1 w-full" title={record.session.name}>
+                                {record.session.name}
+                              </h4>
+                              
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {format(new Date(record.session.date), 'MMM d, yyyy')}
+                              </p>
+                              
+                              <div className="mt-2 flex items-center gap-1 text-[10px] text-gray-400">
+                                <Clock className="h-3 w-3" />
+                                {format(new Date(record.scannedAt), 'h:mm a')}
+                              </div>
+
+                              {record.notes && (
+                                <div className="mt-2 w-full pt-2 border-t border-dashed">
+                                  <p className="text-[10px] text-muted-foreground line-clamp-2 text-left w-full">
+                                    {record.notes}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="notes" className="space-y-4">
+                  <Card className="border-none shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <StickyNote className="h-5 w-5 text-muted-foreground" />
+                        Submitted Notes
+                      </CardTitle>
+                      <CardDescription>Notes submitted by this trainee for various sessions</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {!stats.notes || stats.notes.records.length === 0 ? (
+                        <div className="text-center py-12 text-muted-foreground bg-gray-50 rounded-lg border border-dashed">
+                          <StickyNote className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                          <p>No notes submitted yet</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {stats.notes.records.map((note) => (
+                            <Card key={note.id} className="overflow-hidden border border-gray-100 hover:border-gray-200 transition-colors">
+                              <div className="p-6">
+                                <div className="flex items-start justify-between mb-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                                        {note.session.name}
+                                      </Badge>
+                                      <Badge variant="outline" className="text-xs">
+                                        {format(new Date(note.createdAt), 'MMM d, yyyy h:mm a')}
+                                      </Badge>
+                                    </div>
+                                    {note.content && (
+                                      <ReadMoreText text={note.content} className="text-sm text-foreground mb-3" />
+                                    )}
+                                    {note.type === 'image' && note.imagePath && (
+                                      <div className="mt-3">
+                                        <img 
+                                          src={`${API_BASE_URL}${note.imagePath}`}
+                                          alt="Note attachment"
+                                          className="max-w-full h-auto rounded-lg border border-gray-200 max-h-64 object-contain cursor-pointer"
+                                          onClick={() => window.open(`${API_BASE_URL}${note.imagePath}`, '_blank')}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </Card>
+                          ))}
                         </div>
                       )}
                     </CardContent>
