@@ -120,7 +120,6 @@ export default function TraineeDetailPage() {
   const [studentTeams, setStudentTeams] = useState<Array<{id: number; name: string; color: string; joinReason: string; joinedAt: string}>>([])  
   const [personalNotices, setPersonalNotices] = useState<Array<{id: number; title: string; content: string; type: string; createdAt: string}>>([])  
   const [newNotice, setNewNotice] = useState({ title: "", content: "", type: "info" })
-  const [newNotice, setNewNotice] = useState({ title: "", content: "", type: "info" })
   const [addingNotice, setAddingNotice] = useState(false)
   const [viewingImage, setViewingImage] = useState<string | null>(null)
 
