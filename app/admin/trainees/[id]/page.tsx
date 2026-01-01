@@ -76,9 +76,10 @@ interface TraineeStats {
     records: Array<{
       id: number
       sessionId: number
-      scannedAt: string
+      scannedAt: string | null
       isOffline: boolean
-      notes?: string
+      notes?: string | null
+      status: 'present' | 'absent'
       session: {
         id: number
         name: string
@@ -119,7 +120,9 @@ export default function TraineeDetailPage() {
   const [studentTeams, setStudentTeams] = useState<Array<{id: number; name: string; color: string; joinReason: string; joinedAt: string}>>([])  
   const [personalNotices, setPersonalNotices] = useState<Array<{id: number; title: string; content: string; type: string; createdAt: string}>>([])  
   const [newNotice, setNewNotice] = useState({ title: "", content: "", type: "info" })
+  const [newNotice, setNewNotice] = useState({ title: "", content: "", type: "info" })
   const [addingNotice, setAddingNotice] = useState(false)
+  const [viewingImage, setViewingImage] = useState<string | null>(null)
 
   useEffect(() => {
     if (params.id) {
@@ -805,12 +808,24 @@ export default function TraineeDetailPage() {
                           {stats.attendance.records.map((record) => (
                             <div 
                               key={record.id} 
-                              className="bg-white border rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all group relative overflow-hidden"
+                              className={`border rounded-xl p-4 flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md transition-all group relative overflow-hidden ${
+                                record.status === 'absent' ? 'bg-red-50 border-red-100' : 'bg-white border-gray-200'
+                              }`}
                             >
-                              <div className={`absolute top-0 right-0 w-3 h-3 rounded-bl-lg ${record.isOffline ? 'bg-amber-400' : 'bg-green-400'}`} title={record.isOffline ? 'Offline Scan' : 'Online Scan'} />
+                              {record.status === 'present' && (
+                                <div className={`absolute top-0 right-0 w-3 h-3 rounded-bl-lg ${record.isOffline ? 'bg-amber-400' : 'bg-green-400'}`} title={record.isOffline ? 'Offline Scan' : 'Online Scan'} />
+                              )}
                               
-                              <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center mb-3 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                                <Calendar className="h-5 w-5 text-gray-400 group-hover:text-blue-600" />
+                              <div className={`h-10 w-10 rounded-full flex items-center justify-center mb-3 transition-colors ${
+                                record.status === 'absent' 
+                                  ? 'bg-red-100 text-red-600' 
+                                  : 'bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600'
+                              }`}>
+                                {record.status === 'absent' ? (
+                                  <XCircle className="h-5 w-5" />
+                                ) : (
+                                  <Calendar className="h-5 w-5" />
+                                )}
                               </div>
                               
                               <h4 className="font-semibold text-sm text-foreground line-clamp-1 w-full" title={record.session.name}>
@@ -823,13 +838,21 @@ export default function TraineeDetailPage() {
                               
                               <div className="mt-2 flex items-center gap-1 text-[10px] text-gray-400">
                                 <Clock className="h-3 w-3" />
-                                {format(new Date(record.scannedAt), 'h:mm a')}
+                                {record.scannedAt ? format(new Date(record.scannedAt), 'h:mm a') : '-'}
                               </div>
 
                               {record.notes && (
-                                <div className="mt-2 w-full pt-2 border-t border-dashed">
+                                <div className="mt-2 w-full pt-2 border-t border-dashed border-gray-200">
                                   <p className="text-[10px] text-muted-foreground line-clamp-2 text-left w-full">
                                     {record.notes}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {record.status === 'absent' && (
+                                <div className="mt-2 w-full pt-2 border-t border-dashed border-red-200">
+                                  <p className="text-[10px] text-red-500 font-medium">
+                                    Missed Session
                                   </p>
                                 </div>
                               )}
@@ -880,7 +903,7 @@ export default function TraineeDetailPage() {
                                           src={`${API_BASE_URL}${note.imagePath}`}
                                           alt="Note attachment"
                                           className="max-w-full h-auto rounded-lg border border-gray-200 max-h-64 object-contain cursor-pointer"
-                                          onClick={() => window.open(`${API_BASE_URL}${note.imagePath}`, '_blank')}
+                                          onClick={() => setViewingImage(`${API_BASE_URL}${note.imagePath}`)}
                                         />
                                       </div>
                                     )}
@@ -1041,6 +1064,30 @@ export default function TraineeDetailPage() {
           open={!!pdfViewer}
           onOpenChange={(open) => !open && setPdfViewer(null)}
         />
+      )}
+
+      {viewingImage && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          onClick={() => setViewingImage(null)}
+        >
+          <div className="relative max-w-5xl w-full h-full flex items-center justify-center p-4">
+            <img
+              src={viewingImage}
+              alt="Full size note"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 text-white/70 hover:text-white hover:bg-white/10 rounded-full h-10 w-10"
+              onClick={() => setViewingImage(null)}
+            >
+              <XCircle className="h-6 w-6" />
+            </Button>
+          </div>
+        </div>
       )}
     </AdminLayout>
   )
