@@ -6,13 +6,24 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, DollarSign, CheckCircle2, Clock, XCircle, Search, Filter, Download, Eye, FileText } from "lucide-react"
+import { Loader2, DollarSign, Calendar, CheckCircle2, XCircle, Search, Filter, Download, Eye, FileText, User, Clock, ArrowLeft } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { AdminLayout } from "@/components/admin-layout"
 import { toast } from "sonner"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import Link from 'next/link'
-import { PDFViewer } from "@/components/pdf-viewer"
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -53,7 +64,7 @@ export default function AdminPaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [monthFilter, setMonthFilter] = useState<string>("")
-  const [pdfViewer, setPdfViewer] = useState<{ url: string; title: string } | null>(null)
+  const [viewingReceipt, setViewingReceipt] = useState<{ url: string; title: string } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -319,78 +330,103 @@ export default function AdminPaymentsPage() {
           </Card>
 
           {/* Payments Table */}
-          <Card className="shadow-sm border-gray-200 bg-white">
-            <CardHeader className="bg-white border-b border-gray-200">
+          <Card className="shadow-md border-none bg-white overflow-hidden">
+            <CardHeader className="bg-white border-b border-gray-100 py-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg text-[#1f2d3d]">Payment Records</CardTitle>
-                  <CardDescription className="text-gray-500">{filteredPayments.length} payment{filteredPayments.length !== 1 ? 's' : ''} found</CardDescription>
+                  <CardTitle className="text-xl text-[#1f2d3d] font-bold">Contribution Records</CardTitle>
+                  <CardDescription className="text-gray-500 mt-1">
+                    {filteredPayments.length} record{filteredPayments.length !== 1 ? 's' : ''} found for the selected period
+                  </CardDescription>
                 </div>
-                <DollarSign className="h-5 w-5 text-gray-400" />
+                <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-[#e8cb85]" />
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               {filteredPayments.length === 0 ? (
-                <div className="text-center py-12 text-gray-500 bg-gray-50">
-                  <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-lg font-medium">No payments found</p>
-                  <p className="text-sm mt-1">Try adjusting your filters</p>
+                <div className="text-center py-20 text-gray-500 bg-gray-50/30">
+                  <div className="h-20 w-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <DollarSign className="h-10 w-10 text-gray-300" />
+                  </div>
+                  <p className="text-xl font-semibold text-[#1f2d3d]">No contributions found</p>
+                  <p className="text-sm mt-2 text-gray-400">Try adjusting your filters to find what you're looking for</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200 bg-gray-50">
-                        <th className="text-left p-4 font-medium text-sm text-gray-500">Student</th>
-                        <th className="text-left p-4 font-medium text-sm text-gray-500">Month</th>
-                        <th className="text-left p-4 font-medium text-sm text-gray-500">Amount</th>
-                        <th className="text-left p-4 font-medium text-sm text-gray-500">Status</th>
-                        <th className="text-left p-4 font-medium text-sm text-gray-500">Paid Date</th>
-                        <th className="text-left p-4 font-medium text-sm text-gray-500">Deposit Slip</th>
-                        <th className="text-left p-4 font-medium text-sm text-gray-500">Actions</th>
+                      <tr className="border-b border-gray-100 bg-gray-50/50">
+                        <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-gray-500">Trainee</th>
+                        <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-gray-500">Month</th>
+                        <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-gray-500">Amount</th>
+                        <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-gray-500">Status</th>
+                        <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-gray-500">Submission Date</th>
+                        <th className="text-left p-4 font-semibold text-xs uppercase tracking-wider text-gray-500">Receipt</th>
+                        <th className="text-right p-4 font-semibold text-xs uppercase tracking-wider text-gray-500">Actions</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-50">
                       {filteredPayments.map((payment) => (
-                        <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <tr key={payment.id} className="hover:bg-gray-50/80 transition-colors group">
                           <td className="p-4">
-                            <div>
-                              <div className="font-medium text-[#1f2d3d]">
-                                {payment.student.fullNameEnglish || payment.student.username}
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-10 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                {(payment.student.fullNameEnglish || payment.student.username).charAt(0).toUpperCase()}
                               </div>
-                              {payment.student.fullNameAmharic && (
-                                <div className="text-sm text-gray-500">{payment.student.fullNameAmharic}</div>
-                              )}
-                              <div className="text-xs text-gray-400">{payment.student.phone}</div>
+                              <div>
+                                <div className="font-bold text-[#1f2d3d] group-hover:text-[#e8cb85] transition-colors">
+                                  {payment.student.fullNameEnglish || payment.student.username}
+                                </div>
+                                <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                  <FileText className="h-3 w-3" />
+                                  {payment.student.phone}
+                                </div>
+                              </div>
                             </div>
                           </td>
-                          <td className="p-4 text-sm text-gray-600">{payment.month}</td>
-                          <td className="p-4 font-medium text-[#1f2d3d]">ETB {payment.amount.toFixed(2)}</td>
+                          <td className="p-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-800">
+                              {payment.month}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="font-bold text-[#1f2d3d]">
+                              ETB {payment.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </div>
+                          </td>
                           <td className="p-4">{getStatusBadge(payment.status)}</td>
-                          <td className="p-4 text-sm text-gray-600">
-                            {payment.paidAt 
-                              ? new Date(payment.paidAt).toLocaleDateString()
-                              : '-'}
+                          <td className="p-4">
+                            <div className="text-sm text-gray-600">
+                              {new Date(payment.createdAt).toLocaleDateString(undefined, { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
+                            </div>
+                            <div className="text-[10px] text-gray-400 mt-0.5">
+                              {new Date(payment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
                           </td>
                           <td className="p-4">
                             {payment.depositSlipPath ? (
-                              <div className="flex gap-2">
+                              <div className="flex gap-1">
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => {
                                     if (!payment.depositSlipPath) return
                                     const url = `${API_BASE_URL}/${payment.depositSlipPath}`
-                                    if (payment.depositSlipPath.toLowerCase().endsWith('.pdf')) {
-                                      setPdfViewer({ url, title: `Deposit Slip - ${payment.student.fullNameEnglish || payment.student.username} - ${payment.month}` })
-                                    } else {
-                                      window.open(url, '_blank')
-                                    }
+                                    setViewingReceipt({ 
+                                      url, 
+                                      title: `Receipt - ${payment.student.fullNameEnglish || payment.student.username} - ${payment.month}` 
+                                    })
                                   }}
-                                  className="gap-2 border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] text-gray-600"
+                                  className="h-8 w-8 p-0 border-gray-200 hover:bg-[#1f2d3d] hover:text-white transition-all"
+                                  title="View Receipt"
                                 >
                                   <Eye className="h-4 w-4" />
-                                  View
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -399,49 +435,36 @@ export default function AdminPaymentsPage() {
                                     const url = `${API_BASE_URL}/${payment.depositSlipPath}`
                                     const link = document.createElement('a')
                                     link.href = url
-                                    link.download = `deposit-slip-${payment.month}.pdf`
+                                    link.download = `receipt-${payment.student.username}-${payment.month}.pdf`
                                     document.body.appendChild(link)
                                     link.click()
                                     document.body.removeChild(link)
                                   }}
-                                  className="gap-2 border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] text-gray-600"
-                                  title="Download"
+                                  className="h-8 w-8 p-0 border-gray-200 hover:bg-[#1f2d3d] hover:text-white transition-all"
+                                  title="Download Receipt"
                                 >
                                   <Download className="h-4 w-4" />
                                 </Button>
                               </div>
                             ) : (
-                              <span className="text-gray-400 text-sm">-</span>
+                              <span className="text-gray-300 italic text-xs">No receipt</span>
                             )}
                           </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
                               {payment.status !== 'paid' && (
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => updatePaymentStatus(payment.id, 'paid')}
-                                  className="gap-1 border-gray-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 text-emerald-600"
+                                  className="h-8 px-3 border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all font-semibold text-xs"
                                 >
-                                  <CheckCircle2 className="h-4 w-4" />
-                                  Mark Paid
-                                </Button>
-                              )}
-                              {payment.status !== 'overdue' && payment.status !== 'paid' && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => updatePaymentStatus(payment.id, 'overdue')}
-                                  className="gap-1 border-gray-200 hover:bg-rose-600 hover:text-white hover:border-rose-600 text-rose-600"
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                  Mark Overdue
+                                  Approve
                                 </Button>
                               )}
                               <Link href={`/admin/trainees/${payment.studentId}`}>
-                                <Button variant="ghost" size="sm" className="gap-1 text-gray-500 hover:text-[#1f2d3d] hover:bg-gray-100">
-                                  <Eye className="h-4 w-4" />
-                                  View
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-[#1f2d3d] hover:bg-gray-100">
+                                  <User className="h-4 w-4" />
                                 </Button>
                               </Link>
                             </div>
@@ -455,14 +478,32 @@ export default function AdminPaymentsPage() {
             </CardContent>
           </Card>
 
-          {pdfViewer && (
-            <PDFViewer
-              url={pdfViewer.url}
-              title={pdfViewer.title}
-              open={!!pdfViewer}
-              onOpenChange={(open) => !open && setPdfViewer(null)}
-            />
-          )}
+          {/* Receipt Viewer Modal */}
+          <Dialog open={!!viewingReceipt} onOpenChange={(open) => !open && setViewingReceipt(null)}>
+            <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 overflow-hidden flex flex-col">
+              <DialogHeader className="p-4 border-b">
+                <DialogTitle>{viewingReceipt?.title}</DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 bg-gray-100 overflow-auto flex items-center justify-center p-4">
+                {viewingReceipt?.url.toLowerCase().endsWith('.pdf') ? (
+                  <iframe 
+                    src={viewingReceipt.url} 
+                    className="w-full h-full border-none rounded-lg shadow-lg"
+                    title="PDF Viewer"
+                  />
+                ) : (
+                  <img 
+                    src={viewingReceipt?.url} 
+                    alt="Receipt" 
+                    className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                  />
+                )}
+              </div>
+              <div className="p-4 border-t bg-white flex justify-end">
+                <Button onClick={() => setViewingReceipt(null)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </AdminLayout>

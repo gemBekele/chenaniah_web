@@ -217,7 +217,7 @@ export default function StudentDashboardPage() {
             <nav className="hidden md:flex items-center gap-1">
               <NavItem id="overview" label="Overview" />
               <NavItem id="assignments" label="Assignments" />
-              {/* <NavItem id="payments" label="Contributions" /> */}
+              <NavItem id="payments" label="Contributions" />
               <NavItem id="resources" label="Resources" />
               <NavItem id="notes" label="Notes" />
               <NavItem id="teams" label="Teams" />
@@ -264,7 +264,7 @@ export default function StudentDashboardPage() {
             <nav className="flex flex-col gap-2">
               <NavItem id="overview" label="Overview" />
               <NavItem id="assignments" label="Assignments" />
-              {/* <NavItem id="payments" label="Contributions" /> */}
+              <NavItem id="payments" label="Contributions" />
               <NavItem id="resources" label="Resources" />
               <NavItem id="notes" label="Notes" />
               <NavItem id="teams" label="Teams" />
@@ -390,7 +390,7 @@ export default function StudentDashboardPage() {
                 </CardContent>
               </Card>
 
-              {/* <Card className="h-full border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
+              <Card className="h-full border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg text-[#1f2d3d]">
                     <DollarSign className="h-5 w-5 text-[#e8cb85]" />
@@ -409,7 +409,7 @@ export default function StudentDashboardPage() {
                     </Button>
                   </div>
                 </CardContent>
-              </Card> */}
+              </Card>
 
               <Card className="h-full border-gray-100 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)] bg-white hover:shadow-md transition-shadow duration-200">
                 <CardHeader>
@@ -517,7 +517,7 @@ export default function StudentDashboardPage() {
           </div>
         )}
 
-        {/* {activeTab === "payments" && (
+        {activeTab === "payments" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
               <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Monthly Contributions</h1>
@@ -525,7 +525,7 @@ export default function StudentDashboardPage() {
             </div>
             <StudentPayments user={user} />
           </div>
-        )} */}
+        )}
 
         {activeTab === "resources" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -6,13 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, ArrowLeft, User, FileText, DollarSign, CheckCircle2, XCircle, Clock, Save, ChevronDown, ChevronUp, Phone, MapPin, Calendar, Shield, GraduationCap, Users, Bell, Plus, Trash2, ClipboardList, StickyNote, Image as ImageIcon } from "lucide-react"
+import { Loader2, ArrowLeft, User, FileText, DollarSign, CheckCircle2, XCircle, Clock, Save, ChevronDown, ChevronUp, Phone, MapPin, Calendar, Shield, GraduationCap, Users, Bell, Plus, Trash2, ClipboardList, StickyNote, Image as ImageIcon, Eye, Download } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AdminLayout } from "@/components/admin-layout"
 import { toast } from "sonner"
-import { PDFViewer } from "@/components/pdf-viewer"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
@@ -116,7 +121,7 @@ export default function TraineeDetailPage() {
   const [gradingSubmission, setGradingSubmission] = useState<number | null>(null)
   const [grade, setGrade] = useState("")
   const [feedback, setFeedback] = useState("")
-  const [pdfViewer, setPdfViewer] = useState<{ url: string; title: string } | null>(null)
+  const [viewingReceipt, setViewingReceipt] = useState<{ url: string; title: string } | null>(null)
   const [studentTeams, setStudentTeams] = useState<Array<{id: number; name: string; color: string; joinReason: string; joinedAt: string}>>([])  
   const [personalNotices, setPersonalNotices] = useState<Array<{id: number; title: string; content: string; type: string; createdAt: string}>>([])  
   const [newNotice, setNewNotice] = useState({ title: "", content: "", type: "info" })
@@ -265,17 +270,7 @@ export default function TraineeDetailPage() {
 
   const handleViewDocument = (path: string, title: string) => {
     const url = `${API_BASE_URL}/${path}`
-    const lowerPath = path.toLowerCase()
-    if (lowerPath.endsWith('.pdf') || 
-        lowerPath.endsWith('.jpg') || 
-        lowerPath.endsWith('.jpeg') || 
-        lowerPath.endsWith('.png') || 
-        lowerPath.endsWith('.gif') || 
-        lowerPath.endsWith('.webp')) {
-      setPdfViewer({ url, title })
-    } else {
-      window.open(url, '_blank')
-    }
+    setViewingReceipt({ url, title })
   }
 
   const loadStudentTeams = async () => {
@@ -723,58 +718,98 @@ export default function TraineeDetailPage() {
                 </TabsContent>
 
                 <TabsContent value="payments" className="space-y-4">
-                  <Card className="border-none shadow-sm">
-                    <CardHeader>
-                      <CardTitle>Payment Records</CardTitle>
-                      <CardDescription>
-                        Paid: {stats.payments.paid} | Pending: {stats.payments.pending} | Overdue: {stats.payments.overdue}
-                      </CardDescription>
+                  <Card className="border-none shadow-sm bg-white overflow-hidden">
+                    <CardHeader className="bg-gray-50/50 border-b border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-lg flex items-center gap-2 text-[#1f2d3d]">
+                            <DollarSign className="h-5 w-5 text-[#e8cb85]" />
+                            Contribution History
+                          </CardTitle>
+                          <CardDescription>
+                            Paid: {stats.payments.paid} | Pending: {stats.payments.pending} | Overdue: {stats.payments.overdue}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="bg-white text-[#1f2d3d] border-gray-200">
+                          {stats.payments.records.length} Records
+                        </Badge>
+                      </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0">
                       {stats.payments.records.length === 0 ? (
-                        <div className="text-center py-12 text-muted-foreground bg-gray-50 rounded-lg border border-dashed">
-                          <DollarSign className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                          <p>No payment records found</p>
+                        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                          <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <DollarSign className="h-8 w-8 text-gray-200" />
+                          </div>
+                          <p className="text-lg font-medium text-gray-500">No contribution records yet</p>
                         </div>
                       ) : (
-                        <div className="rounded-md border">
+                        <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
-                              <tr className="border-b bg-gray-50">
-                                <th className="text-left p-4 font-medium text-muted-foreground">Month</th>
-                                <th className="text-left p-4 font-medium text-muted-foreground">Amount</th>
-                                <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
-                                <th className="text-left p-4 font-medium text-muted-foreground">Paid Date</th>
-                                <th className="text-left p-4 font-medium text-muted-foreground">Actions</th>
+                              <tr className="bg-gray-50/30 border-b border-gray-100">
+                                <th className="text-left p-4 font-semibold text-gray-500">Month</th>
+                                <th className="text-left p-4 font-semibold text-gray-500">Amount</th>
+                                <th className="text-left p-4 font-semibold text-gray-500">Status</th>
+                                <th className="text-left p-4 font-semibold text-gray-500">Submission Date</th>
+                                <th className="text-right p-4 font-semibold text-gray-500">Receipt</th>
                               </tr>
                             </thead>
-                            <tbody>
-                              {stats.payments.records.map((payment) => (
-                                <tr key={payment.id} className="border-b last:border-0 hover:bg-gray-50/50">
-                                  <td className="p-4 font-medium">{payment.month}</td>
-                                  <td className="p-4">ETB {payment.amount.toFixed(2)}</td>
+                            <tbody className="divide-y divide-gray-50">
+                              {stats.payments.records.map((payment: any) => (
+                                <tr key={payment.id} className="hover:bg-gray-50/50 transition-colors">
+                                  <td className="p-4 font-medium text-[#1f2d3d]">{payment.month}</td>
+                                  <td className="p-4 font-bold text-[#1f2d3d]">ETB {payment.amount.toFixed(2)}</td>
                                   <td className="p-4">
-                                    <Badge variant="outline" className={`
-                                      ${payment.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : ''}
-                                      ${payment.status === 'overdue' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                                      ${payment.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' : ''}
-                                    `}>
-                                      {payment.status}
-                                    </Badge>
+                                    {payment.status === 'paid' ? (
+                                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-50 shadow-none">Paid</Badge>
+                                    ) : payment.status === 'pending' ? (
+                                      <Badge className="bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-50 shadow-none">Pending</Badge>
+                                    ) : (
+                                      <Badge className="bg-rose-50 text-rose-700 border-rose-100 hover:bg-rose-50 shadow-none">Overdue</Badge>
+                                    )}
                                   </td>
-                                  <td className="p-4 text-muted-foreground">
-                                    {payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : '-'}
+                                  <td className="p-4 text-gray-500">
+                                    {new Date(payment.createdAt).toLocaleDateString(undefined, {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric'
+                                    })}
                                   </td>
-                                  <td className="p-4">
-                                    {payment.status !== 'paid' && (
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                        onClick={() => updatePaymentStatus(payment.id, 'paid')}
-                                      >
-                                        Mark Paid
-                                      </Button>
+                                  <td className="p-4 text-right">
+                                    {payment.depositSlipPath ? (
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => {
+                                            const url = `${getApiBaseUrl()}/${payment.depositSlipPath}`
+                                            setViewingReceipt({ url, title: `Receipt - ${payment.month}` })
+                                          }}
+                                          className="h-8 px-3 border-gray-200 hover:bg-[#1f2d3d] hover:text-white transition-all text-xs"
+                                        >
+                                          <Eye className="h-3.5 w-3.5 mr-1.5" />
+                                          View
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => {
+                                            const url = `${getApiBaseUrl()}/${payment.depositSlipPath}`
+                                            const link = document.createElement('a')
+                                            link.href = url
+                                            link.download = `receipt-${payment.month}.pdf`
+                                            document.body.appendChild(link)
+                                            link.click()
+                                            document.body.removeChild(link)
+                                          }}
+                                          className="h-8 w-8 p-0 border-gray-200 hover:bg-[#1f2d3d] hover:text-white transition-all"
+                                        >
+                                          <Download className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <span className="text-xs text-gray-300 italic">No receipt</span>
                                     )}
                                   </td>
                                 </tr>
@@ -1056,14 +1091,32 @@ export default function TraineeDetailPage() {
         </div>
       </div>
       
-      {pdfViewer && (
-        <PDFViewer
-          url={pdfViewer.url}
-          title={pdfViewer.title}
-          open={!!pdfViewer}
-          onOpenChange={(open) => !open && setPdfViewer(null)}
-        />
-      )}
+      {/* Receipt Viewer Modal */}
+      <Dialog open={!!viewingReceipt} onOpenChange={(open) => !open && setViewingReceipt(null)}>
+        <DialogContent className="max-w-4xl w-[95vw] h-[90vh] p-0 overflow-hidden flex flex-col">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle>{viewingReceipt?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 bg-gray-100 overflow-auto flex items-center justify-center p-4">
+            {viewingReceipt?.url.toLowerCase().endsWith('.pdf') ? (
+              <iframe 
+                src={viewingReceipt.url} 
+                className="w-full h-full border-none rounded-lg shadow-lg"
+                title="PDF Viewer"
+              />
+            ) : (
+              <img 
+                src={viewingReceipt?.url} 
+                alt="Receipt" 
+                className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+              />
+            )}
+          </div>
+          <div className="p-4 border-t bg-white flex justify-end">
+            <Button onClick={() => setViewingReceipt(null)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {viewingImage && (
         <div 
