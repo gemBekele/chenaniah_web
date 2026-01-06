@@ -119,8 +119,11 @@ export default function StudentPayments({ user }: StudentPaymentsProps) {
     setIsSubmitting(true)
     try {
       const formDataToSend = new FormData()
+      const monthIndex = months.indexOf(formData.month) + 1
+      const formattedMonth = `${formData.year}-${monthIndex.toString().padStart(2, '0')}`
+      
       formDataToSend.append('amount', formData.amount)
-      formDataToSend.append('month', `${formData.month} ${formData.year}`)
+      formDataToSend.append('month', formattedMonth)
       if (formData.notes) {
         formDataToSend.append('notes', formData.notes)
       }
