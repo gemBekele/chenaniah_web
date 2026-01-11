@@ -16,6 +16,10 @@ interface StudentIDCardProps {
     phone: string
     username: string
     photoPath?: string
+    section?: {
+      name: string
+      color: string
+    }
   }
   qrCodeImage: string | null
   onDownload?: () => void
@@ -116,7 +120,7 @@ export default function StudentIDCard({ user, qrCodeImage, onDownload }: Student
           }} 
         >
           {/* Decorative Top Bar */}
-          <div className="h-2 w-full bg-[#E5C985] shrink-0"></div>
+          <div className="h-2 w-full shrink-0" style={{ backgroundColor: user.section?.color || "#E5C985" }}></div>
 
           {/* Header with Logo */}
           <div className="px-4 pt-4 pb-1 text-center shrink-0 flex flex-col items-center">
@@ -128,7 +132,7 @@ export default function StudentIDCard({ user, qrCodeImage, onDownload }: Student
           {/* Main Content */}
           <div className="flex-1 px-4 flex flex-col items-center justify-start gap-2 overflow-hidden">
             {/* Photo */}
-            <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#E5C985] p-1 bg-white shadow-sm shrink-0 mt-1">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-4 p-1 bg-white shadow-sm shrink-0 mt-1" style={{ borderColor: user.section?.color || "#E5C985" }}>
               <div className="w-full h-full rounded-full overflow-hidden relative">
                 {photoDataUrl ? (
                   <img
@@ -158,10 +162,15 @@ export default function StudentIDCard({ user, qrCodeImage, onDownload }: Student
                 )}
               </div>
 
-              <div className="flex items-center justify-center gap-1.5 text-[#E5C985] text-xs font-semibold tracking-wide pt-0.5">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-semibold tracking-wide pt-0.5" style={{ color: user.section?.color || "#E5C985" }}>
                 <Phone className="w-3 h-3 fill-current" />
                 <p>{user.phone}</p>
               </div>
+              {user.section && (
+                <div className="mt-1 px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-white" style={{ backgroundColor: user.section.color }}>
+                  {user.section.name}
+                </div>
+              )}
             </div>
           </div>
 
@@ -183,7 +192,7 @@ export default function StudentIDCard({ user, qrCodeImage, onDownload }: Student
               )}
             </div>
 
-            <p className="text-[8px] text-[#212E3E] font-medium tracking-widest uppercase border-t border-[#E5C985] pt-1 px-6">Choir Membership Card</p>
+            <p className="text-[8px] text-[#212E3E] font-medium tracking-widest uppercase border-t pt-1 px-6" style={{ borderTopColor: user.section?.color || "#E5C985" }}>Choir Membership Card</p>
           </div>
           
           {/* Decorative Bottom Bar */}

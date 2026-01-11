@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Loader2, Download, FileText, Folder, ExternalLink, Image as ImageIcon, File, Eye, Music, X } from "lucide-react"
+import { Loader2, Download, FileText, Folder, ExternalLink, Image as ImageIcon, File, Eye, Music, X, Send } from "lucide-react"
+import { toast } from "sonner"
 import { getApiBaseUrl } from "@/lib/utils"
 import { PDFViewer } from "@/components/pdf-viewer"
 
@@ -13,6 +14,7 @@ const API_BASE_URL = getApiBaseUrl()
 interface StudentUser {
   id: number
   profileComplete: boolean
+  sectionId?: number
 }
 
 interface Resource {
@@ -127,6 +129,10 @@ export default function StudentResources({ user }: StudentResourcesProps) {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const handleSendToTelegram = (resourceId: number) => {
+    window.open(`https://t.me/chenaniah_resource_bot?start=resource_${resourceId}`, '_blank')
   }
 
   const formatFileSize = (bytes?: number) => {
@@ -265,18 +271,40 @@ export default function StudentResources({ user }: StudentResourcesProps) {
                 >
                   <Download className="h-3 w-3" />
                 </Button>
+                <Button
+                  onClick={() => handleSendToTelegram(resource.id)}
+                  variant="outline"
+                  size="sm"
+                  className="w-auto px-3 border-gray-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 text-gray-600 text-xs"
+                  title="Send to Telegram"
+                >
+                  <Send className="h-3 w-3 mr-1" />
+                  Telegram
+                </Button>
               </>
             )}
             {resource.type === 'link' && (
-              <Button
-                onClick={() => handleOpen(resource)}
-                variant="outline"
-                size="sm"
-                className="w-full border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-all duration-200 text-gray-600 text-xs"
-              >
-                <ExternalLink className="h-3 w-3 mr-1" />
-                Open Link
-              </Button>
+              <>
+                <Button
+                  onClick={() => handleOpen(resource)}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-all duration-200 text-gray-600 text-xs"
+                >
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Open Link
+                </Button>
+                <Button
+                  onClick={() => handleSendToTelegram(resource.id)}
+                  variant="outline"
+                  size="sm"
+                  className="w-auto px-3 border-gray-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 text-gray-600 text-xs"
+                  title="Send to Telegram"
+                >
+                  <Send className="h-3 w-3 mr-1" />
+                  Telegram
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -289,9 +317,9 @@ export default function StudentResources({ user }: StudentResourcesProps) {
         key={resource.id} 
         className="group border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden bg-white"
       >
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+      <div className="p-4">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
               {getFileIcon(resource.fileName, resource.type)}
             </div>
             {resource.type === 'file' && resource.fileSize && (
@@ -301,7 +329,7 @@ export default function StudentResources({ user }: StudentResourcesProps) {
             )}
           </div>
           
-          <div className="mb-4">
+          <div className="mb-3">
             <h3 className="font-semibold text-[#1f2d3d] truncate mb-1" title={resource.title}>
               {resource.title}
             </h3>
@@ -314,7 +342,7 @@ export default function StudentResources({ user }: StudentResourcesProps) {
 
           {/* Audio player */}
           {fileType === 'audio' && resource.type === 'file' && (
-            <div className="mb-4">
+            <div className="mb-3">
               <audio 
                 controls 
                 className="w-full h-10"
@@ -327,7 +355,7 @@ export default function StudentResources({ user }: StudentResourcesProps) {
 
           {/* Image preview */}
           {fileType === 'image' && resource.type === 'file' && (
-            <div className="mb-4 rounded-lg overflow-hidden border border-gray-200 cursor-pointer" onClick={() => handleOpen(resource)}>
+            <div className="mb-3 rounded-lg overflow-hidden border border-gray-200 cursor-pointer" onClick={() => handleOpen(resource)}>
               <img
                 src={getFileUrl(resource) || ''}
                 alt={resource.title}
@@ -377,17 +405,39 @@ export default function StudentResources({ user }: StudentResourcesProps) {
                 >
                   <Download className="h-4 w-4" />
                 </Button>
+                <Button
+                  onClick={() => handleSendToTelegram(resource.id)}
+                  variant="outline"
+                  size="sm"
+                  className="w-auto px-3 border-gray-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 text-gray-600 text-xs"
+                  title="Send to Telegram"
+                >
+                  <Send className="h-3 w-3 mr-1" />
+                  Telegram
+                </Button>
               </>
             )}
             {resource.type === 'link' && (
-              <Button
-                onClick={() => handleOpen(resource)}
-                variant="outline"
-                className="w-full border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-all duration-200 text-gray-600"
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open Link
-              </Button>
+              <>
+                <Button
+                  onClick={() => handleOpen(resource)}
+                  variant="outline"
+                  className="flex-1 border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-all duration-200 text-gray-600"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Link
+                </Button>
+                <Button
+                  onClick={() => handleSendToTelegram(resource.id)}
+                  variant="outline"
+                  size="sm"
+                  className="w-auto px-3 border-gray-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 text-gray-600 text-xs"
+                  title="Send to Telegram"
+                >
+                  <Send className="h-3 w-3 mr-1" />
+                  Telegram
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -405,6 +455,27 @@ export default function StudentResources({ user }: StudentResourcesProps) {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1f2d3d] p-6 rounded-2xl text-white shadow-lg shadow-[#1f2d3d]/10">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
+            <ExternalLink className="h-6 w-6 text-[#e8cb85]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-lg">Access on Telegram</h3>
+              <span className="bg-[#e8cb85] text-[#1f2d3d] text-[10px] font-bold px-2 py-0.5 rounded-full">SECTION BOT</span>
+            </div>
+            <p className="text-white/70 text-sm">Get your section files directly on Telegram</p>
+          </div>
+        </div>
+        <Button 
+          className="bg-[#e8cb85] hover:bg-[#d4b770] text-[#1f2d3d] font-bold rounded-xl px-6"
+          onClick={() => window.open('https://t.me/chenaniah_resource_bot', '_blank')}
+        >
+          Open Bot
+        </Button>
+      </div>
+
       {resources.length === 0 ? (
         <Card className="border-dashed border-2 border-gray-200 bg-gray-50/50 shadow-none">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -496,8 +567,8 @@ export default function StudentResources({ user }: StudentResourcesProps) {
                         )}
                       </div>
                     </CardHeader>
-                    <CardContent className="p-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <CardContent className="p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {displayResources.map((resource) => renderResourceCard(resource, false))}
                       </div>
                     </CardContent>
@@ -505,7 +576,7 @@ export default function StudentResources({ user }: StudentResourcesProps) {
                 )
               } else {
                 return (
-                  <div key={item.resource.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div key={item.resource.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {renderResourceCard(item.resource, true)}
                   </div>
                 )

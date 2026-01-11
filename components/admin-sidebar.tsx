@@ -67,6 +67,12 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
       matchPaths: ['/admin/trainees'] 
     },
     { 
+      path: '/admin/sections', 
+      label: 'Sections', 
+      icon: Users,
+      matchPaths: ['/admin/sections'] 
+    },
+    { 
       path: '/admin/assignments', 
       label: 'Assignments', 
       icon: FileText,

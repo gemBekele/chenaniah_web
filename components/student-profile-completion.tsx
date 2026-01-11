@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Loader2, Upload, FileText, CheckCircle2, AlertCircle, FileCheck, Edit, User, Phone, Mail, Image } from "lucide-react"
+import { Loader2, Upload, FileText, CheckCircle2, AlertCircle, FileCheck, Edit, User, Phone, Mail, Image, Users } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -24,6 +24,12 @@ interface StudentUser {
   hasEssay?: boolean
   hasPortrait?: boolean
   photoPath?: string
+  sectionId?: number
+  section?: {
+    id: number
+    name: string
+    color: string
+  }
 }
 
 interface ProfileCompletionFormProps {
@@ -49,6 +55,56 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
     portrait: false,
     essay: false,
   })
+  const [sections, setSections] = useState<{id: number, name: string, code: string, color: string}[]>([])
+  const [selectedSectionId, setSelectedSectionId] = useState<number | null>(user.sectionId || null)
+  const [isUpdatingSection, setIsUpdatingSection] = useState(false)
+
+  useEffect(() => {
+    loadSections()
+  }, [])
+
+  const loadSections = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/sections`)
+      const data = await response.json()
+      if (data.success) {
+        setSections(data.sections || [])
+      }
+    } catch (err) {
+      console.error("Error loading sections:", err)
+    }
+  }
+
+  const handleSectionSelect = async (sectionId: number) => {
+    const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+    if (!token) return
+
+    setIsUpdatingSection(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/student/select-section`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sectionId }),
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        setSelectedSectionId(sectionId)
+        toast.success('Section selected successfully')
+        onUpdate()
+      } else {
+        toast.error(data.error || 'Failed to select section')
+      }
+    } catch (err) {
+      console.error('Section selection error:', err)
+      toast.error('Failed to select section')
+    } finally {
+      setIsUpdatingSection(false)
+    }
+  }
 
   const handleFileChange = (type: 'id' | 'recommendation' | 'portrait', file: File | null) => {
     if (file) {
@@ -272,6 +328,20 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
                   <p className="font-medium text-[#1f2d3d] truncate">{user.username}</p>
                 </div>
               </div>
+
+              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div className="w-10 h-10 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0">
+                  <Users className="h-5 w-5 text-[#e8cb85]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <Label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">
+                    Choir Section
+                  </Label>
+                  <p className="font-medium text-[#1f2d3d] truncate">
+                    {user.section?.name || "Not selected"}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -437,6 +507,63 @@ export default function ProfileCompletionForm({ user, onUpdate }: ProfileComplet
       </CardHeader>
       
       <CardContent className="p-6 md:p-8 space-y-8">
+        {/* Section Selection */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold text-[#1f2d3d]">
+              Choir Section <span className="text-destructive">*</span>
+            </Label>
+            {user.sectionId && (
+              <span className="flex items-center text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                Selected: {user.section?.name}
+              </span>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {sections.map((section) => (
+              <Button
+                key={section.id}
+                variant={selectedSectionId === section.id ? "default" : "outline"}
+                className={`
+                  h-auto py-4 px-4 flex flex-col items-center gap-2 rounded-xl transition-all relative overflow-hidden
+                  ${selectedSectionId === section.id 
+                    ? "text-white shadow-lg scale-[1.02]" 
+                    : "border-gray-200 hover:border-gray-300 hover:shadow-md text-gray-600 bg-white"
+                  }
+                `}
+                style={selectedSectionId === section.id ? { backgroundColor: section.color } : {}}
+                onClick={() => handleSectionSelect(section.id)}
+                disabled={isUpdatingSection}
+              >
+                {selectedSectionId !== section.id && (
+                  <div 
+                    className="absolute top-0 left-0 right-0 h-1" 
+                    style={{ backgroundColor: section.color }}
+                  />
+                )}
+                <div 
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                    selectedSectionId === section.id 
+                      ? "bg-white/20 text-white" 
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {section.code.toUpperCase()}
+                </div>
+                <span className="text-sm font-semibold">{section.name}</span>
+                {selectedSectionId === section.id && (
+                  <CheckCircle2 className="h-4 w-4 absolute top-2 right-2" />
+                )}
+              </Button>
+            ))}
+          </div>
+          {sections.length === 0 && (
+            <p className="text-sm text-gray-400 italic">Loading sections...</p>
+          )}
+        </div>
+
         {/* ID Document Upload */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">

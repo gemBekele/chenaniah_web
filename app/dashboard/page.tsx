@@ -38,6 +38,7 @@ import StudentNoticeBoard from '@/components/student-notice-board'
 import StudentNotes from '@/components/student-notes'
 import StudentTeams from '@/components/student-teams'
 import StudentPrayer from '@/components/student-prayer'
+import { SectionLeaderUpload } from "@/components/section-leader-upload"
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -53,6 +54,17 @@ interface StudentUser {
   hasEssay?: boolean
   hasPortrait?: boolean
   photoPath?: string
+  sectionId?: number
+  section?: {
+    id: number
+    name: string
+    color: string
+  }
+  ledSection?: {
+    id: number
+    name: string
+    color: string
+  }
 }
 
 export default function StudentDashboardPage() {
@@ -222,12 +234,31 @@ export default function StudentDashboardPage() {
               <NavItem id="notes" label="Notes" />
               <NavItem id="teams" label="Teams" />
               <NavItem id="prayer" label="Prayer" />
+              {user?.ledSection && <NavItem id="leader" label="Section Leader" />}
               <NavItem id="profile" label="My Profile" />
             </nav>
+
+            {/* Section Badge */}
+            {user.section && (
+              <div 
+                className="hidden lg:flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-sm"
+                style={{ backgroundColor: user.section.color }}
+              >
+                {user.section.name}
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-3 pl-4 border-l border-gray-100">
+            <div className="flex items-center gap-4">
+              {user.section && (
+                <div 
+                  className="flex md:hidden items-center px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider text-white shadow-sm"
+                  style={{ backgroundColor: user.section.color }}
+                >
+                  {user.section.name}
+                </div>
+              )}
+              <div className="hidden md:flex items-center gap-3 pl-4 border-l border-gray-100">
               <div className="text-right">
                 <p className="text-sm font-semibold leading-none text-gray-900">{user.username}</p>
                 <p className="text-xs text-gray-500 mt-0.5">Choir Member</p>
@@ -269,6 +300,7 @@ export default function StudentDashboardPage() {
               <NavItem id="notes" label="Notes" />
               <NavItem id="teams" label="Teams" />
               <NavItem id="prayer" label="Prayer" />
+              {user?.ledSection && <NavItem id="leader" label="Section Leader" />}
               <NavItem id="profile" label="My Profile" />
             </nav>
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
@@ -564,6 +596,16 @@ export default function StudentDashboardPage() {
               <p className="text-gray-500 text-lg">Claim your weekly prayer time slot.</p>
             </div>
             <StudentPrayer />
+          </div>
+        )}
+
+        {activeTab === "leader" && user.ledSection && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">Section Leader Dashboard</h1>
+              <p className="text-gray-500 text-lg">Manage resources for the {user.ledSection.name} section.</p>
+            </div>
+            <SectionLeaderUpload section={user.ledSection} />
           </div>
         )}
       </main>
