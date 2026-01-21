@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, Upload, FileText, CheckCircle2, AlertCircle, Trash2 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { toast } from "sonner"
@@ -26,7 +27,34 @@ export function SectionLeaderUpload({ section }: SectionLeaderUploadProps) {
   const [file, setFile] = useState<File | null>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [category, setCategory] = useState('General')
   const [isUploading, setIsUploading] = useState(false)
+  const [categories, setCategories] = useState<string[]>(['General', 'Sheet Music', 'Audio', 'Lyrics', 'Video'])
+  const [isNewCategory, setIsNewCategory] = useState(false)
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  const loadCategories = async () => {
+    const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+    if (!token) return
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/resources/categories`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      const data = await response.json()
+      if (data.success && data.categories.length > 0) {
+        // Merge with defaults and deduplicate
+        const defaults = ['General', 'Sheet Music', 'Audio', 'Lyrics', 'Video']
+        const all = Array.from(new Set([...defaults, ...data.categories]))
+        setCategories(all)
+      }
+    } catch (err) {
+      console.error('Error loading categories:', err)
+    }
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null
@@ -55,6 +83,7 @@ export function SectionLeaderUpload({ section }: SectionLeaderUploadProps) {
     formData.append('file', file)
     formData.append('title', title)
     formData.append('description', description)
+    formData.append('category', category)
     formData.append('sectionId', section.id.toString())
     formData.append('type', 'file')
 
@@ -73,6 +102,7 @@ export function SectionLeaderUpload({ section }: SectionLeaderUploadProps) {
         setFile(null)
         setTitle('')
         setDescription('')
+        setCategory('General')
         // Optionally refresh a list of section resources here
       } else {
         toast.error(data.error || 'Upload failed')
@@ -125,6 +155,45 @@ export function SectionLeaderUpload({ section }: SectionLeaderUploadProps) {
                 required
               />
             </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select 
+                  value={isNewCategory ? "new" : (categories.includes(category) ? category : "new")} 
+                  onValueChange={(val) => {
+                    if (val === "new") {
+                      setIsNewCategory(true)
+                      setCategory("")
+                    } else {
+                      setIsNewCategory(false)
+                      setCategory(val)
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                    <SelectItem value="new" className="font-semibold text-[#e8cb85]">
+                      + Create New Category
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {isNewCategory && (
+                  <Input
+                    placeholder="Enter new category name"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="mt-2 animate-in fade-in slide-in-from-top-1"
+                    autoFocus
+                    required
+                  />
+                )}
+              </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">Description (Optional)</Label>

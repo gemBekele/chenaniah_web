@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Loader2, Download, FileText, Folder, ExternalLink, Image as ImageIcon, File, Eye, Music, X, Send } from "lucide-react"
 import { toast } from "sonner"
 import { getApiBaseUrl } from "@/lib/utils"
@@ -17,7 +19,7 @@ interface StudentUser {
   sectionId?: number
 }
 
-interface Resource {
+export interface Resource {
   id: number
   title: string
   description?: string
@@ -28,21 +30,29 @@ interface Resource {
   fileSize?: number
   createdAt: string
   batchId?: string
+  category?: string
 }
 
 interface StudentResourcesProps {
   user: StudentUser
+  resources?: Resource[] // Optional prop to pass resources directly
+  hideTelegramBanner?: boolean
 }
 
-export default function StudentResources({ user }: StudentResourcesProps) {
+export default function StudentResources({ user, resources: propResources, hideTelegramBanner }: StudentResourcesProps) {
   const [resources, setResources] = useState<Resource[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [pdfViewer, setPdfViewer] = useState<{ url: string; title: string } | null>(null)
   const [imageViewer, setImageViewer] = useState<{ url: string; title: string } | null>(null)
 
   useEffect(() => {
-    loadResources()
-  }, [])
+    if (propResources) {
+      setResources(propResources)
+      setIsLoading(false)
+    } else {
+      loadResources()
+    }
+  }, [propResources])
 
   const loadResources = async () => {
     const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
@@ -202,6 +212,11 @@ export default function StudentResources({ user }: StudentResourcesProps) {
                 {resource.description}
               </p>
             )}
+            {resource.category && resource.category !== 'General' && (
+              <span className="inline-block mt-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                {resource.category}
+              </span>
+            )}
           </div>
 
           {/* Audio player */}
@@ -338,6 +353,11 @@ export default function StudentResources({ user }: StudentResourcesProps) {
                 {resource.description}
               </p>
             )}
+            {resource.category && resource.category !== 'General' && (
+              <span className="inline-block mt-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                {resource.category}
+              </span>
+            )}
           </div>
 
           {/* Audio player */}
@@ -445,6 +465,210 @@ export default function StudentResources({ user }: StudentResourcesProps) {
     )
   }
 
+  const renderResourceGrid = (resourcesToRender: Resource[]) => {
+    if (resourcesToRender.length === 0) {
+      return (
+        <Card className="border-dashed border-2 border-gray-200 bg-gray-50/50 shadow-none">
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <Folder className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-[#1f2d3d]">No Resources Found</h3>
+            <p className="text-gray-500 max-w-sm mt-1">
+              There are no resources in this category yet.
+            </p>
+          </CardContent>
+        </Card>
+      )
+    }
+
+    const { grouped, ungrouped } = groupResources(resourcesToRender)
+    const allGroups = [
+      ...Object.entries(grouped).map(([batchId, batchResources]) => ({
+        type: 'batch' as const,
+        batchId,
+        resources: batchResources,
+      })),
+      ...ungrouped.map(resource => ({
+        type: 'single' as const,
+        resource,
+      })),
+    ].sort((a, b) => {
+      const aDate = a.type === 'batch' ? a.resources[0].createdAt : a.resource.createdAt
+      const bDate = b.type === 'batch' ? b.resources[0].createdAt : b.resource.createdAt
+      return new Date(bDate).getTime() - new Date(aDate).getTime()
+    })
+
+    return (
+      <Accordion type="single" collapsible className="w-full space-y-2">
+        {allGroups.map((item) => {
+          if (item.type === 'batch') {
+            // Extract batch title and description
+            const firstResource = item.resources[0]
+            const commonDescription = item.resources.every(r => r.description === firstResource.description && r.description) 
+              ? firstResource.description 
+              : undefined
+            
+            // Try to extract a base title
+            let batchTitle: string | undefined
+            const titles = item.resources.map(r => r.title)
+            let titlePrefix: string | undefined
+            
+            if (titles.length > 0) {
+              const firstTitleMatch = titles[0].match(/^(.+?)\s*-\s*(.+)$/)
+              if (firstTitleMatch) {
+                const prefix = firstTitleMatch[1]
+                if (titles.every(title => title.startsWith(prefix + ' - ') || title === prefix)) {
+                  batchTitle = prefix
+                  titlePrefix = prefix
+                }
+              }
+            }
+            
+            const displayResources = titlePrefix 
+              ? item.resources.map(r => ({
+                  ...r,
+                  title: r.title.startsWith(titlePrefix + ' - ') 
+                    ? r.title.replace(titlePrefix + ' - ', '')
+                    : r.title
+                }))
+              : item.resources
+            
+            return (
+              <AccordionItem key={item.batchId} value={`batch-${item.batchId}`} className="border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-50">
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="w-8 h-8 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0">
+                      <Folder className="h-4 w-4 text-[#e8cb85]" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-[#1f2d3d] text-sm">
+                        {batchTitle || `Batch Upload (${item.resources.length} files)`}
+                      </h3>
+                      <p className="text-xs text-gray-400 font-normal mt-0.5">
+                        {new Date(item.resources[0].createdAt).toLocaleDateString()} • {item.resources.length} items
+                      </p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-2 bg-gray-50/30 border-t border-gray-100">
+                  {commonDescription && (
+                    <p className="text-sm text-gray-600 mb-4 italic border-l-2 border-[#e8cb85] pl-3 py-1">
+                      {commonDescription}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {displayResources.map((resource) => renderResourceCard(resource, false))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )
+          } else {
+            const resource = item.resource
+            return (
+              <AccordionItem key={resource.id} value={`resource-${resource.id}`} className="border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-50">
+                  <div className="flex items-center gap-3 text-left overflow-hidden">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                      {getFileIcon(resource.fileName, resource.type)}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-[#1f2d3d] text-sm truncate pr-4">
+                        {resource.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-gray-400 font-normal mt-0.5">
+                        <span>{new Date(resource.createdAt).toLocaleDateString()}</span>
+                        {resource.fileSize && (
+                          <>
+                            <span>•</span>
+                            <span>{formatFileSize(resource.fileSize)}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-2 bg-gray-50/30 border-t border-gray-100">
+                  <div className="max-w-3xl">
+                    {resource.description && (
+                      <p className="text-sm text-gray-600 mb-4">
+                        {resource.description}
+                      </p>
+                    )}
+                    
+                    {/* Audio Player Inline */}
+                    {getFileType(resource.fileName) === 'audio' && (
+                      <div className="mb-4 bg-white p-2 rounded-lg border border-gray-200">
+                        <audio 
+                          controls 
+                          className="w-full h-8"
+                          src={getFileUrl(resource) || undefined}
+                        >
+                          Your browser does not support the audio element.
+                        </audio>
+                      </div>
+                    )}
+
+                    {/* Image Preview Inline */}
+                    {getFileType(resource.fileName) === 'image' && (
+                      <div className="mb-4 rounded-lg overflow-hidden border border-gray-200 max-w-sm">
+                        <img
+                          src={getFileUrl(resource) || ''}
+                          alt={resource.title}
+                          className="w-full h-auto object-cover"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2 mt-2">
+                       {/* Action Buttons */}
+                       <Button
+                        onClick={() => handleOpen(resource)}
+                        variant="default"
+                        size="sm"
+                        className="bg-[#1f2d3d] hover:bg-[#1f2d3d]/90 h-8 text-xs"
+                      >
+                        {getFileType(resource.fileName) === 'pdf' ? (
+                          <>
+                            <Eye className="h-3 w-3 mr-1.5" /> View
+                          </>
+                        ) : (
+                          <>
+                            <ExternalLink className="h-3 w-3 mr-1.5" /> Open
+                          </>
+                        )}
+                      </Button>
+                      
+                      {resource.type === 'file' && (
+                        <Button
+                          onClick={() => handleDownload(resource)}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs"
+                        >
+                          <Download className="h-3 w-3 mr-1.5" /> Download
+                        </Button>
+                      )}
+                      
+                      <Button
+                        onClick={() => handleSendToTelegram(resource.id)}
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                      >
+                        <Send className="h-3 w-3 mr-1.5" /> Telegram
+                      </Button>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )
+          }
+        })}
+      </Accordion>
+    )
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -453,28 +677,18 @@ export default function StudentResources({ user }: StudentResourcesProps) {
     )
   }
 
+  // Get unique categories
+  const categories = Array.from(new Set(resources.map(r => r.category || 'General')))
+  // Ensure 'General' is first if it exists, or add it if we want a default tab
+  if (categories.includes('General')) {
+    categories.sort((a, b) => a === 'General' ? -1 : b === 'General' ? 1 : a.localeCompare(b))
+  } else if (categories.length > 0) {
+    categories.sort()
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#1f2d3d] p-6 rounded-2xl text-white shadow-lg shadow-[#1f2d3d]/10">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm">
-            <ExternalLink className="h-6 w-6 text-[#e8cb85]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-lg">Access on Telegram</h3>
-              <span className="bg-[#e8cb85] text-[#1f2d3d] text-[10px] font-bold px-2 py-0.5 rounded-full">SECTION BOT</span>
-            </div>
-            <p className="text-white/70 text-sm">Get your section files directly on Telegram</p>
-          </div>
-        </div>
-        <Button 
-          className="bg-[#e8cb85] hover:bg-[#d4b770] text-[#1f2d3d] font-bold rounded-xl px-6"
-          onClick={() => window.open('https://t.me/chenaniah_resource_bot', '_blank')}
-        >
-          Open Bot
-        </Button>
-      </div>
+
 
       {resources.length === 0 ? (
         <Card className="border-dashed border-2 border-gray-200 bg-gray-50/50 shadow-none">
@@ -489,101 +703,24 @@ export default function StudentResources({ user }: StudentResourcesProps) {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
-          {(() => {
-            const { grouped, ungrouped } = groupResources(resources)
-            const allGroups = [
-              ...Object.entries(grouped).map(([batchId, batchResources]) => ({
-                type: 'batch' as const,
-                batchId,
-                resources: batchResources,
-              })),
-              ...ungrouped.map(resource => ({
-                type: 'single' as const,
-                resource,
-              })),
-            ].sort((a, b) => {
-              const aDate = a.type === 'batch' ? a.resources[0].createdAt : a.resource.createdAt
-              const bDate = b.type === 'batch' ? b.resources[0].createdAt : b.resource.createdAt
-              return new Date(bDate).getTime() - new Date(aDate).getTime()
-            })
-
-            return allGroups.map((item, groupIndex) => {
-              if (item.type === 'batch') {
-                // Extract batch title and description
-                const firstResource = item.resources[0]
-                const commonDescription = item.resources.every(r => r.description === firstResource.description && r.description) 
-                  ? firstResource.description 
-                  : undefined
-                
-                // Try to extract a base title if all titles follow a pattern (e.g., "Title - filename")
-                let batchTitle: string | undefined
-                const titles = item.resources.map(r => r.title)
-                let titlePrefix: string | undefined
-                
-                if (titles.length > 0) {
-                  // Check if all titles share a common prefix before " - "
-                  const firstTitleMatch = titles[0].match(/^(.+?)\s*-\s*(.+)$/)
-                  if (firstTitleMatch) {
-                    const prefix = firstTitleMatch[1]
-                    // Check if all titles start with the same prefix
-                    if (titles.every(title => title.startsWith(prefix + ' - ') || title === prefix)) {
-                      batchTitle = prefix
-                      titlePrefix = prefix
-                    }
-                  }
-                }
-                
-                // Create resources with cleaned titles for display (without mutating originals)
-                const displayResources = titlePrefix 
-                  ? item.resources.map(r => ({
-                      ...r,
-                      title: r.title.startsWith(titlePrefix + ' - ') 
-                        ? r.title.replace(titlePrefix + ' - ', '')
-                        : r.title
-                    }))
-                  : item.resources
-                
-                // Display batch as one unified post/card
-                return (
-                  <Card key={item.batchId} className="border-gray-200 shadow-sm hover:shadow-md transition-all bg-white">
-                    <CardHeader className="pb-3 border-b border-gray-200 bg-gray-50/50">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Folder className="h-5 w-5 text-[#e8cb85]" />
-                            <CardTitle className="text-lg font-semibold text-[#1f2d3d]">
-                              {batchTitle || `Uploaded together (${item.resources.length} files)`}
-                            </CardTitle>
-                          </div>
-                          <span className="text-xs text-gray-400">
-                            {new Date(item.resources[0].createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        {commonDescription && (
-                          <CardDescription className="text-sm text-gray-600 mt-1">
-                            {commonDescription}
-                          </CardDescription>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {displayResources.map((resource) => renderResourceCard(resource, false))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              } else {
-                return (
-                  <div key={item.resource.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {renderResourceCard(item.resource, true)}
-                  </div>
-                )
-              }
-            })
-          })()}
-        </div>
+        <Tabs defaultValue="All" className="w-full">
+          <TabsList className="w-full flex flex-wrap h-auto p-1 bg-gray-100/50 rounded-xl mb-6">
+            <TabsTrigger value="All" className="flex-1 rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1f2d3d] data-[state=active]:shadow-sm">All</TabsTrigger>
+            {categories.map(cat => (
+              <TabsTrigger key={cat} value={cat} className="flex-1 rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1f2d3d] data-[state=active]:shadow-sm">{cat}</TabsTrigger>
+            ))}
+          </TabsList>
+          
+          <TabsContent value="All" className="mt-0">
+            {renderResourceGrid(resources)}
+          </TabsContent>
+          
+          {categories.map(cat => (
+            <TabsContent key={cat} value={cat} className="mt-0">
+              {renderResourceGrid(resources.filter(r => (r.category || 'General') === cat))}
+            </TabsContent>
+          ))}
+        </Tabs>
       )}
 
       {pdfViewer && (

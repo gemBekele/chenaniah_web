@@ -618,7 +618,9 @@ export default function AdminSectionDetailPage() {
                           variant={noticeForm.type === type ? "default" : "outline"}
                           size="sm"
                           onClick={() => setNoticeForm({ ...noticeForm, type })}
-                          className={noticeForm.type === type ? "bg-[#1f2d3d]" : ""}
+                          className={noticeForm.type === type 
+                            ? "bg-[#1f2d3d] text-white hover:bg-[#1f2d3d]/90" 
+                            : "text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-100"}
                         >
                           {type.charAt(0).toUpperCase() + type.slice(1)}
                         </Button>

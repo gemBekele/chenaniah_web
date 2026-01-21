@@ -38,6 +38,7 @@ import StudentNoticeBoard from '@/components/student-notice-board'
 import StudentNotes from '@/components/student-notes'
 import StudentTeams from '@/components/student-teams'
 import StudentPrayer from '@/components/student-prayer'
+import StudentSection from '@/components/student-section'
 import { SectionLeaderUpload } from "@/components/section-leader-upload"
 
 const API_BASE_URL = getApiBaseUrl()
@@ -230,6 +231,7 @@ export default function StudentDashboardPage() {
               <NavItem id="overview" label="Overview" />
               <NavItem id="assignments" label="Assignments" />
               <NavItem id="payments" label="Contributions" />
+              <NavItem id="section" label="Section" />
               <NavItem id="resources" label="Resources" />
               <NavItem id="notes" label="Notes" />
               <NavItem id="teams" label="Teams" />
@@ -240,23 +242,25 @@ export default function StudentDashboardPage() {
 
             {/* Section Badge */}
             {user.section && (
-              <div 
-                className="hidden lg:flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-sm"
+              <button 
+                onClick={() => setActiveTab("section")}
+                className="hidden lg:flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white shadow-sm hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: user.section.color }}
               >
                 {user.section.name}
-              </div>
+              </button>
             )}
           </div>
 
             <div className="flex items-center gap-4">
               {user.section && (
-                <div 
-                  className="flex md:hidden items-center px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider text-white shadow-sm"
+                <button 
+                  onClick={() => setActiveTab("section")}
+                  className="flex md:hidden items-center px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider text-white shadow-sm hover:opacity-90 transition-opacity"
                   style={{ backgroundColor: user.section.color }}
                 >
                   {user.section.name}
-                </div>
+                </button>
               )}
               <div className="hidden md:flex items-center gap-3 pl-4 border-l border-gray-100">
               <div className="text-right">
@@ -296,6 +300,7 @@ export default function StudentDashboardPage() {
               <NavItem id="overview" label="Overview" />
               <NavItem id="assignments" label="Assignments" />
               <NavItem id="payments" label="Contributions" />
+              <NavItem id="section" label="Section" />
               <NavItem id="resources" label="Resources" />
               <NavItem id="notes" label="Notes" />
               <NavItem id="teams" label="Teams" />
@@ -556,6 +561,12 @@ export default function StudentDashboardPage() {
               <p className="text-gray-500 text-lg">Submit your monthly contributions with deposit slip.</p>
             </div>
             <StudentPayments user={user} />
+          </div>
+        )}
+
+        {activeTab === "section" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <StudentSection user={user} onSectionUpdate={loadUserData} />
           </div>
         )}
 

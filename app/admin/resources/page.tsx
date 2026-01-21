@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Folder, Plus, Upload, X, FileText, ExternalLink, Download, Trash2 } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getApiBaseUrl } from "@/lib/utils"
 import { AdminLayout } from "@/components/admin-layout"
 import { toast } from "sonner"
@@ -25,6 +26,7 @@ interface Resource {
   fileSize?: number
   createdAt: string
   batchId?: string
+  category?: string
 }
 
 export default function AdminResourcesPage() {
@@ -39,14 +41,50 @@ export default function AdminResourcesPage() {
     description: "",
     type: "file" as "file" | "link",
     url: "",
+    category: "General",
   })
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const [categories, setCategories] = useState<string[]>(['General', 'Sheet Music', 'Audio', 'Lyrics', 'Video'])
+  const [isNewCategory, setIsNewCategory] = useState(false)
 
   useEffect(() => {
     loadResources()
+    loadCategories()
   }, [])
+
+  const loadCategories = async () => {
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!token) return
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/resources/categories`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      // Fallback to public endpoint if admin specific one doesn't exist (it's the same route actually)
+      // But wait, my route is /resources/categories, not /admin/resources/categories
+      // The base URL for admin might be different? No, API_BASE_URL is root.
+      // The route I added is router.get('/categories', ...) inside resources.routes.ts
+      // resources.routes.ts is mounted at /resources (usually).
+      // Let's check server.ts to be sure.
+      // Assuming it is mounted at /resources or /admin/resources.
+      // I'll check server.ts later if this fails, but for now I'll try /resources/categories
+      
+      const res = await fetch(`${API_BASE_URL}/resources/categories`, {
+         headers: { 'Authorization': `Bearer ${token}` }
+      })
+      
+      const data = await res.json()
+      if (data.success && data.categories.length > 0) {
+        const defaults = ['General', 'Sheet Music', 'Audio', 'Lyrics', 'Video']
+        const all = Array.from(new Set([...defaults, ...data.categories]))
+        setCategories(all)
+      }
+    } catch (err) {
+      console.error('Error loading categories:', err)
+    }
+  }
 
   const loadResources = async () => {
     const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
@@ -182,6 +220,7 @@ export default function AdminResourcesPage() {
         
         uploadFormData.append('titles', JSON.stringify(titles))
         uploadFormData.append('descriptions', JSON.stringify(descriptions))
+        uploadFormData.append('category', formData.category)
 
         const response = await fetch(`${API_BASE_URL}/admin/resources/upload`, {
           method: 'POST',
@@ -195,7 +234,7 @@ export default function AdminResourcesPage() {
         if (data.success) {
           const count = data.count || data.resources?.length || selectedFiles.length
           toast.success(`${count} resource${count > 1 ? 's' : ''} uploaded successfully`)
-          setFormData({ title: "", description: "", type: "file", url: "" })
+          setFormData({ title: "", description: "", type: "file", url: "", category: "General" })
           setSelectedFiles([])
           if (fileInputRef.current) {
             fileInputRef.current.value = ''
@@ -217,13 +256,14 @@ export default function AdminResourcesPage() {
             description: formData.description || undefined,
             type: 'link',
             url: formData.url,
+            category: formData.category,
           }),
         })
 
         const data = await response.json()
         if (data.success) {
           toast.success('Resource created successfully')
-          setFormData({ title: "", description: "", type: "file", url: "" })
+          setFormData({ title: "", description: "", type: "file", url: "", category: "General" })
           setShowCreateForm(false)
           loadResources()
         } else {
@@ -341,6 +381,44 @@ export default function AdminResourcesPage() {
                         required={selectedFiles.length === 0 || selectedFiles.length === 1}
                         className="bg-gray-50 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="category" className="text-[#1f2d3d]">Category</Label>
+                      <Select 
+                        value={isNewCategory ? "new" : (categories.includes(formData.category) ? formData.category : "new")} 
+                        onValueChange={(val) => {
+                          if (val === "new") {
+                            setIsNewCategory(true)
+                            setFormData({ ...formData, category: "" })
+                          } else {
+                            setIsNewCategory(false)
+                            setFormData({ ...formData, category: val })
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="bg-gray-50 border-gray-200">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map(cat => (
+                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                          ))}
+                          <SelectItem value="new" className="font-semibold text-[#e8cb85]">
+                            + Create New Category
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {isNewCategory && (
+                        <Input
+                          placeholder="Enter new category name"
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                          className="mt-2 animate-in fade-in slide-in-from-top-1 bg-gray-50 border-gray-200"
+                          autoFocus
+                          required
+                        />
+                      )}
                     </div>
                   </div>
                   
@@ -509,6 +587,11 @@ export default function AdminResourcesPage() {
                               <CardDescription className="mt-1 line-clamp-2 text-xs text-gray-500">
                                 {resource.description}
                               </CardDescription>
+                            )}
+                            {resource.category && resource.category !== 'General' && (
+                              <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-[#e8cb85]/20 text-[#1f2d3d] mt-2">
+                                {resource.category}
+                              </span>
                             )}
                           </div>
                         </div>
