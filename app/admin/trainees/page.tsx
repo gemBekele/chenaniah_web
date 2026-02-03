@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,17 +36,17 @@ interface Trainee {
 }
 
 export default function AdminTraineesPage() {
-  const [trainees, setTrainees] = useState<Trainee[]>([])
+  const [allTrainees, setAllTrainees] = useState<Trainee[]>([])
   const [totalCount, setTotalCount] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [selectedTrainee, setSelectedTrainee] = useState<Trainee | null>(null)
   const router = useRouter()
 
+  // Load all trainees once on mount
   useEffect(() => {
     loadTrainees()
-  }, [statusFilter, searchQuery])
+  }, [])
 
   const loadTrainees = async () => {
     const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
@@ -57,14 +57,8 @@ export default function AdminTraineesPage() {
 
     setIsLoading(true)
     try {
+      // Fetch all trainees without filters
       const params = new URLSearchParams()
-      if (statusFilter !== 'all') {
-        params.append('status', statusFilter)
-      }
-      if (searchQuery) {
-        params.append('search', searchQuery)
-      }
-      // Request a high limit to get all trainees, or no limit if backend supports it
       params.append('limit', '10000')
 
       const response = await fetch(`${API_BASE_URL}/admin/trainees?${params.toString()}`, {
@@ -82,7 +76,7 @@ export default function AdminTraineesPage() {
 
       const data = await response.json()
       if (data.success) {
-        setTrainees(data.students || [])
+        setAllTrainees(data.students || [])
         setTotalCount(data.total || 0)
       }
     } catch (err) {
@@ -91,6 +85,29 @@ export default function AdminTraineesPage() {
       setIsLoading(false)
     }
   }
+
+  // Client-side filtering for instant search
+  const trainees = useMemo(() => {
+    let filtered = allTrainees
+
+    // Filter by status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(t => t.status === statusFilter)
+    }
+
+    // Filter by search query (name, phone, username)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter(t => 
+        t.username.toLowerCase().includes(query) ||
+        t.phone.includes(query) ||
+        (t.fullNameEnglish?.toLowerCase().includes(query)) ||
+        (t.fullNameAmharic?.includes(query))
+      )
+    }
+
+    return filtered
+  }, [allTrainees, statusFilter, searchQuery])
 
   const getStatusBadge = (status: string) => {
     const badges = {
@@ -146,7 +163,7 @@ export default function AdminTraineesPage() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-3xl font-bold text-emerald-600">
-                  {trainees.filter(t => t.status === 'active').length}
+                  {allTrainees.filter(t => t.status === 'active').length}
                 </div>
                 <CheckCircle2 className="h-5 w-5 text-emerald-600" />
               </div>
@@ -159,7 +176,7 @@ export default function AdminTraineesPage() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-3xl font-bold text-blue-600">
-                  {trainees.filter(t => t.profileComplete).length}
+                  {allTrainees.filter(t => t.profileComplete).length}
                 </div>
                 <FileText className="h-5 w-5 text-blue-600" />
               </div>
@@ -172,7 +189,7 @@ export default function AdminTraineesPage() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-3xl font-bold text-[#e8cb85]">
-                  {trainees.filter(t => t.status === 'graduated').length}
+                  {allTrainees.filter(t => t.status === 'graduated').length}
                 </div>
                 <Clock className="h-5 w-5 text-[#e8cb85]" />
               </div>

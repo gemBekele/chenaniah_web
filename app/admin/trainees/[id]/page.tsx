@@ -15,6 +15,8 @@ import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -127,6 +129,8 @@ export default function TraineeDetailPage() {
   const [newNotice, setNewNotice] = useState({ title: "", content: "", type: "info" })
   const [addingNotice, setAddingNotice] = useState(false)
   const [viewingImage, setViewingImage] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (params.id) {
@@ -382,6 +386,36 @@ export default function TraineeDetailPage() {
     }
   }
 
+  const deleteStudent = async () => {
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!token) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/trainees/${params.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        toast.success('Student deleted successfully')
+        router.push('/admin/trainees')
+      } else {
+        toast.error(data.error || 'Failed to delete student')
+      }
+    } catch (err) {
+      console.error('Error deleting student:', err)
+      toast.error('Failed to delete student')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteDialog(false)
+    }
+  }
+
   if (isLoading || !stats) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
@@ -521,6 +555,14 @@ export default function TraineeDetailPage() {
                         {isUpdatingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                       </Button>
                     </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-3 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 hover:border-red-300"
+                      onClick={() => setShowDeleteDialog(true)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Student
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1141,6 +1183,39 @@ export default function TraineeDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Delete Student</DialogTitle>
+            <DialogDescription className="pt-3">
+              Are you sure you want to delete <span className="font-semibold">{stats?.student.fullNameEnglish || stats?.student.username}</span>? 
+              This action cannot be undone and will permanently remove:
+              <ul className="list-disc list-inside mt-2 text-sm space-y-1">
+                <li>All attendance records</li>
+                <li>All payment records</li>
+                <li>All assignment submissions</li>
+                <li>All notes and notices</li>
+                <li>Team memberships</li>
+              </ul>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={deleteStudent}
+              disabled={isDeleting}
+            >
+              {isDeleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+              Delete Student
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   )
 }
