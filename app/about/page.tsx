@@ -14,7 +14,7 @@ export default function AboutPage() {
       <AboutHeroSection />
       <MissionVisionSection />
       <AmharicSection />
-      <TeamSection />
+      {/* <TeamSection /> */}
       <PhotoGallery />
       <ContactSection />
       <Footer />
