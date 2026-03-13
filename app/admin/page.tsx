@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [isStudent, setIsStudent] = useState(false)
   const router = useRouter()
 
   // Check authentication after component mounts (client-side only)
@@ -20,7 +21,15 @@ export default function AdminPage() {
     
     // Use requestAnimationFrame to ensure this runs after React hydration
     const rafId = requestAnimationFrame(() => {
+      // Check for admin token first
       let token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+      let studentFlag = false
+      
+      // If no admin token, check for student token
+      if (!token) {
+        token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+        studentFlag = !!token
+      }
       
       // If no full token, try to reconstruct from compressed storage
       if (!token) {
@@ -32,6 +41,7 @@ export default function AdminPage() {
       }
       
       setIsAuthenticated(!!token)
+      setIsStudent(studentFlag)
       setIsLoading(false)
       setMounted(true)
     })
@@ -92,14 +102,107 @@ export default function AdminPage() {
     localStorage.removeItem('admin_token_compressed')
     localStorage.removeItem('admin_token_header')
     sessionStorage.removeItem('admin_token')
+    localStorage.removeItem('student_token')
+    sessionStorage.removeItem('student_token')
+    localStorage.removeItem('student_role')
+    sessionStorage.removeItem('student_role')
+    localStorage.removeItem('student_user')
+    sessionStorage.removeItem('student_user')
+    localStorage.removeItem('student_permissions')
+    sessionStorage.removeItem('student_permissions')
     setIsAuthenticated(false)
+  }
+
+  // Load student permissions on mount
+  useEffect(() => {
+    const loadStudentPermissions = async () => {
+      const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+      if (!token) return
+
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/student/roles/my-roles`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          // Extract all permissions from roles
+          const permissions = new Set<string>()
+          data.roles?.forEach((role: any) => {
+            role.permissions?.forEach((perm: string) => permissions.add(perm))
+          })
+          const permsArray = Array.from(permissions)
+          localStorage.setItem('student_permissions', JSON.stringify(permsArray))
+          sessionStorage.setItem('student_permissions', JSON.stringify(permsArray))
+
+          if (data.ledSection) {
+            localStorage.setItem('led_section', JSON.stringify(data.ledSection))
+            sessionStorage.setItem('led_section', JSON.stringify(data.ledSection))
+          } else {
+            localStorage.removeItem('led_section')
+            sessionStorage.removeItem('led_section')
+          }
+        }
+      } catch (error) {
+        console.error('Error loading student permissions:', error)
+      }
+    }
+
+    // Only load permissions if we have a student token (not admin)
+    const adminToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    if (!adminToken) {
+      loadStudentPermissions()
+    }
+  }, [])
+
+  // Permission-to-route mapping (same order as sidebar navItems)
+  const permissionRouteMap: Record<string, string> = {
+    interview: '/admin/interview',
+    trainees: '/admin/trainees',
+    sections: '/admin/sections',
+    assignments: '/admin/assignments',
+    payments: '/admin/payments',
+    attendance: '/admin/attendance',
+    resources: '/admin/resources',
+    notes: '/admin/notes',
+    notices: '/admin/notices',
+    teams: '/admin/teams',
+    applications: '/admin/applications',
+    prayer: '/admin/prayer',
   }
 
   useEffect(() => {
     if (mounted && isAuthenticated && typeof window !== 'undefined') {
-      router.push('/admin/applications')
+      if (!isStudent) {
+        // Admin users go to applications
+        router.push('/admin/applications')
+      } else {
+        // Student users: redirect to their first permitted module
+        setTimeout(() => {
+          try {
+            const perms = localStorage.getItem('student_permissions') || sessionStorage.getItem('student_permissions')
+            if (perms) {
+              const permissions: string[] = JSON.parse(perms)
+              // Find first permitted route
+              for (const [perm, route] of Object.entries(permissionRouteMap)) {
+                if (permissions.includes(perm)) {
+                  router.push(route)
+                  return
+                }
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing student permissions:', e)
+          }
+          // Fallback if no permissions found
+          router.push('/admin/applications')
+        }, 500) // Small delay to allow permissions to load
+      }
     }
-  }, [mounted, isAuthenticated, router])
+  }, [mounted, isAuthenticated, isStudent, router])
 
   // Show loading state until mounted to prevent hydration mismatch
   // Always render the same structure on server and initial client render

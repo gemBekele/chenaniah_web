@@ -83,6 +83,9 @@ export default function AdminAttendancePage() {
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
     if (!token) {
+      token = localStorage.getItem("student_token") || sessionStorage.getItem("student_token")
+    }
+    if (!token) {
       const compressedToken = localStorage.getItem("admin_token_compressed")
       const header = localStorage.getItem("admin_token_header")
       if (compressedToken && header) {
@@ -122,6 +125,9 @@ export default function AdminAttendancePage() {
 
       if (sessionsRes.status === 401 || studentsRes.status === 401) {
         localStorage.removeItem("admin_token")
+        localStorage.removeItem('student_token')
+        sessionStorage.removeItem("admin_token")
+        sessionStorage.removeItem('student_token')
         router.push("/admin")
         return
       }

@@ -74,6 +74,7 @@ export default function AdminSectionDetailPage() {
   const [notices, setNotices] = useState<Notice[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isLeaderDialogOpen, setIsLeaderDialogOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   // Resource upload state
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
@@ -88,6 +89,9 @@ export default function AdminSectionDetailPage() {
   const [isCreatingNotice, setIsCreatingNotice] = useState(false)
 
   useEffect(() => {
+    const adminToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    setIsAdmin(!!adminToken)
+    
     if (sectionId) {
       loadSection()
       loadStudents()
@@ -96,17 +100,16 @@ export default function AdminSectionDetailPage() {
     }
   }, [sectionId])
 
-  const getToken = () => localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+  const getToken = () => localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
 
   const loadSection = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/sections`, {
+      const response = await fetch(`${API_BASE_URL}/sections/${sectionId}`, {
         headers: { 'Authorization': `Bearer ${getToken()}` },
       })
       const data = await response.json()
       if (data.success) {
-        const found = data.sections.find((s: Section) => s.id === sectionId)
-        setSection(found || null)
+        setSection(data.section)
       }
     } catch (err) {
       console.error("Error loading section:", err)
@@ -170,14 +173,12 @@ export default function AdminSectionDetailPage() {
 
   const loadResources = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/resources/all`, {
+      const response = await fetch(`${API_BASE_URL}/admin/resources/all?sectionId=${sectionId}`, {
         headers: { 'Authorization': `Bearer ${getToken()}` },
       })
       const data = await response.json()
       if (data.success) {
-        // Filter resources for this section
-        const sectionResources = (data.resources || []).filter((r: any) => r.sectionId === sectionId)
-        setResources(sectionResources)
+        setResources(data.resources || [])
       }
     } catch (err) {
       console.error("Error loading resources:", err)
@@ -209,7 +210,7 @@ export default function AdminSectionDetailPage() {
     formData.append('sectionId', sectionId.toString())
 
     try {
-      const response = await fetch(`${API_BASE_URL}/resources/upload`, {
+      const response = await fetch(`${API_BASE_URL}/admin/resources/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${getToken()}` },
         body: formData,
@@ -422,16 +423,18 @@ export default function AdminSectionDetailPage() {
                   </div>
                 </div>
               )}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  loadAllStudents()
-                  setIsLeaderDialogOpen(true)
-                }}
-              >
-                {section.leader ? 'Change Leader' : 'Assign Leader'}
-              </Button>
+              {isAdmin && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    loadAllStudents()
+                    setIsLeaderDialogOpen(true)
+                  }}
+                >
+                  {section.leader ? 'Change Leader' : 'Assign Leader'}
+                </Button>
+              )}
             </CardContent>
           </Card>
 

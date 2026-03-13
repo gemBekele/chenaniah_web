@@ -28,6 +28,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
     setIsLoading(true)
 
     try {
+      // Only allow admin login - students should use /login
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
@@ -36,21 +37,19 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         body: JSON.stringify({ username, password }),
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
       const data = await response.json()
 
-      console.log("data", data)
-
-      if (data.success && data.token) {
-        console.log("Login successful, calling onLoginSuccess with token:", data.token)
+      if (response.ok && data.success && data.token) {
+        console.log("Admin login successful")
+        localStorage.setItem('admin_token', data.token)
+        sessionStorage.setItem('admin_token', data.token)
         onLoginSuccess(data.token)
-      } else {
-        console.log("Login failed, data:", data)
-        setError(data.error || "Invalid credentials")
+        return
       }
+
+      // Admin login failed - show error
+      const errorMsg = data.error || "Invalid admin credentials"
+      setError(errorMsg)
     } catch (err) {
       console.error("Login error:", err)
       setError("Failed to connect to server. Please try again.")

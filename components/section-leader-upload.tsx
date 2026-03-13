@@ -80,15 +80,15 @@ export function SectionLeaderUpload({ section }: SectionLeaderUploadProps) {
 
     setIsUploading(true)
     const formData = new FormData()
-    formData.append('file', file)
-    formData.append('title', title)
-    formData.append('description', description)
+    formData.append('files', file)
+    formData.append('titles', JSON.stringify([title]))
+    formData.append('descriptions', JSON.stringify([description]))
     formData.append('category', category)
     formData.append('sectionId', section.id.toString())
     formData.append('type', 'file')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/resources/upload`, {
+      const response = await fetch(`${API_BASE_URL}/admin/resources/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

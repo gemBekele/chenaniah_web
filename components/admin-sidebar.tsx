@@ -16,10 +16,12 @@ import {
   Folder,
   DollarSign,
   CheckSquare,
-  Bell
+  Bell,
+  Shield,
+  Key
 } from "lucide-react"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
 interface AdminSidebarProps {
@@ -35,11 +37,30 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
     localStorage.removeItem('admin_token')
     localStorage.removeItem('admin_token_compressed')
     localStorage.removeItem('admin_token_header')
+    // Check if it was a student logout BEFORE removing tokens
+    const wasStudent = !!(localStorage.getItem('student_token') || sessionStorage.getItem('student_token'))
+    
     sessionStorage.removeItem('admin_token')
+    localStorage.removeItem('student_token')
+    sessionStorage.removeItem('student_token')
+    localStorage.removeItem('student_role')
+    sessionStorage.removeItem('student_role')
+    localStorage.removeItem('student_user')
+    sessionStorage.removeItem('student_user')
+    localStorage.removeItem('student_permissions')
+    sessionStorage.removeItem('student_permissions')
+    localStorage.removeItem('led_section')
+    sessionStorage.removeItem('led_section')
+    
     if (onLogout) {
       onLogout()
     } else {
-      router.push('/admin')
+      // If student was logged in, redirect to student login, else admin login
+      if (wasStudent) {
+        router.push('/login')
+      } else {
+        router.push('/admin')
+      }
     }
   }
 
@@ -53,7 +74,8 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
       path: '/admin/interview', 
       label: 'Interview', 
       icon: Calendar, 
-      matchPaths: ['/admin/interview'] 
+      matchPaths: ['/admin/interview'],
+      permission: 'interview'
     },
     // { 
     //   path: '/admin/time-slots', 
@@ -64,63 +86,147 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
       path: '/admin/trainees', 
       label: 'Trainees', 
       icon: Users,
-      matchPaths: ['/admin/trainees'] 
+      matchPaths: ['/admin/trainees'],
+      permission: 'trainees'
     },
     { 
       path: '/admin/sections', 
       label: 'Sections', 
       icon: Users,
-      matchPaths: ['/admin/sections'] 
+      matchPaths: ['/admin/sections'],
+      permission: 'sections'
     },
     { 
       path: '/admin/assignments', 
       label: 'Assignments', 
       icon: FileText,
-      matchPaths: ['/admin/assignments'] 
+      matchPaths: ['/admin/assignments'],
+      permission: 'assignments'
     },
     { 
       path: '/admin/payments', 
       label: 'Payments', 
       icon: DollarSign,
-      matchPaths: ['/admin/payments'] 
+      matchPaths: ['/admin/payments'],
+      permission: 'payments'
     },
     { 
       path: '/admin/attendance', 
       label: 'Attendance', 
       icon: CheckSquare,
-      matchPaths: ['/admin/attendance'] 
+      matchPaths: ['/admin/attendance'],
+      permission: 'attendance'
     },
     { 
       path: '/admin/resources', 
       label: 'Resources', 
       icon: Folder,
-      matchPaths: ['/admin/resources'] 
+      matchPaths: ['/admin/resources'],
+      permission: 'resources'
     },
     { 
       path: '/admin/notes', 
       label: 'Notes', 
       icon: FileText,
-      matchPaths: ['/admin/notes'] 
+      matchPaths: ['/admin/notes'],
+      permission: 'notes'
     },
     { 
       path: '/admin/notices', 
       label: 'Notices', 
       icon: Bell,
-      matchPaths: ['/admin/notices'] 
+      matchPaths: ['/admin/notices'],
+      permission: 'notices'
     },
     { 
       path: '/admin/teams', 
       label: 'Teams', 
       icon: Users,
-      matchPaths: ['/admin/teams'] 
+      matchPaths: ['/admin/teams'],
+      permission: 'teams'
+    },
+    { 
+      path: '/admin/applications', 
+      label: 'Applications', 
+      icon: FileText,
+      matchPaths: ['/admin/applications'],
+      permission: 'applications'
     },
     { 
       path: '/admin/prayer', 
       label: 'Prayer', 
       icon: Clock,
-      matchPaths: ['/admin/prayer'] 
+      matchPaths: ['/admin/prayer'],
+      permission: 'prayer'
+    },
+    { 
+      path: '/admin/roles', 
+      label: 'Roles', 
+      icon: Shield,
+      matchPaths: ['/admin/roles'],
+      adminOnly: true
+    },
+    { 
+      path: '/admin/student-access', 
+      label: 'Student Access', 
+      icon: Key,
+      matchPaths: ['/admin/student-access'],
+      adminOnly: true
     },
   ]
+
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [studentPermissions, setStudentPermissions] = useState<string[]>([])
+  const [ledSection, setLedSection] = useState<{id: number, name: string} | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    setMounted(true)
+    const adminToken = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    setIsAdmin(!!adminToken)
+    
+    if (!adminToken) {
+      try {
+        const perms = localStorage.getItem('student_permissions') || sessionStorage.getItem('student_permissions')
+        if (perms) setStudentPermissions(JSON.parse(perms))
+        
+        const section = localStorage.getItem('led_section') || sessionStorage.getItem('led_section')
+        if (section) setLedSection(JSON.parse(section))
+      } catch (e) {}
+    }
+    setIsLoading(false)
+  }, [])
+
+  const isStudentWithPermissions = !isAdmin && studentPermissions.length > 0
+
+  // Filter navItems based on permissions - show nothing while loading
+  let filteredNavItems = navItems
+  
+  if (isLoading) {
+    filteredNavItems = []
+  } else {
+    filteredNavItems = navItems.filter(item => {
+      // Hide admin-only pages for students
+      if (item.adminOnly && !isAdmin) return false
+      // Always show for admins
+      if (isAdmin) return true
+      
+      // Special case for section leader link - it's not in navItems yet
+      return !item.permission || studentPermissions.includes(item.permission)
+    })
+
+    // Add Section Management for students who lead a section
+    if (!isAdmin && ledSection) {
+      filteredNavItems.push({
+        path: `/admin/sections/${ledSection.id}`,
+        label: `My Section: ${ledSection.name}`,
+        icon: Users,
+        matchPaths: [`/admin/sections/${ledSection.id}`],
+        adminOnly: false
+      })
+    }
+  }
 
   return (
     <div 
@@ -151,7 +257,16 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
 
       {/* Navigation */}
       <div className="flex-1 py-6 px-3 space-y-2 overflow-y-auto">
-        {navItems.map((item) => {
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+          </div>
+        ) : filteredNavItems.length === 0 ? (
+          <div className="text-center py-8 text-gray-400 text-sm">
+            No access yet
+          </div>
+        ) : (
+          filteredNavItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.path || (item.matchPaths && item.matchPaths.some(path => pathname.startsWith(path)))
           
@@ -172,20 +287,18 @@ export function AdminSidebar({ onLogout }: AdminSidebarProps) {
               {!collapsed && <span>{item.label}</span>}
             </Link>
           )
-        })}
-      </div>
+        })
+      )}
 
-      {/* Footer */}
-      <div className="p-4 border-t border-white/10 space-y-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className={cn(
-            "w-full justify-start text-gray-400 hover:text-white hover:bg-white/10",
-            collapsed && "justify-center px-0"
-          )}
-          onClick={() => setCollapsed(!collapsed)}
-        >
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className={cn(
+          "w-full justify-start text-gray-400 hover:text-white hover:bg-white/10 mt-auto",
+          collapsed && "justify-center px-0"
+        )}
+        onClick={() => setCollapsed(!collapsed)}
+      >
           {collapsed ? <ChevronRight className="h-5 w-5" /> : (
             <>
               <ChevronLeft className="h-5 w-5 mr-2" />

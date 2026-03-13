@@ -44,6 +44,24 @@ export function getStudentToken(): string | null {
   return localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
 }
 
+export function getAdminOrStudentToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('admin_token') || 
+         sessionStorage.getItem('admin_token') ||
+         localStorage.getItem('student_token') || 
+         sessionStorage.getItem('student_token')
+}
+
+export function isAdminLoggedIn(): boolean {
+  if (typeof window === 'undefined') return false
+  return !!(localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token'))
+}
+
+export function isStudentLoggedIn(): boolean {
+  if (typeof window === 'undefined') return false
+  return !!(localStorage.getItem('student_token') || sessionStorage.getItem('student_token'))
+}
+
 
 
 

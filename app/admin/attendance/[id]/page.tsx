@@ -69,6 +69,9 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
     if (!token) {
+      token = localStorage.getItem("student_token") || sessionStorage.getItem("student_token")
+    }
+    if (!token) {
       const compressedToken = localStorage.getItem("admin_token_compressed")
       const header = localStorage.getItem("admin_token_header")
       if (compressedToken && header) {
@@ -145,6 +148,12 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
     localStorage.removeItem("admin_token_compressed")
     localStorage.removeItem("admin_token_header")
     sessionStorage.removeItem("admin_token")
+    localStorage.removeItem('student_token')
+    sessionStorage.removeItem('student_token')
+    localStorage.removeItem('student_role')
+    sessionStorage.removeItem('student_role')
+    localStorage.removeItem('student_user')
+    sessionStorage.removeItem('student_user')
     router.push("/admin")
   }
 

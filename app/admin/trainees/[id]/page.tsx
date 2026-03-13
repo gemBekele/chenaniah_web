@@ -141,7 +141,7 @@ export default function TraineeDetailPage() {
   }, [params.id])
 
   const loadTraineeStats = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) {
       router.push('/admin')
       return
@@ -158,6 +158,9 @@ export default function TraineeDetailPage() {
 
       if (response.status === 401) {
         localStorage.removeItem('admin_token')
+        localStorage.removeItem('student_token')
+        sessionStorage.removeItem('admin_token')
+        sessionStorage.removeItem('student_token')
         router.push('/admin')
         return
       }
@@ -175,7 +178,7 @@ export default function TraineeDetailPage() {
   }
 
   const updateStatus = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     setIsUpdatingStatus(true)
@@ -205,7 +208,7 @@ export default function TraineeDetailPage() {
   }
 
   const gradeAssignment = async (submissionId: number) => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     if (!grade || parseInt(grade) < 0 || parseInt(grade) > 100) {
@@ -246,7 +249,7 @@ export default function TraineeDetailPage() {
   }
 
   const updatePaymentStatus = async (paymentId: number, status: string) => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     try {
@@ -278,7 +281,7 @@ export default function TraineeDetailPage() {
   }
 
   const loadStudentTeams = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     try {
@@ -299,7 +302,7 @@ export default function TraineeDetailPage() {
   }
 
   const loadPersonalNotices = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     try {
@@ -321,7 +324,7 @@ export default function TraineeDetailPage() {
   }
 
   const createPersonalNotice = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     if (!newNotice.title.trim() || !newNotice.content.trim()) {
@@ -360,7 +363,7 @@ export default function TraineeDetailPage() {
   }
 
   const deletePersonalNotice = async (noticeId: number) => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     if (!confirm('Delete this personal notice?')) return
@@ -387,7 +390,7 @@ export default function TraineeDetailPage() {
   }
 
   const deleteStudent = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     setIsDeleting(true)

@@ -61,7 +61,7 @@ export default function AdminTeamsPage() {
   }, [])
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     return {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',

@@ -64,7 +64,7 @@ export default function AdminSectionsPage() {
   }, [])
 
   const loadSections = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) {
       router.push('/admin')
       return
@@ -81,6 +81,9 @@ export default function AdminSectionsPage() {
 
       if (response.status === 401) {
         localStorage.removeItem('admin_token')
+        localStorage.removeItem('student_token')
+        sessionStorage.removeItem('admin_token')
+        sessionStorage.removeItem('student_token')
         router.push('/admin')
         return
       }
@@ -98,7 +101,7 @@ export default function AdminSectionsPage() {
   }
 
   const loadAllStudents = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     try {
       const response = await fetch(`${API_BASE_URL}/admin/trainees`, {
         headers: {
@@ -116,7 +119,7 @@ export default function AdminSectionsPage() {
   }
 
   const loadSectionStudents = async (sectionId: number) => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     setIsLoadingStudents(true)
     try {
       const response = await fetch(`${API_BASE_URL}/admin/trainees?sectionId=${sectionId}`, {
@@ -139,7 +142,7 @@ export default function AdminSectionsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     
     try {
       const url = editingSection 
@@ -176,7 +179,7 @@ export default function AdminSectionsPage() {
   const handleAssignLeader = async (studentId: number) => {
     if (!selectedSectionForLeader) return
     
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     try {
       const response = await fetch(`${API_BASE_URL}/sections/${selectedSectionForLeader.id}/leader`, {
         method: 'POST',
@@ -204,7 +207,7 @@ export default function AdminSectionsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this section?")) return
 
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     try {
       const response = await fetch(`${API_BASE_URL}/sections/${id}`, {
         method: 'DELETE',

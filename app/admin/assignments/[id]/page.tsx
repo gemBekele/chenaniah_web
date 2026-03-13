@@ -62,7 +62,7 @@ export default function AssignmentAssessmentPage() {
   }, [params.id])
 
   const loadAssignment = async () => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) {
       router.push('/admin')
       return
@@ -79,6 +79,9 @@ export default function AssignmentAssessmentPage() {
 
       if (response.status === 401) {
         localStorage.removeItem('admin_token')
+        localStorage.removeItem('student_token')
+        sessionStorage.removeItem('admin_token')
+        sessionStorage.removeItem('student_token')
         router.push('/admin')
         return
       }
@@ -96,7 +99,7 @@ export default function AssignmentAssessmentPage() {
   }
 
   const gradeSubmission = async (submissionId: number) => {
-    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
     if (!token) return
 
     if (!grade || parseInt(grade) < 0 || parseInt(grade) > 100) {

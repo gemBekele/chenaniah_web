@@ -57,7 +57,7 @@ export default function AdminNoticesPage() {
   // Fetch notices from API
   const fetchNotices = async () => {
     try {
-      const token = localStorage.getItem('admin_token')
+      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
       const response = await fetch(`${API_BASE_URL}/notices/all`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -102,7 +102,7 @@ export default function AdminNoticesPage() {
     }
 
     setSaving(true)
-    const token = localStorage.getItem('admin_token')
+    const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
 
     try {
       if (currentNotice) {
@@ -149,7 +149,7 @@ export default function AdminNoticesPage() {
 
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this notice?")) {
-      const token = localStorage.getItem('admin_token')
+      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
       try {
         const response = await fetch(`${API_BASE_URL}/notices/${id}`, {
           method: 'DELETE',

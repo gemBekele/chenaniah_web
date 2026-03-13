@@ -23,7 +23,9 @@ import {
   ChevronRight,
   Sparkles,
   DollarSign,
-  QrCode
+  QrCode,
+  Users,
+  Star
 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { clearStudentAuth } from "@/lib/auth"
@@ -68,6 +70,32 @@ interface StudentUser {
   }
 }
 
+interface AccessibleModule {
+  key: string
+  label: string
+}
+
+const DEFAULT_MODULES = [
+  { key: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { key: 'assignments', label: 'Assignments', icon: BookOpen },
+  { key: 'payments', label: 'Contributions', icon: DollarSign },
+  { key: 'section', label: 'Section', icon: Users },
+  { key: 'resources', label: 'Resources', icon: FileText },
+  { key: 'notes', label: 'Notes', icon: FileCheck },
+  { key: 'teams', label: 'Teams', icon: Sparkles },
+  { key: 'prayer', label: 'Prayer', icon: Sparkles },
+  { key: 'leader', label: 'Section Leader', icon: Star },
+  { key: 'roles', label: 'My Roles', icon: Star },
+  { key: 'profile', label: 'My Profile', icon: User },
+]
+
+const MODULE_PERMISSION_MAP: Record<string, string> = {
+  payments: 'payments.view',
+  resources: 'resources.view',
+  notes: 'notes.view',
+  teams: 'teams.view',
+}
+
 export default function StudentDashboardPage() {
   const [user, setUser] = useState<StudentUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -76,12 +104,80 @@ export default function StudentDashboardPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null)
   const [qrCodeLoading, setQrCodeLoading] = useState(false)
+  const [studentRoles, setStudentRoles] = useState<any[]>([])
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false)
+  const [accessibleModules, setAccessibleModules] = useState<string[]>(['overview', 'assignments', 'section', 'profile'])
+  const [isLoadingModules, setIsLoadingModules] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
     loadUserData()
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      loadAccessibleModules()
+      loadStudentRoles()
+    }
+  }, [user])
+
+  // Redirect to admin dashboard when clicking "My Roles"
+  useEffect(() => {
+    if (activeTab === 'roles') {
+      router.push('/admin')
+    }
+  }, [activeTab, router])
+
+  const loadAccessibleModules = async () => {
+    const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+    if (!token) return
+
+    setIsLoadingModules(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/student/modules/my-modules`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+      // Students always get full access to all modules
+      setAccessibleModules(['overview', 'assignments', 'payments', 'section', 'resources', 'notes', 'teams', 'prayer', 'leader', 'roles', 'profile'])
+        return
+      }
+    } catch (error) {
+      console.error('Error loading accessible modules:', error)
+      setAccessibleModules(['overview', 'assignments', 'payments', 'section', 'resources', 'notes', 'teams', 'prayer', 'leader', 'profile'])
+    } finally {
+      setIsLoadingModules(false)
+    }
+  }
+
+  const loadStudentRoles = async () => {
+    const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
+    if (!token) return
+
+    setIsLoadingRoles(true)
+    try {
+      const response = await fetch(`${API_BASE_URL}/student/roles/my-roles`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setStudentRoles(data.roles || [])
+      }
+    } catch (error) {
+      console.error('Error loading student roles:', error)
+    } finally {
+      setIsLoadingRoles(false)
+    }
+  }
 
   const loadUserData = async () => {
     const token = localStorage.getItem('student_token') || sessionStorage.getItem('student_token')
@@ -154,7 +250,7 @@ export default function StudentDashboardPage() {
         router.push('/login')
   }
 
-  if (!mounted || isLoading) {
+  if (!mounted || isLoading || isLoadingModules) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -228,15 +324,16 @@ export default function StudentDashboardPage() {
             
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
-              <NavItem id="overview" label="Overview" />
-              <NavItem id="assignments" label="Assignments" />
-              <NavItem id="payments" label="Contributions" />
+              {accessibleModules.includes('overview') && <NavItem id="overview" label="Overview" />}
+              {accessibleModules.includes('assignments') && <NavItem id="assignments" label="Assignments" />}
+              {accessibleModules.includes('payments') && <NavItem id="payments" label="Contributions" />}
               <NavItem id="section" label="Section" />
-              <NavItem id="resources" label="Resources" />
-              <NavItem id="notes" label="Notes" />
-              <NavItem id="teams" label="Teams" />
-              <NavItem id="prayer" label="Prayer" />
-              {user?.ledSection && <NavItem id="leader" label="Section Leader" />}
+              {accessibleModules.includes('resources') && <NavItem id="resources" label="Resources" />}
+              {accessibleModules.includes('notes') && <NavItem id="notes" label="Notes" />}
+              {accessibleModules.includes('teams') && <NavItem id="teams" label="Teams" />}
+              {accessibleModules.includes('prayer') && <NavItem id="prayer" label="Prayer" />}
+              {accessibleModules.includes('leader') && user?.ledSection && <NavItem id="leader" label="Section Leader" />}
+              {accessibleModules.includes('roles') && <NavItem id="roles" label="My Roles" />}
               <NavItem id="profile" label="My Profile" />
             </nav>
 
@@ -297,15 +394,16 @@ export default function StudentDashboardPage() {
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-100 p-4 space-y-4 animate-in slide-in-from-top-2 shadow-xl z-50">
             <nav className="flex flex-col gap-2">
-              <NavItem id="overview" label="Overview" />
-              <NavItem id="assignments" label="Assignments" />
-              <NavItem id="payments" label="Contributions" />
+              {accessibleModules.includes('overview') && <NavItem id="overview" label="Overview" />}
+              {accessibleModules.includes('assignments') && <NavItem id="assignments" label="Assignments" />}
+              {accessibleModules.includes('payments') && <NavItem id="payments" label="Contributions" />}
               <NavItem id="section" label="Section" />
-              <NavItem id="resources" label="Resources" />
-              <NavItem id="notes" label="Notes" />
-              <NavItem id="teams" label="Teams" />
-              <NavItem id="prayer" label="Prayer" />
-              {user?.ledSection && <NavItem id="leader" label="Section Leader" />}
+              {accessibleModules.includes('resources') && <NavItem id="resources" label="Resources" />}
+              {accessibleModules.includes('notes') && <NavItem id="notes" label="Notes" />}
+              {accessibleModules.includes('teams') && <NavItem id="teams" label="Teams" />}
+              {accessibleModules.includes('prayer') && <NavItem id="prayer" label="Prayer" />}
+              {accessibleModules.includes('leader') && user?.ledSection && <NavItem id="leader" label="Section Leader" />}
+              {accessibleModules.includes('roles') && <NavItem id="roles" label="My Roles" />}
               <NavItem id="profile" label="My Profile" />
             </nav>
             <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
@@ -617,6 +715,75 @@ export default function StudentDashboardPage() {
               <p className="text-gray-500 text-lg">Manage resources for the {user.ledSection.name} section.</p>
             </div>
             <SectionLeaderUpload section={user.ledSection} />
+          </div>
+        )}
+
+        {activeTab === "roles" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900">My Roles & Permissions</h1>
+              <p className="text-gray-500 text-lg">Access admin features assigned to you.</p>
+            </div>
+
+            {isLoadingRoles ? (
+              <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : studentRoles.length === 0 ? (
+              <div className="text-center p-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No roles assigned yet. Contact admin to get access.</p>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {studentRoles.map((role: any) => (
+                  <div key={role.id} className="border rounded-lg p-6 bg-white shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold">{role.name}</h3>
+                      {role.assignedAt && (
+                        <span className="text-sm text-gray-500">
+                          Assigned: {new Date(role.assignedAt).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    {role.description && (
+                      <p className="text-gray-600 mb-4">{role.description}</p>
+                    )}
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-900">Access to:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {role.permissions && role.permissions.length > 0 ? (
+                          role.permissions.map((module: string, idx: number) => {
+                            const moduleLinks: Record<string, { label: string; path: string }> = {
+                              trainees: { label: 'Trainees', path: '/admin/trainees' },
+                              payments: { label: 'Payments', path: '/admin/payments' },
+                              attendance: { label: 'Attendance', path: '/admin/attendance' },
+                              resources: { label: 'Resources', path: '/admin/resources' },
+                              assignments: { label: 'Assignments', path: '/admin/assignments' },
+                              sections: { label: 'Sections', path: '/admin/sections' },
+                              notes: { label: 'Notes', path: '/admin/notes' },
+                              teams: { label: 'Teams', path: '/admin/teams' },
+                              applications: { label: 'Applications', path: '/admin/applications' },
+                            }
+                            const link = moduleLinks[module]
+                            return (
+                              <a
+                                key={idx}
+                                href={link ? link.path : '#'}
+                                className="inline-flex items-center px-3 py-2 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                              >
+                                {link ? link.label : module}
+                              </a>
+                            )
+                          })
+                        ) : (
+                          <span className="text-gray-500">No specific permissions</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>
