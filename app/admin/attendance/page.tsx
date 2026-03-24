@@ -40,6 +40,8 @@ import {
   ChevronRight,
   Phone,
   Mail,
+  X,
+  SlidersHorizontal,
 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { format } from "date-fns"
@@ -91,6 +93,10 @@ export default function AdminAttendancePage() {
   const [newSessionLocation, setNewSessionLocation] = useState("")
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
   const [chartView, setChartView] = useState<"bar" | "pie" | "line">("bar")
+  const [activeFilters, setActiveFilters] = useState<string[]>([])
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [attendanceRateRange, setAttendanceRateRange] = useState<[number, number]>([0, 100])
+  const [missedSessionsRange, setMissedSessionsRange] = useState<[number, number]>([0, 10])
 
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
@@ -296,6 +302,61 @@ export default function AdminAttendancePage() {
     })
   }
 
+  const updateActiveFilters = () => {
+    const filters: string[] = []
+    if (searchQuery) filters.push(`Search: "${searchQuery}"`)
+    if (missedFilter !== "all") {
+      const labels: { [key: string]: string } = {
+        low: "None (0)",
+        medium: "Some (1-2)",
+        high: "Many (3+)",
+      }
+      filters.push(`Missed: ${labels[missedFilter] || `${missedFilter} session${parseInt(missedFilter) > 1 ? 's' : ''}`}`)
+    }
+    if (rateFilter !== "all") {
+      const labels: { [key: string]: string } = {
+        high: "High (>80%)",
+        medium: "Medium (50-80%)",
+        low: "Low (<50%)",
+      }
+      filters.push(`Rate: ${labels[rateFilter]}`)
+    }
+    if (attendanceRateRange[0] > 0 || attendanceRateRange[1] < 100) {
+      filters.push(`Rate Range: ${attendanceRateRange[0]}%-${attendanceRateRange[1]}%`)
+    }
+    if (missedSessionsRange[0] > 0 || missedSessionsRange[1] < 10) {
+      filters.push(`Missed Range: ${missedSessionsRange[0]}-${missedSessionsRange[1]}`)
+    }
+    setActiveFilters(filters)
+  }
+
+  const clearFilter = (filterToRemove: string) => {
+    if (filterToRemove.startsWith('Search:')) {
+      setSearchQuery("")
+    } else if (filterToRemove.startsWith('Missed:')) {
+      setMissedFilter("all")
+    } else if (filterToRemove.startsWith('Rate:')) {
+      setRateFilter("all")
+    } else if (filterToRemove.startsWith('Rate Range:')) {
+      setAttendanceRateRange([0, 100])
+    } else if (filterToRemove.startsWith('Missed Range:')) {
+      setMissedSessionsRange([0, 10])
+    }
+  }
+
+  const clearAllFilters = () => {
+    setSearchQuery("")
+    setMissedFilter("all")
+    setRateFilter("all")
+    setAttendanceRateRange([0, 100])
+    setMissedSessionsRange([0, 10])
+  }
+
+  // Update active filters when filter values change
+  useEffect(() => {
+    updateActiveFilters()
+  }, [searchQuery, missedFilter, rateFilter, attendanceRateRange, missedSessionsRange])
+
   const filteredStudentStats = studentStats.filter(stat => {
     const matchesSearch = (stat.fullNameEnglish || stat.username).toLowerCase().includes(searchQuery.toLowerCase())
     
@@ -318,7 +379,11 @@ export default function AdminAttendancePage() {
       matchesRate = stat.attendanceRate >= 80
     }
 
-    return matchesSearch && matchesMissed && matchesRate
+    // Additional range filters
+    const matchesRateRange = stat.attendanceRate >= attendanceRateRange[0] && stat.attendanceRate <= attendanceRateRange[1]
+    const matchesMissedRange = stat.missedCount >= missedSessionsRange[0] && stat.missedCount <= missedSessionsRange[1]
+
+    return matchesSearch && matchesMissed && matchesRate && matchesRateRange && matchesMissedRange
   })
 
   return (
@@ -733,8 +798,52 @@ export default function AdminAttendancePage() {
               {/* Student Details Table */}
               <Card className="border-none shadow-md bg-white overflow-hidden">
                 <CardHeader className="border-b border-gray-50 bg-gray-50/30">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <CardTitle className="text-xl text-[#1f2d3d]">Student Attendance Details</CardTitle>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <CardTitle className="text-xl text-[#1f2d3d]">Student Attendance Details</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                          className="h-9"
+                        >
+                          <SlidersHorizontal className="h-4 w-4 mr-2" />
+                          Advanced Filters
+                          {showAdvancedFilters ? <ChevronDown className="h-4 w-4 ml-2" /> : <ChevronRight className="h-4 w-4 ml-2" />}
+                        </Button>
+                        {activeFilters.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={clearAllFilters}
+                            className="h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            Clear All ({activeFilters.length})
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Active Filter Chips */}
+                    {activeFilters.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {activeFilters.map((filter, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="flex items-center gap-1 bg-[#1f2d3d]/10 text-[#1f2d3d] hover:bg-[#1f2d3d]/20 cursor-pointer"
+                            onClick={() => clearFilter(filter)}
+                          >
+                            {filter}
+                            <X className="h-3 w-3 ml-1" />
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Basic Filters */}
                     <div className="flex flex-wrap gap-4">
                       <div className="relative w-full md:w-64">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -772,6 +881,60 @@ export default function AdminAttendancePage() {
                         <option value="low">Low (&lt;50%)</option>
                       </select>
                     </div>
+
+                    {/* Advanced Filters */}
+                    {showAdvancedFilters && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50/50 rounded-lg border">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">Attendance Rate Range (%)</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={attendanceRateRange[0]}
+                              onChange={(e) => setAttendanceRateRange([parseInt(e.target.value) || 0, attendanceRateRange[1]])}
+                              className="w-20 h-8 text-sm"
+                              placeholder="Min"
+                            />
+                            <span className="text-gray-400">-</span>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={attendanceRateRange[1]}
+                              onChange={(e) => setAttendanceRateRange([attendanceRateRange[0], parseInt(e.target.value) || 100])}
+                              className="w-20 h-8 text-sm"
+                              placeholder="Max"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">Missed Sessions Range</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="20"
+                              value={missedSessionsRange[0]}
+                              onChange={(e) => setMissedSessionsRange([parseInt(e.target.value) || 0, missedSessionsRange[1]])}
+                              className="w-20 h-8 text-sm"
+                              placeholder="Min"
+                            />
+                            <span className="text-gray-400">-</span>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="20"
+                              value={missedSessionsRange[1]}
+                              onChange={(e) => setMissedSessionsRange([missedSessionsRange[0], parseInt(e.target.value) || 20])}
+                              className="w-20 h-8 text-sm"
+                              placeholder="Max"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
