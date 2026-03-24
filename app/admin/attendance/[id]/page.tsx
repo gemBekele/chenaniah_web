@@ -59,12 +59,23 @@ interface SessionStats {
   attendanceRate: number
 }
 
+interface Student {
+  id: number
+  fullNameEnglish?: string
+  fullNameAmharic?: string
+  username: string
+  phone?: string
+  status: string
+}
+
 export default function SessionDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [session, setSession] = useState<Session | null>(null)
   const [stats, setStats] = useState<SessionStats | null>(null)
+  const [students, setStudents] = useState<Student[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [absentSearchQuery, setAbsentSearchQuery] = useState("")
 
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
@@ -94,23 +105,30 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
     setIsLoading(true)
     try {
       const token = getToken()
-      const [sessionRes, statsRes] = await Promise.all([
+      const [sessionRes, statsRes, studentsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/attendance/sessions/${params.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_BASE_URL}/attendance/sessions/${params.id}/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        fetch(`${API_BASE_URL}/admin/trainees?status=active&limit=1000`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ])
 
       const sessionData = await sessionRes.json()
       const statsData = await statsRes.json()
+      const studentsData = await studentsRes.json()
 
       if (sessionData.success) {
         setSession(sessionData.session)
       }
       if (statsData.success) {
         setStats(statsData.stats)
+      }
+      if (studentsData.success) {
+        setStudents(studentsData.students || [])
       }
     } catch (error) {
       console.error("Error loading session data:", error)
@@ -189,6 +207,20 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
       record.student.username.toLowerCase().includes(searchLower)
     )
   }) || []
+
+  const getAbsentStudents = () => {
+    if (!session?.attendanceRecords || !students.length) return []
+    
+    const attendedStudentIds = new Set(session.attendanceRecords.map(record => record.studentId))
+    const absentStudents = students.filter(student => !attendedStudentIds.has(student.id))
+    
+    const searchLower = absentSearchQuery.toLowerCase()
+    return absentStudents.filter(student => 
+      student.fullNameEnglish?.toLowerCase().includes(searchLower) ||
+      student.fullNameAmharic?.toLowerCase().includes(searchLower) ||
+      student.username.toLowerCase().includes(searchLower)
+    )
+  }
 
   return (
     <AdminLayout onLogout={handleLogout}>
@@ -358,6 +390,71 @@ export default function SessionDetailsPage({ params }: { params: { id: string } 
                   <Users className="h-6 w-6 opacity-40" />
                 </div>
                 <p>{session.attendanceRecords && session.attendanceRecords.length > 0 ? "No matching students found" : "No attendance records yet"}</p>
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* Absent Students Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold tracking-tight">Absent Students</h2>
+            <Badge variant="secondary" className="font-normal bg-rose-50 text-rose-700 border-rose-200">
+              {getAbsentStudents().length} absent
+            </Badge>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search absent students..."
+              value={absentSearchQuery}
+              onChange={(e) => setAbsentSearchQuery(e.target.value)}
+              className="pl-10 max-w-sm bg-background border-border/60 focus:border-primary/50"
+            />
+          </div>
+
+          <Card className="border-border/40 shadow-sm overflow-hidden bg-card">
+            {getAbsentStudents().length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-rose-50/50 text-rose-700 font-medium border-b border-rose-100">
+                    <tr>
+                      <th className="px-6 py-4">Student</th>
+                      <th className="px-6 py-4">Username</th>
+                      <th className="px-6 py-4">Phone</th>
+                      <th className="px-6 py-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-rose-50">
+                    {getAbsentStudents().map((student) => (
+                      <tr key={student.id} className="hover:bg-rose-50/20 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-9 w-9 rounded-full bg-rose-100 flex items-center justify-center text-rose-700 text-xs font-bold ring-2 ring-background">
+                              {(student.fullNameEnglish || student.username).substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="font-medium text-foreground">
+                              {student.fullNameEnglish || student.username}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-muted-foreground">{student.username}</td>
+                        <td className="px-6 py-4 text-muted-foreground">{student.phone || "N/A"}</td>
+                        <td className="px-6 py-4">
+                          <Badge variant="outline" className="text-xs border-rose-200 text-rose-700 bg-rose-50">Absent</Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                <div className="bg-emerald-50 p-3 rounded-full mb-3">
+                  <CheckCircle className="h-6 w-6 text-emerald-600 opacity-60" />
+                </div>
+                <p>All students attended this session!</p>
               </div>
             )}
           </Card>

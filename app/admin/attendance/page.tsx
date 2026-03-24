@@ -31,9 +31,19 @@ import {
   MapPin,
   User,
   Eye,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  BarChart3,
+  PieChart,
+  ChevronDown,
+  ChevronRight,
+  Phone,
+  Mail,
 } from "lucide-react"
 import { getApiBaseUrl } from "@/lib/utils"
 import { format } from "date-fns"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, LineChart, Line } from "recharts"
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -79,6 +89,8 @@ export default function AdminAttendancePage() {
   const [newSessionName, setNewSessionName] = useState("")
   const [newSessionDate, setNewSessionDate] = useState("")
   const [newSessionLocation, setNewSessionLocation] = useState("")
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
+  const [chartView, setChartView] = useState<"bar" | "pie" | "line">("bar")
 
   const getToken = () => {
     let token = localStorage.getItem("admin_token") || sessionStorage.getItem("admin_token")
@@ -238,6 +250,52 @@ export default function AdminAttendancePage() {
 
   const studentStats = calculateStudentStats()
   
+  const toggleRowExpansion = (studentId: number) => {
+    const newExpanded = new Set(expandedRows)
+    if (newExpanded.has(studentId)) {
+      newExpanded.delete(studentId)
+    } else {
+      newExpanded.add(studentId)
+    }
+    setExpandedRows(newExpanded)
+  }
+
+  const getChartData = () => {
+    const attendanceRanges = [
+      { name: '0-25%', count: 0, color: '#ef4444' },
+      { name: '26-50%', count: 0, color: '#f97316' },
+      { name: '51-75%', count: 0, color: '#eab308' },
+      { name: '76-90%', count: 0, color: '#22c55e' },
+      { name: '91-100%', count: 0, color: '#16a34a' },
+    ]
+
+    studentStats.forEach(stat => {
+      if (stat.attendanceRate <= 25) attendanceRanges[0].count++
+      else if (stat.attendanceRate <= 50) attendanceRanges[1].count++
+      else if (stat.attendanceRate <= 75) attendanceRanges[2].count++
+      else if (stat.attendanceRate <= 90) attendanceRanges[3].count++
+      else attendanceRanges[4].count++
+    })
+
+    return attendanceRanges
+  }
+
+  const getAttendanceTrendData = () => {
+    const completedSessions = sessions.filter(s => s.status === 'completed').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    
+    return completedSessions.map(session => {
+      const attendanceCount = session.attendanceRecords?.length || 0
+      const totalStudents = students.length
+      const rate = totalStudents > 0 ? (attendanceCount / totalStudents) * 100 : 0
+      
+      return {
+        session: session.name.length > 15 ? session.name.substring(0, 15) + '...' : session.name,
+        attendance: rate,
+        date: format(new Date(session.date), 'MMM dd')
+      }
+    })
+  }
+
   const filteredStudentStats = studentStats.filter(stat => {
     const matchesSearch = (stat.fullNameEnglish || stat.username).toLowerCase().includes(searchQuery.toLowerCase())
     
@@ -252,9 +310,13 @@ export default function AdminAttendancePage() {
     }
 
     let matchesRate = true
-    if (rateFilter === "low") matchesRate = stat.attendanceRate < 50
-    else if (rateFilter === "medium") matchesRate = stat.attendanceRate >= 50 && stat.attendanceRate < 80
-    else if (rateFilter === "high") matchesRate = stat.attendanceRate >= 80
+    if (rateFilter === "low") {
+      matchesRate = stat.attendanceRate < 50
+    } else if (rateFilter === "medium") {
+      matchesRate = stat.attendanceRate >= 50 && stat.attendanceRate < 80
+    } else if (rateFilter === "high") {
+      matchesRate = stat.attendanceRate >= 80
+    }
 
     return matchesSearch && matchesMissed && matchesRate
   })
@@ -521,148 +583,325 @@ export default function AdminAttendancePage() {
           </>
         ) : (
           <>
-            {/* Student Insights Content */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="border-none shadow-md bg-white">
-                <CardContent className="p-6">
-                  <p className="text-sm font-medium text-gray-500 mb-1">Total Students</p>
-                  <p className="text-3xl font-bold text-[#1f2d3d]">{students.length}</p>
-                </CardContent>
-              </Card>
-              <Card className="border-none shadow-md bg-white">
-                <CardContent className="p-6">
-                  <p className="text-sm font-medium text-gray-500 mb-1">Avg. Attendance</p>
-                  <p className="text-3xl font-bold text-[#1f2d3d]">
-                    {(studentStats.reduce((acc, s) => acc + s.attendanceRate, 0) / (students.length || 1)).toFixed(1)}%
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-none shadow-md bg-white">
-                <CardContent className="p-6">
-                  <p className="text-sm font-medium text-gray-500 mb-1">Perfect Attendance</p>
-                  <p className="text-3xl font-bold text-emerald-600">
-                    {studentStats.filter(s => s.attendanceRate === 100).length}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border-none shadow-md bg-white">
-                <CardContent className="p-6">
-                  <p className="text-sm font-medium text-gray-500 mb-1">Critical (Missed 3+)</p>
-                  <p className="text-3xl font-bold text-rose-600">
-                    {studentStats.filter(s => s.missedCount >= 3).length}
-                  </p>
+            {/* Enhanced Student Insights */}
+            <div className="space-y-6">
+              {/* Stats Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card className="border-none shadow-md bg-white">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Total Students</p>
+                        <p className="text-3xl font-bold text-[#1f2d3d]">{students.length}</p>
+                      </div>
+                      <Users className="h-8 w-8 text-[#1f2d3d]/60" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-none shadow-md bg-white">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Avg. Attendance</p>
+                        <p className="text-3xl font-bold text-[#1f2d3d]">
+                          {(studentStats.reduce((acc, s) => acc + s.attendanceRate, 0) / (students.length || 1)).toFixed(1)}%
+                        </p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-emerald-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-none shadow-md bg-white">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Perfect Attendance</p>
+                        <p className="text-3xl font-bold text-emerald-600">
+                          {studentStats.filter(s => s.attendanceRate === 100).length}
+                        </p>
+                      </div>
+                      <CheckCircle className="h-8 w-8 text-emerald-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-none shadow-md bg-white">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 mb-1">Critical (Missed 3+)</p>
+                        <p className="text-3xl font-bold text-rose-600">
+                          {studentStats.filter(s => s.missedCount >= 3).length}
+                        </p>
+                      </div>
+                      <AlertTriangle className="h-8 w-8 text-rose-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Attendance Distribution Chart */}
+                <Card className="border-none shadow-md bg-white">
+                  <CardHeader className="border-b border-gray-50 bg-gray-50/30">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-[#1f2d3d]">Attendance Distribution</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant={chartView === "bar" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setChartView("bar")}
+                          className={chartView === "bar" ? "bg-[#1f2d3d] text-white" : ""}
+                        >
+                          <BarChart3 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant={chartView === "pie" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setChartView("pie")}
+                          className={chartView === "pie" ? "bg-[#1f2d3d] text-white" : ""}
+                        >
+                          <PieChart className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="h-64">
+                      {chartView === "bar" ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={getChartData()}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                            <Bar dataKey="count" fill="#1f2d3d" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RechartsPieChart>
+                            <Pie
+                              data={getChartData()}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                              outerRadius={80}
+                              fill="#8884d8"
+                              dataKey="count"
+                            >
+                              {getChartData().map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </RechartsPieChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Attendance Trend Chart */}
+                <Card className="border-none shadow-md bg-white">
+                  <CardHeader className="border-b border-gray-50 bg-gray-50/30">
+                    <CardTitle className="text-lg text-[#1f2d3d]">Attendance Trend</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={getAttendanceTrendData()}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis domain={[0, 100]} />
+                          <Tooltip labelFormatter={(label) => `Date: ${label}`} />
+                          <Line 
+                            type="monotone" 
+                            dataKey="attendance" 
+                            stroke="#1f2d3d" 
+                            strokeWidth={2}
+                            dot={{ fill: '#1f2d3d', strokeWidth: 2, r: 4 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Student Details Table */}
+              <Card className="border-none shadow-md bg-white overflow-hidden">
+                <CardHeader className="border-b border-gray-50 bg-gray-50/30">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <CardTitle className="text-xl text-[#1f2d3d]">Student Attendance Details</CardTitle>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Search students..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-9 h-10 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-gray-400" />
+                        <select
+                          value={missedFilter}
+                          onChange={(e) => setMissedFilter(e.target.value)}
+                          className="h-10 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#e8cb85]/20"
+                        >
+                          <option value="all">Missed Sessions</option>
+                          <option value="low">None (0)</option>
+                          <option value="medium">Some (1-2)</option>
+                          <option value="high">Many (3+)</option>
+                          {[1, 2, 3, 4, 5].map(n => (
+                            <option key={n} value={n.toString()}>{n} Session{n > 1 ? 's' : ''}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <select
+                        value={rateFilter}
+                        onChange={(e) => setRateFilter(e.target.value)}
+                        className="h-10 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#e8cb85]/20"
+                      >
+                        <option value="all">Attendance Rate</option>
+                        <option value="high">High (&gt;80%)</option>
+                        <option value="medium">Medium (50-80%)</option>
+                        <option value="low">Low (&lt;50%)</option>
+                      </select>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-gray-50/50 text-gray-500 font-medium border-b border-gray-100">
+                        <tr>
+                          <th className="px-6 py-4 w-8"></th>
+                          <th className="px-6 py-4">Student</th>
+                          <th className="px-6 py-4 text-center">Attended</th>
+                          <th className="px-6 py-4 text-center">Missed</th>
+                          <th className="px-6 py-4">Attendance Rate</th>
+                          <th className="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {filteredStudentStats.map((stat) => (
+                          <>
+                            <tr key={stat.id} className="hover:bg-gray-50/50 transition-colors group">
+                              <td className="px-6 py-4">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleRowExpansion(stat.id)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  {expandedRows.has(stat.id) ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-9 w-9 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-bold text-xs">
+                                    {(stat.fullNameEnglish || stat.username).charAt(0).toUpperCase()}
+                                  </div>
+                                  <div>
+                                    <div className="font-bold text-[#1f2d3d]">{stat.fullNameEnglish || stat.username}</div>
+                                    <div className="text-xs text-gray-400">{stat.phone}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-center font-medium text-emerald-600 bg-emerald-50/20">
+                                {stat.attendedCount}
+                              </td>
+                              <td className="px-6 py-4 text-center font-medium text-rose-600 bg-rose-50/20">
+                                {stat.missedCount}
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div 
+                                      className={`h-full rounded-full ${
+                                        stat.attendanceRate >= 80 ? 'bg-emerald-500' : 
+                                        stat.attendanceRate >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                                      }`}
+                                      style={{ width: `${stat.attendanceRate}%` }}
+                                    />
+                                  </div>
+                                  <span className="font-bold text-[#1f2d3d] w-12 text-right">
+                                    {stat.attendanceRate.toFixed(0)}%
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => router.push(`/admin/trainees/${stat.id}`)}
+                                    className="h-8 w-8 p-0 text-gray-400 hover:text-[#1f2d3d] hover:bg-gray-100"
+                                    title="View Student Profile"
+                                  >
+                                    <User className="h-4 w-4" />
+                                  </Button>
+                                  {stat.phone && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => window.open(`tel:${stat.phone}`)}
+                                      className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600 hover:bg-blue-50"
+                                      title="Call Student"
+                                    >
+                                      <Phone className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                            {expandedRows.has(stat.id) && (
+                              <tr className="bg-gray-50/30">
+                                <td colSpan={6} className="px-6 py-4">
+                                  <div className="space-y-3">
+                                    <div className="text-sm font-medium text-gray-700">Recent Session Attendance:</div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                      {sessions
+                                        .filter(s => s.status === 'completed')
+                                        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                        .slice(0, 6)
+                                        .map(session => {
+                                          const attended = session.attendanceRecords?.some(record => record.studentId === stat.id)
+                                          return (
+                                            <div key={session.id} className="flex items-center gap-2 text-xs">
+                                              <div className={`w-2 h-2 rounded-full ${attended ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+                                              <span className="truncate">{session.name}</span>
+                                              <span className="text-gray-400">({format(new Date(session.date), 'MMM dd')})</span>
+                                            </div>
+                                          )
+                                        })}
+                                    </div>
+                                    {stat.missedCount >= 3 && (
+                                      <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 p-2 rounded">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        <span>This student has missed {stat.missedCount} sessions. Consider reaching out for support.</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </CardContent>
               </Card>
             </div>
-
-            <Card className="border-none shadow-md bg-white overflow-hidden">
-              <CardHeader className="border-b border-gray-50 bg-gray-50/30">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <CardTitle className="text-xl text-[#1f2d3d]">Student Attendance Insights</CardTitle>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="relative w-full md:w-64">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Search students..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 h-10 border-gray-200 focus:border-[#e8cb85] focus:ring-[#e8cb85]/20"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Filter className="h-4 w-4 text-gray-400" />
-                      <select
-                        value={missedFilter}
-                        onChange={(e) => setMissedFilter(e.target.value)}
-                        className="h-10 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#e8cb85]/20"
-                      >
-                        <option value="all">Missed Sessions</option>
-                        <option value="low">None (0)</option>
-                        <option value="medium">Some (1-2)</option>
-                        <option value="high">Many (3+)</option>
-                        {[1, 2, 3, 4, 5].map(n => (
-                          <option key={n} value={n.toString()}>{n} Session{n > 1 ? 's' : ''}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <select
-                      value={rateFilter}
-                      onChange={(e) => setRateFilter(e.target.value)}
-                      className="h-10 px-3 rounded-md border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#e8cb85]/20"
-                    >
-                      <option value="all">Attendance Rate</option>
-                      <option value="high">High (&gt;80%)</option>
-                      <option value="medium">Medium (50-80%)</option>
-                      <option value="low">Low (&lt;50%)</option>
-                    </select>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50/50 text-gray-500 font-medium border-b border-gray-100">
-                      <tr>
-                        <th className="px-6 py-4">Student</th>
-                        <th className="px-6 py-4 text-center">Attended</th>
-                        <th className="px-6 py-4 text-center">Missed</th>
-                        <th className="px-6 py-4">Attendance Rate</th>
-                        <th className="px-6 py-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {filteredStudentStats.map((stat) => (
-                        <tr key={stat.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 rounded-full bg-[#1f2d3d] text-white flex items-center justify-center font-bold text-xs">
-                                {(stat.fullNameEnglish || stat.username).charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <div className="font-bold text-[#1f2d3d]">{stat.fullNameEnglish || stat.username}</div>
-                                <div className="text-xs text-gray-400">{stat.phone}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center font-medium text-emerald-600 bg-emerald-50/20">
-                            {stat.attendedCount}
-                          </td>
-                          <td className="px-6 py-4 text-center font-medium text-rose-600 bg-rose-50/20">
-                            {stat.missedCount}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div 
-                                  className={`h-full rounded-full ${
-                                    stat.attendanceRate >= 80 ? 'bg-emerald-500' : 
-                                    stat.attendanceRate >= 50 ? 'bg-amber-500' : 'bg-rose-500'
-                                  }`}
-                                  style={{ width: `${stat.attendanceRate}%` }}
-                                />
-                              </div>
-                              <span className="font-bold text-[#1f2d3d] w-12 text-right">
-                                {stat.attendanceRate.toFixed(0)}%
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => router.push(`/admin/trainees/${stat.id}`)}
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-[#1f2d3d] hover:bg-gray-100"
-                            >
-                              <User className="h-4 w-4" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
           </>
         )}
       </div>
