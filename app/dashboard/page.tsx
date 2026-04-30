@@ -94,6 +94,7 @@ const MODULE_PERMISSION_MAP: Record<string, string> = {
   resources: 'resources.view',
   notes: 'notes.view',
   teams: 'teams.view',
+  prayer: 'prayer.view',
 }
 
 export default function StudentDashboardPage() {
@@ -143,13 +144,30 @@ export default function StudentDashboardPage() {
       })
 
       if (response.ok) {
-      // Students always get full access to all modules
-      setAccessibleModules(['overview', 'assignments', 'payments', 'section', 'resources', 'notes', 'teams', 'prayer', 'leader', 'roles', 'profile'])
+        const data = await response.json()
+        const apiModules: string[] = Array.isArray(data?.modules) ? data.modules : []
+
+        const baseModules = ['overview', 'assignments', 'section', 'profile']
+        const mappedModules = apiModules
+          .filter((moduleKey) => moduleKey in MODULE_PERMISSION_MAP)
+          .map((moduleKey) => moduleKey)
+
+        const modulesSet = new Set<string>([...baseModules, ...mappedModules])
+        if (user?.ledSection) {
+          modulesSet.add('leader')
+        }
+
+        // Keep roles tab available when student has any admin module permission.
+        if (apiModules.length > 0) {
+          modulesSet.add('roles')
+        }
+
+        setAccessibleModules(Array.from(modulesSet))
         return
       }
     } catch (error) {
       console.error('Error loading accessible modules:', error)
-      setAccessibleModules(['overview', 'assignments', 'payments', 'section', 'resources', 'notes', 'teams', 'prayer', 'leader', 'profile'])
+      setAccessibleModules(['overview', 'assignments', 'section', 'profile'])
     } finally {
       setIsLoadingModules(false)
     }

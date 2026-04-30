@@ -76,7 +76,7 @@ export default function AdminRolesPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    permissions: [] as string[]
+    permissionIds: [] as number[]
   })
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null)
@@ -141,9 +141,7 @@ export default function AdminRolesPage() {
       
       const method = editingRole ? 'PUT' : 'POST'
 
-      const permissionIds = permissions
-        .filter(p => formData.permissions.includes(p.module))
-        .map(p => p.id)
+      const permissionIds = formData.permissionIds
 
       const response = await fetch(url, {
         method,
@@ -206,7 +204,7 @@ export default function AdminRolesPage() {
     setFormData({
       name: role.name,
       description: role.description || '',
-      permissions: role.permissions.map(p => p.module)
+      permissionIds: role.permissions.map(p => p.id)
     })
     setIsDialogOpen(true)
   }
@@ -216,16 +214,16 @@ export default function AdminRolesPage() {
     setFormData({
       name: '',
       description: '',
-      permissions: []
+      permissionIds: []
     })
   }
 
-  const togglePermission = (moduleKey: string) => {
+  const togglePermission = (permissionId: number) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(moduleKey)
-        ? prev.permissions.filter(p => p !== moduleKey)
-        : [...prev.permissions, moduleKey]
+      permissionIds: prev.permissionIds.includes(permissionId)
+        ? prev.permissionIds.filter(id => id !== permissionId)
+        : [...prev.permissionIds, permissionId]
     }))
   }
 
@@ -297,16 +295,17 @@ export default function AdminRolesPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Module Access</Label>
-                  <p className="text-xs text-muted-foreground">Select which modules this role can access</p>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    {MODULES.map((mod) => {
-                      const Icon = mod.icon
-                      const isSelected = formData.permissions.includes(mod.key)
+                  <Label>Permissions</Label>
+                  <p className="text-xs text-muted-foreground">Select specific actions this role can perform</p>
+                  <div className="grid grid-cols-1 gap-2 mt-2 max-h-72 overflow-y-auto">
+                    {permissions.map((perm) => {
+                      const moduleMeta = MODULES.find((m) => m.key === perm.module)
+                      const Icon = moduleMeta?.icon
+                      const isSelected = formData.permissionIds.includes(perm.id)
                       return (
                         <div
-                          key={mod.key}
-                          onClick={() => !editingRole?.isSystem && togglePermission(mod.key)}
+                          key={perm.id}
+                          onClick={() => !editingRole?.isSystem && togglePermission(perm.id)}
                           className={`
                             flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all
                             ${isSelected 
@@ -316,10 +315,14 @@ export default function AdminRolesPage() {
                             ${editingRole?.isSystem ? 'opacity-50 cursor-not-allowed' : ''}
                           `}
                         >
-                          <div className={`p-2 rounded-md ${mod.color} text-white`}>
-                            <Icon className="h-4 w-4" />
+                          <Checkbox checked={isSelected} />
+                          <div className={`p-2 rounded-md ${moduleMeta?.color || 'bg-gray-500'} text-white`}>
+                            {Icon ? <Icon className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
                           </div>
-                          <span className="font-medium text-sm">{mod.label}</span>
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{moduleMeta?.label || perm.module}</div>
+                            <div className="text-xs text-muted-foreground capitalize">{perm.action}</div>
+                          </div>
                           {isSelected && (
                             <Check className="h-4 w-4 ml-auto text-primary" />
                           )}
@@ -331,7 +334,7 @@ export default function AdminRolesPage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={!formData.name || formData.permissions.length === 0}>
+                <Button onClick={handleSubmit} disabled={!formData.name || formData.permissionIds.length === 0}>
                   {editingRole ? 'Update Role' : 'Create Role'}
                 </Button>
               </DialogFooter>
