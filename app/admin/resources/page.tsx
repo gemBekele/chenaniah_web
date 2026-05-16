@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Folder, Plus, Upload, X, FileText, ExternalLink, Download, Trash2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { getApiBaseUrl } from "@/lib/utils"
 import { AdminLayout } from "@/components/admin-layout"
 import { toast } from "sonner"
@@ -318,6 +319,182 @@ export default function AdminResourcesPage() {
     }
   }
 
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return null
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
+  }
+
+  const groupResources = (resourcesToGroup: Resource[]) => {
+    const grouped: Record<string, Resource[]> = {}
+    const ungrouped: Resource[] = []
+
+    resourcesToGroup.forEach((resource) => {
+      if (resource.batchId) {
+        if (!grouped[resource.batchId]) {
+          grouped[resource.batchId] = []
+        }
+        grouped[resource.batchId].push(resource)
+      } else {
+        ungrouped.push(resource)
+      }
+    })
+
+    return { grouped, ungrouped }
+  }
+
+  const renderResourceRow = (resource: Resource) => (
+    <div key={resource.id} className="border border-gray-200 rounded-lg p-3 bg-white">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-[#1f2d3d] truncate" title={resource.title}>{resource.title}</p>
+          {resource.description && (
+            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{resource.description}</p>
+          )}
+          <div className="mt-2 text-xs text-gray-500 flex flex-wrap gap-2 items-center">
+            <span>{new Date(resource.createdAt).toLocaleDateString()}</span>
+            {resource.category && resource.category !== 'General' && <span>• {resource.category}</span>}
+            {resource.fileName && <span className="truncate max-w-[220px]">• {resource.fileName}</span>}
+            {resource.fileSize && <span>• {formatFileSize(resource.fileSize)}</span>}
+          </div>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          {resource.type === 'link' ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(resource.url, '_blank')}
+              className="border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-colors text-gray-600"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(resource.fileUrl, '_blank')}
+              className="border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-colors text-gray-600"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDelete(resource.id, resource.title)}
+            disabled={deletingId === resource.id}
+            className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
+          >
+            {deletingId === resource.id ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderGroupedResources = (resourcesToRender: Resource[]) => {
+    const { grouped, ungrouped } = groupResources(resourcesToRender)
+
+    const allGroups = [
+      ...Object.entries(grouped).map(([batchId, batchResources]) => ({
+        type: 'batch' as const,
+        batchId,
+        resources: batchResources,
+      })),
+      ...ungrouped.map((resource) => ({
+        type: 'single' as const,
+        resource,
+      })),
+    ].sort((a, b) => {
+      const aDate = a.type === 'batch' ? a.resources[0].createdAt : a.resource.createdAt
+      const bDate = b.type === 'batch' ? b.resources[0].createdAt : b.resource.createdAt
+      return new Date(bDate).getTime() - new Date(aDate).getTime()
+    })
+
+    return (
+      <Accordion type="single" collapsible className="w-full space-y-2">
+        {allGroups.map((item) => {
+          if (item.type === 'batch') {
+            const firstResource = item.resources[0]
+            const commonDescription = item.resources.every(r => r.description === firstResource.description && r.description)
+              ? firstResource.description
+              : undefined
+
+            return (
+              <AccordionItem
+                key={item.batchId}
+                value={`batch-${item.batchId}`}
+                className="border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm"
+              >
+                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-50">
+                  <div className="flex items-center gap-3 text-left">
+                    <div className="w-8 h-8 rounded-full bg-[#e8cb85]/10 flex items-center justify-center shrink-0">
+                      <Folder className="h-4 w-4 text-[#e8cb85]" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-[#1f2d3d] text-sm">
+                        {`Batch Upload (${item.resources.length} files)`}
+                      </h3>
+                      <p className="text-xs text-gray-400 font-normal mt-0.5">
+                        {new Date(item.resources[0].createdAt).toLocaleDateString()} • {item.resources.length} items
+                      </p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4 pt-2 bg-gray-50/30 border-t border-gray-100">
+                  {commonDescription && (
+                    <p className="text-sm text-gray-600 mb-4 italic border-l-2 border-[#e8cb85] pl-3 py-1">
+                      {commonDescription}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {item.resources.map((resource) => renderResourceRow(resource))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )
+          }
+
+          return (
+            <AccordionItem
+              key={item.resource.id}
+              value={`resource-${item.resource.id}`}
+              className="border border-gray-200 rounded-lg bg-white overflow-hidden shadow-sm"
+            >
+              <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-gray-50">
+                <div className="flex items-center gap-3 text-left overflow-hidden">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                    {item.resource.type === 'file' ? (
+                      <FileText className="h-4 w-4 text-[#1f2d3d]" />
+                    ) : (
+                      <ExternalLink className="h-4 w-4 text-[#1f2d3d]" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-[#1f2d3d] text-sm truncate pr-4">
+                      {item.resource.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 font-normal mt-0.5">
+                      {new Date(item.resource.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 pb-4 pt-2 bg-gray-50/30 border-t border-gray-100">
+                {renderResourceRow(item.resource)}
+              </AccordionContent>
+            </AccordionItem>
+          )
+        })}
+      </Accordion>
+    )
+  }
+
   if (isLoading) {
     return (
       <AdminLayout>
@@ -570,84 +747,7 @@ export default function AdminResourcesPage() {
                   <p className="text-sm mt-1">Click the "Add Resource" button to share files or links</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {resources.map((resource) => (
-                    <Card key={resource.id} className="border-gray-200 hover:border-[#1f2d3d]/30 transition-all hover:shadow-md group flex flex-col h-full shadow-sm bg-white">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start gap-3">
-                          <div className="p-2 rounded-lg bg-gray-50 text-[#1f2d3d] group-hover:bg-[#1f2d3d] group-hover:text-white transition-colors">
-                            {resource.type === 'file' ? (
-                              <FileText className="h-5 w-5" />
-                            ) : (
-                              <ExternalLink className="h-5 w-5" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-base truncate text-[#1f2d3d] group-hover:text-[#e8cb85] transition-colors" title={resource.title}>
-                              {resource.title}
-                            </CardTitle>
-                            {resource.description && (
-                              <CardDescription className="mt-1 line-clamp-2 text-xs text-gray-500">
-                                {resource.description}
-                              </CardDescription>
-                            )}
-                            {resource.category && resource.category !== 'General' && (
-                              <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-[#e8cb85]/20 text-[#1f2d3d] mt-2">
-                                {resource.category}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="flex-1 flex flex-col justify-end pt-0">
-                        <div className="space-y-3 mt-auto pt-3 border-t border-gray-100">
-                          {resource.fileName && (
-                            <p className="text-xs text-gray-500 flex items-center gap-1">
-                              <span className="truncate max-w-[150px]">{resource.fileName}</span>
-                              {resource.fileSize && <span className="shrink-0">• {(resource.fileSize / 1024 / 1024).toFixed(2)} MB</span>}
-                            </p>
-                          )}
-                          <div className="flex gap-2">
-                            {resource.type === 'link' ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => window.open(resource.url, '_blank')}
-                                className="flex-1 border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-colors text-gray-600"
-                              >
-                                <ExternalLink className="h-4 w-4 mr-2" />
-                                Open Link
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => window.open(resource.fileUrl, '_blank')}
-                                className="flex-1 border-gray-200 hover:bg-[#1f2d3d] hover:text-white hover:border-[#1f2d3d] transition-colors text-gray-600"
-                              >
-                                <Download className="h-4 w-4 mr-2" />
-                                Download
-                              </Button>
-                            )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDelete(resource.id, resource.title)}
-                              disabled={deletingId === resource.id}
-                              className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
-                            >
-                              {deletingId === resource.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <div>{renderGroupedResources(resources)}</div>
               )}
             </CardContent>
           </Card>
