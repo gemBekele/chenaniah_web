@@ -107,7 +107,7 @@ export default function StudentDashboardPage() {
   const [qrCodeLoading, setQrCodeLoading] = useState(false)
   const [studentRoles, setStudentRoles] = useState<any[]>([])
   const [isLoadingRoles, setIsLoadingRoles] = useState(false)
-  const [accessibleModules, setAccessibleModules] = useState<string[]>(['overview', 'assignments', 'section', 'profile'])
+  const [accessibleModules, setAccessibleModules] = useState<string[]>(['overview', 'assignments', 'section', 'profile', 'resources'])
   const [isLoadingModules, setIsLoadingModules] = useState(true)
   const router = useRouter()
 
@@ -147,7 +147,7 @@ export default function StudentDashboardPage() {
         const data = await response.json()
         const apiModules: string[] = Array.isArray(data?.modules) ? data.modules : []
 
-        const baseModules = ['overview', 'assignments', 'section', 'profile']
+        const baseModules = ['overview', 'assignments', 'section', 'profile', 'resources']
         const mappedModules = apiModules
           .filter((moduleKey) => moduleKey in MODULE_PERMISSION_MAP)
           .map((moduleKey) => moduleKey)
@@ -167,7 +167,7 @@ export default function StudentDashboardPage() {
       }
     } catch (error) {
       console.error('Error loading accessible modules:', error)
-      setAccessibleModules(['overview', 'assignments', 'section', 'profile'])
+      setAccessibleModules(['overview', 'assignments', 'section', 'profile', 'resources'])
     } finally {
       setIsLoadingModules(false)
     }
